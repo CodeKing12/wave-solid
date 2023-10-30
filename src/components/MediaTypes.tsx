@@ -1,3 +1,11 @@
+export interface MediaType {
+    [page: string]: MediaObj[][]
+};
+
+export interface ApiMapper {
+    [key: string]: string
+};
+
 export interface AudioStream {
     language: string;
     codec: string;

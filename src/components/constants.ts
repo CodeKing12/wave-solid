@@ -1,3 +1,5 @@
+import { ApiMapper } from "./MediaTypes";
+
 export const MEDIA_ENDPOINT = "https://plugin.sc2.zone";
 export const PATH_SEARCH_MEDIA = "/api/media/filter/v2/search?order=desc&sort=score&type=*";
 export const DEFAULT_ITEM_COUNT = 100;
@@ -34,3 +36,20 @@ export const authAxiosConfig = {
 }
 
 export const proxyUrl = "http://localhost:5000/video"
+
+
+export const mediaPerPage = 100
+
+export const api_map: ApiMapper = {
+    movies: PATH_MOVIES,
+    series: PATH_SERIES,
+    concerts: PATH_CONCERTS,
+    fairy_tales: PATH_FAIRY_TALES,
+    animated_movies: PATH_ANIMATED_MOVIES,
+    animated_series: PATH_ANIMATED_SERIES,
+    movies_czsk: PATH_MOVIES_CZSK,
+    series_czsk: PATH_SERIES_CZSK,
+    search: PATH_SEARCH_MEDIA
+}
+  
+export const allPages = Object.keys(api_map)

@@ -29,18 +29,18 @@ interface SidebarProps {
     onLogout: () => void,
 }
 
-const NavItem = function NavItem({ icon, text, page, current, onItemClick }: SidebarItemProps) {
+const NavItem = function NavItem(props: SidebarItemProps) {
     // console.log("Nav Item is re-rendering")
     // const { ref, focused } = useFocusable({onEnterPress: () => onItemClick(page)});
 
     return (
         <a 
             // ref={ref}
-            class={`flex gap-5 items-center text-base active:font-semibold cursor-pointer py-2 px-8 w-full border-r-2 border-yellow-300 border-opacity-0 hover:border-opacity-100 hover:text-yellow-300 hover:fill-yellow-300 opacity-80 ${page === current ? "text-yellow-300 fill-yellow-300 opacity-100 border-r-4 border-opacity-100" : ""}`} 
-            onClick={() => onItemClick(page)}
+            class={`flex gap-5 items-center text-base active:font-semibold cursor-pointer py-2 px-8 w-full border-r-2 border-yellow-300 border-opacity-0 hover:border-opacity-100 hover:text-yellow-300 hover:fill-yellow-300 opacity-80 ${props.page === props.current ? "text-yellow-300 fill-yellow-300 opacity-100 border-r-4 border-opacity-100" : ""}`} 
+            onClick={() => props.onItemClick(props.page)}
         >
-            {icon}
-            <span>{ text }</span>
+            {props.icon}
+            <span>{ props.text }</span>
         </a>
     )
 }
@@ -87,6 +87,7 @@ const Sidebar = function Sidebar(props: SidebarProps) {
                     <p class="font-semibold text-[rgba(249,249,249,0.67)] text-opacity-[67] mb-5 px-8 text-[15px]">Categories</p>
                     {/* <FocusContext.Provider value={focusKey}> */}
                         <div class="text-white fill-white flex flex-col gap-5">
+                            { props.current }
                             <NavItem icon={<IconMovie size={30} />} text="Movies" page="movies" current={props.current} onItemClick={props.onChange} />
                             <NavItem icon={<IconDeviceTv size={30} />} text="Series" page="series" current={props.current} onItemClick={props.onChange} />
                             <NavItem icon={<IconDisc size={30} />} text="Concerts" page="concerts" current={props.current} onItemClick={props.onChange} />
