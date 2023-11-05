@@ -2,9 +2,9 @@
 // import { formatStringAsId } from "@/utils/general";
 // import { FocusableComponentLayout, useFocusable } from "@noriginmedia/norigin-spatial-navigation";
 
-// interface FocusLeafProps { 
-//     children: ReactNode, 
-//     className?: string, 
+// interface FocusLeafProps {
+//     children: ReactNode,
+//     className?: string,
 //     focusedStyles?: string,
 //     isForm?: boolean,
 //     isFocusable?: boolean,
@@ -31,8 +31,8 @@
 //         [isForm, id, onFocus]
 //     );
 
-//     const { ref, focused, focusKey } = useFocusable({ 
-//         onFocus: (focusDetails: FocusableComponentLayout) => handleFocus(true, focusDetails), 
+//     const { ref, focused, focusKey } = useFocusable({
+//         onFocus: (focusDetails: FocusableComponentLayout) => handleFocus(true, focusDetails),
 //         onBlur: () => handleFocus(false), onEnterPress,
 //         focusable: isFocusable,
 //         focusKey: customFocusKey ? customFocusKey : undefined
