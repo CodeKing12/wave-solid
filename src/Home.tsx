@@ -1,5 +1,3 @@
-// import Sidebar, { PageType } from '@/components/Sidebar'
-// import { SearchNormal1, ArrowLeft, ArrowRight, SearchNormal } from "iconsax-react"
 import {
 	MEDIA_ENDPOINT,
 	TOKEN_PARAM_NAME,
@@ -8,15 +6,9 @@ import {
 	api_map,
 	mediaPerPage,
 } from "@/components/constants";
-// import { useEffect, createSignal, useRef, useCallback, useMemo } from 'react';
 import MediaList from "@/components/MediaList";
-// import { BeatLoader, BounceLoader, ClipLoader, ClockLoader, ClimbingBoxLoader, FadeLoader, GridLoader, PuffLoader, PulseLoader, PropagateLoader, RingLoader, SquareLoader, SkewLoader, ScaleLoader, HashLoader, SyncLoader, RotateLoader } from 'react-spinners';
-// import { HashLoader } from 'react-spinners';
 import { MediaObj, MediaType } from "@/components/MediaTypes";
 import Login from "@/components/Login";
-// import Alert, { AlertData, AlertInfo } from "@/components/Alert";
-// import { useFocusable, FocusContext } from "@noriginmedia/norigin-spatial-navigation";
-// import FocusLeaf from '@/components/FocusLeaf';
 import MediaModal from "@/components/MediaModal";
 import dummyMediaInfo from "@/media.json";
 import { useAlert } from "@/AlertContext";
@@ -31,9 +23,9 @@ import {
 	createSignal,
 } from "solid-js";
 import { IconArrowLeft, IconArrowRight } from "@tabler/icons-solidjs";
-// import { Spinner, SpinnerType } from 'solid-spinner';
 import Sidebar, { PageType } from "./components/Sidebar";
-import { useFocusable } from "./spatial-nav";
+import { FocusContext, useFocusable } from "./spatial-nav";
+import FocusLeaf from "./components/FocusLeaf";
 
 type PaginationType = {
 	[page in PageType]: number;
@@ -57,6 +49,10 @@ interface PageMediaObj {
 }
 
 export default function Home() {
+	const { setRef, focusKey, hasFocusedChild, focusSelf } = useFocusable({
+		forceFocus: true,
+	});
+
 	const [loading, setLoading] = createSignal(false);
 	const [isAuthenticated, setIsAuthenticated] = createSignal(false);
 	const [openLogin, setOpenLogin] = createSignal(false);
@@ -81,9 +77,7 @@ export default function Home() {
 	let prevPagination = pagination();
 	const [query, setQuery] = createSignal("");
 	const [searchHistory, setSearchHistory] = createSignal<string[]>([]);
-	const { setRef, focusKey, hasFocusedChild, focusSelf } = useFocusable({
-		forceFocus: true,
-	});
+
 	const [selectedMedia, setSelectedMedia] = createSignal<
 		MediaObj | undefined
 	>();
@@ -91,35 +85,20 @@ export default function Home() {
 	const [finishedLoading, setFinishedLoading] = createSignal(false);
 	const [modalPlaceholder, setModalPlaceholder] = createSignal("");
 
-	// createEffect(() => {
-	//   if (!openLogin() && !openModal()) {
-	//     // console.log("Focused self after login modal close")
-	//     // focusSelf();
-	//   }
-	//   if (isAuthenticated() && !openModal()) {
-	//     // console.log("Quit media modal")
-	//     // focusSelf();
-	//   }
-	// })
+	createEffect(() => {
+		if (!openLogin() && !openModal()) {
+			console.log("Focused self after login modal close");
+			focusSelf();
+		}
+		if (isAuthenticated() && !openModal()) {
+			console.log("Quit media modal");
+			focusSelf();
+		}
+	});
 
 	const { addAlert } = useAlert();
 
 	onMount(() => {
-		// Initialize
-		// console.log(SpatialNavigation);
-		// SpatialNavigation.init();
-
-		// // Define navigable elements (anchors and elements with "focusable" class).
-		// SpatialNavigation.add({
-		// 	selector: "a, .focusable",
-		// });
-
-		// // Make the *currently existing* navigable elements focusable.
-		// SpatialNavigation.makeFocusable();
-
-		// // Focus the first navigable element.
-		// SpatialNavigation.focus();
-
 		async function retrieveToken() {
 			let storedAuth = localStorage.getItem("authToken");
 			const storedToken: TokenObj = JSON.parse(storedAuth || "{}");
@@ -282,6 +261,15 @@ export default function Home() {
 
 	const onMediaModalClose = () => setOpenModal(false);
 
+	const onCardFocus = ({ y }: { y: number }) => {
+		if (mainRef) {
+			mainRef.scrollTo({
+				top: y,
+				behavior: "smooth",
+			});
+		}
+	};
+
 	const onMediaCardClick = (mediaInfo: MediaObj) => {
 		setOpenModal(true);
 		setSelectedMedia(mediaInfo);
@@ -295,7 +283,10 @@ export default function Home() {
 	const navShowFavorites = () => console.log("Clicked Favorites");
 	const hideSidebarHandler = (isHidden: boolean) => setHideSidebar(isHidden);
 	const openLoginHandler = () => setOpenLogin(true);
-	const closeLoginHandler = () => setOpenLogin(false);
+	const closeLoginHandler = () => {
+		console.log("Done");
+		setOpenLogin(false);
+	};
 	const sbLogoutHandler = () => logoutWebshare();
 
 	const pageChangeHandler = (newPage: PageType) => {
@@ -332,87 +323,104 @@ export default function Home() {
 				onLoginClick={openLoginHandler}
 			/>
 
-			{/* <FocusContext.Provider value={focusKey}> */}
-			<section
-				class={`xxl:px-[72px] flex h-screen min-h-screen flex-1 flex-col overflow-auto px-3 pb-16 pt-10 font-poppins duration-500 ease-in-out xs:px-4 xsm:px-8 md:px-14 lg:ml-[300px] xl:px-16 ${
-					hideSidebar() ? "!ml-0" : ""
-				}`}
-				id="main-display"
-				ref={mainRef}
-			>
-				<Navbar
-					query={query()}
-					updateQuery={navUpdateQuery}
-					onSearch={searchMedia}
-					showFavorites={navShowFavorites}
-				/>
-
-				<div class={`relative mt-6 flex-1`} ref={setRef}>
-					{/* {page() && ( */}
-					<MediaList
-						media={getCurrentPageMedia()}
-						onMediaModalOpen={onMediaCardClick}
-						isSidebarOpen={hideSidebar()}
-					/>
-					{/* )} */}
-					{
-						// media()[page()] && media()[page()]?.[pagination()[page()]]?.length ?
-						// : <Spinner type={SpinnerType.puff} width={70} height={70} color="#fde047" class="!absolute top-[37%] left-1/2 -translate-x-1/2 -translate-y-1/2" />
-					}
-				</div>
-				<div
-					class={`mt-10 flex flex-col items-center gap-7 sm:flex-row sm:justify-between sm:gap-0 ${
-						loading()
-							? "pointer-events-none opacity-40"
-							: "pointer-events-auto opacity-100"
+			<FocusContext.Provider value={focusKey()}>
+				<section
+					class={`xxl:px-[72px] flex h-screen min-h-screen flex-1 flex-col overflow-auto px-3 pb-16 pt-10 font-poppins duration-500 ease-in-out xs:px-4 xsm:px-8 md:px-14 lg:ml-[300px] xl:px-16 ${
+						hideSidebar() ? "!ml-0" : ""
 					}`}
+					id="main-display"
+					ref={mainRef}
 				>
-					{/* <FocusLeaf class={pagination[page] + 1 === 1 ? "cursor-not-allowed" : ""} focusedStyles="[&>button]:!bg-black-1 [&>button]:!border-yellow-300 [&>button]:!text-yellow-300" isFocusable={pagination[page] + 1 !== 1} onEnterPress={() => updatePagination(page, -1)}> */}
-					<button
-						class={`flex items-center gap-4 rounded-xl border-2 border-transparent bg-yellow-300 px-9 py-3 text-lg font-semibold text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 ${
-							pagination()[page()] + 1 === 1
-								? "pointer-events-none opacity-40"
-								: ""
-						}`}
-						onClick={() => updatePagination(page(), -1)}
-					>
-						{/* <ArrowLeft size={32} variant='Bold' /> */}
-						<IconArrowLeft size={32} />
-						Previous
-					</button>
-					{/* </FocusLeaf> */}
+					<Navbar
+						query={query()}
+						updateQuery={navUpdateQuery}
+						onSearch={searchMedia}
+						showFavorites={navShowFavorites}
+					/>
 
-					{typeof pagination()[page()] == "number" &&
-					pagination()[page()] >= 0 ? (
-						<p class="text-lg font-semibold text-gray-300">
-							Page:{" "}
-							<span class="ml-2 text-yellow-300">
-								{pagination()[page()] + 1}
-							</span>{" "}
-							/ {Math.ceil(totals()[page()] / mediaPerPage)}
-						</p>
-					) : (
-						""
-					)}
-
-					{/* <FocusLeaf class={pagination[page] + 1 === Math.ceil(totals[page] / mediaPerPage) ? "cursor-not-allowed" : ""} focusedStyles="[&>button]:!bg-black-1 [&>button]:!border-yellow-300 [&>button]:!text-yellow-300" isFocusable={pagination[page] + 1 !== Math.ceil(totals[page] / mediaPerPage)} onEnterPress={() => updatePagination(page, +1)}> */}
-					<button
-						class={`flex items-center gap-4 rounded-xl border-2 border-transparent bg-yellow-300 px-9 py-3 text-lg font-semibold text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 ${
-							pagination()[page()] + 1 ===
-							Math.ceil(totals()[page()] / mediaPerPage)
+					<div class={`relative mt-6 flex-1`} ref={setRef}>
+						<MediaList
+							media={getCurrentPageMedia()}
+							onMediaModalOpen={onMediaCardClick}
+							onCardFocus={onCardFocus}
+							isSidebarOpen={hideSidebar()}
+						/>
+					</div>
+					<div
+						class={`mt-10 flex flex-col items-center gap-7 sm:flex-row sm:justify-between sm:gap-0 ${
+							loading()
 								? "pointer-events-none opacity-40"
-								: ""
+								: "pointer-events-auto opacity-100"
 						}`}
-						onClick={() => updatePagination(page(), +1)}
 					>
-						Next
-						{/* <ArrowRight size={32} variant='Bold' /> */}
-						<IconArrowRight size={32} />
-					</button>
-					{/* </FocusLeaf> */}
-				</div>
-			</section>
-			{/* </FocusContext.Provider> */}
+						<FocusLeaf
+							class={
+								pagination()[page()] + 1 === 1
+									? "cursor-not-allowed"
+									: ""
+							}
+							focusedStyles="[&>button]:!bg-black-1 [&>button]:!border-yellow-300 [&>button]:!text-yellow-300"
+							isFocusable={pagination()[page()] + 1 !== 1}
+							onEnterPress={() => updatePagination(page(), -1)}
+						>
+							<button
+								class={`flex items-center gap-4 rounded-xl border-2 border-transparent bg-yellow-300 px-9 py-3 text-lg font-semibold text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 ${
+									pagination()[page()] + 1 === 1
+										? "pointer-events-none opacity-40"
+										: ""
+								}`}
+								onClick={() => updatePagination(page(), -1)}
+							>
+								{/* <ArrowLeft size={32} variant='Bold' /> */}
+								<IconArrowLeft size={32} />
+								Previous
+							</button>
+						</FocusLeaf>
+
+						{typeof pagination()[page()] == "number" &&
+						pagination()[page()] >= 0 ? (
+							<p class="text-lg font-semibold text-gray-300">
+								Page:{" "}
+								<span class="ml-2 text-yellow-300">
+									{pagination()[page()] + 1}
+								</span>{" "}
+								/ {Math.ceil(totals()[page()] / mediaPerPage)}
+							</p>
+						) : (
+							""
+						)}
+
+						<FocusLeaf
+							class={
+								pagination()[page()] + 1 ===
+								Math.ceil(totals()[page()] / mediaPerPage)
+									? "cursor-not-allowed"
+									: ""
+							}
+							focusedStyles="[&>button]:!bg-black-1 [&>button]:!border-yellow-300 [&>button]:!text-yellow-300"
+							isFocusable={
+								pagination()[page()] + 1 !==
+								Math.ceil(totals()[page()] / mediaPerPage)
+							}
+							onEnterPress={() => updatePagination(page(), +1)}
+						>
+							<button
+								class={`flex items-center gap-4 rounded-xl border-2 border-transparent bg-yellow-300 px-9 py-3 text-lg font-semibold text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 ${
+									pagination()[page()] + 1 ===
+									Math.ceil(totals()[page()] / mediaPerPage)
+										? "pointer-events-none opacity-40"
+										: ""
+								}`}
+								onClick={() => updatePagination(page(), +1)}
+							>
+								Next
+								{/* <ArrowRight size={32} variant='Bold' /> */}
+								<IconArrowRight size={32} />
+							</button>
+						</FocusLeaf>
+					</div>
+				</section>
+			</FocusContext.Provider>
 
 			<Login
 				show={openLogin() && !isAuthenticated()}

@@ -67,7 +67,7 @@ input {
 	height: 3px;
 	border-radius: 50px;
 	background-color: #fde047;
-	animation: underlineElement 0.3s ease-in-out !important;
+	animation: underlineElement 0.2s ease-in-out !important;
 	animation-fill-mode: forwards !important;
 }
 
@@ -89,8 +89,7 @@ input {
 }
 
 .on-svg-focus svg {
-	color: #191919;
-	fill: #fde047;
+	color: #fde047;
 }
 
 .login-input-focus input {
@@ -328,4 +327,8 @@ video-js.video-js {
 	100% {
 		opacity: 1;
 	}
+}
+
+.player[data-view-type="video"] {
+	aspect-ratio: 16 /9;
 }

@@ -5,6 +5,7 @@ import {
 	onMount,
 	onCleanup,
 	Setter,
+	Accessor,
 } from "solid-js";
 import noop from "lodash/noop";
 import { Ref } from "solid-js";
@@ -62,12 +63,12 @@ export interface UseFocusableConfig<P = object> {
 }
 
 export interface UseFocusableResult {
-	// ref: Ref<any>; // <any> since we don't know which HTML tag is passed here
+	ref: Accessor<HTMLElement | undefined>; // <any> since we don't know which HTML tag is passed here
 	setRef: Setter<HTMLElement | undefined>;
 	focusSelf: (focusDetails?: FocusDetails) => void;
-	focused: boolean;
-	hasFocusedChild: boolean;
-	focusKey: string;
+	focused: Accessor<boolean>;
+	hasFocusedChild: Accessor<boolean>;
+	focusKey: Accessor<string>;
 }
 // defaultProps = {
 // 	focusable: true,
@@ -233,11 +234,12 @@ const useFocusableHook = <P>(
 	};
 
 	return {
+		ref,
 		setRef,
 		focusSelf,
-		focused: focused(),
-		hasFocusedChild: hasFocusedChild(),
-		focusKey: focusKey(),
+		focused,
+		hasFocusedChild,
+		focusKey,
 	};
 };
 

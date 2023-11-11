@@ -1,6 +1,4 @@
-// import { memo, useState, useEffect } from "react";
 import { createSignal, createEffect } from "solid-js";
-// import { CloseCircle, Login as LoginIcon } from "iconsax-react";
 import {
 	AUTH_ENDPOINT,
 	PATH_LOGIN,
@@ -10,13 +8,12 @@ import {
 import { sha1 } from "@/utils/Sha";
 import { md5crypt } from "@/utils/MD5";
 import { parseXml } from "@/utils/general";
-// import { PacmanLoader } from "react-spinners";
-// import { FocusContext, useFocusable } from "@noriginmedia/norigin-spatial-navigation";
-// import FocusLeaf from "./FocusLeaf";
 import axiosInstance from "@/utils/axiosInstance";
 import { useAlert } from "@/AlertContext";
 import { Spinner, SpinnerType } from "solid-spinner";
 import { IconKey, IconX } from "@tabler/icons-solidjs";
+import { FocusContext, useFocusable } from "@/spatial-nav";
+import FocusLeaf from "./FocusLeaf";
 
 interface LoginProps {
 	show: boolean;
@@ -44,23 +41,19 @@ const Login = function Login(props: LoginProps) {
 	const [username, setUsername] = createSignal("");
 	const [password, setPassword] = createSignal("");
 	const [isAuthenticating, setIsAuthenticating] = createSignal(false);
-	// const {
-	//     ref,
-	//     focusSelf,
-	//     hasFocusedChild,
-	//     focusKey,
-	// } = useFocusable({
-	//     trackChildren: true,
-	//     autoRestoreFocus: true,
-	// });
+	const { setRef, focusSelf, hasFocusedChild, focusKey } = useFocusable({
+		focusable: props.show,
+		trackChildren: true,
+		autoRestoreFocus: true,
+		isFocusBoundary: props.show,
+	});
 	const { addAlert } = useAlert();
 
-	// createEffect(() => {
-	//     // console.log(show)
-	//     if (show) {
-	//         focusSelf();
-	//     }
-	// }, [focusSelf, show]);
+	createEffect(() => {
+		if (props.show) {
+			focusSelf();
+		}
+	});
 
 	function loginWebshare(event?: any) {
 		if (event) {
@@ -74,7 +67,7 @@ const Login = function Login(props: LoginProps) {
 			.post(
 				AUTH_ENDPOINT + PATH_SALT,
 				{
-					username_or_email: username,
+					username_or_email: username(),
 				},
 				authAxiosConfig,
 			)
@@ -85,7 +78,7 @@ const Login = function Login(props: LoginProps) {
 					.post(
 						AUTH_ENDPOINT + PATH_LOGIN,
 						{
-							username_or_email: username,
+							username_or_email: username(),
 							keep_logged_in: 1,
 							password: hashedPassword,
 						},
@@ -134,99 +127,117 @@ const Login = function Login(props: LoginProps) {
 	}
 
 	return (
-		// <FocusContext.Provider value={focusKey}>
-		<div
-			class={`login-modal invisible fixed bottom-0 top-0 z-0 flex h-full w-full items-center justify-center opacity-0 backdrop-blur-lg duration-300 ease-linear ${
-				props.show ? "!visible !z-[110] !opacity-100" : ""
-			}`}
-		>
+		<FocusContext.Provider value={focusKey()}>
 			<div
-				class={`invisible w-[450px] translate-y-10 rounded-2xl bg-[#191919] px-8 pb-10 pt-7 text-white opacity-0 duration-[400ms] ease-in-out ${
-					props.show ? "!visible !translate-y-0 !opacity-100" : ""
+				class={`login-modal invisible fixed bottom-0 top-0 z-0 flex h-full w-full items-center justify-center opacity-0 backdrop-blur-lg duration-300 ease-linear ${
+					props.show ? "!visible !z-[110] !opacity-100" : ""
 				}`}
+				ref={setRef}
 			>
-				<div class="mb-10 flex justify-end">
-					{/* <FocusLeaf focusedStyles="on-svg-focus"> */}
-					<button
-						class="cursor-pointer text-white hover:text-yellow-300"
-						onClick={props.onClose}
-					>
-						<IconX class="duration-300 ease-in-out" size={35} />
-					</button>
-					{/* </FocusLeaf> */}
-				</div>
-				<div class="relative">
-					<div
-						class={`duration-300 ease-in-out ${
-							props.show ? "visible opacity-100" : ""
-						} ${
-							isAuthenticating()
-								? "!invisible !-translate-y-10 !opacity-0"
-								: ""
-						}`}
-					>
-						<h3 class="mb-2 text-3xl font-semibold text-gray-50">
-							Log in to Webshare
-						</h3>
-						<p class="mb-10 text-sm text-gray-400">
-							Enter your Webshare username and password
-						</p>
-						<form
-							class="mb-4 flex w-full flex-col gap-4"
-							onSubmit={loginWebshare}
+				<div
+					class={`invisible w-[450px] translate-y-10 rounded-2xl bg-[#191919] px-8 pb-10 pt-7 text-white opacity-0 duration-[400ms] ease-in-out ${
+						props.show ? "!visible !translate-y-0 !opacity-100" : ""
+					}`}
+				>
+					<div class="mb-10 flex justify-end">
+						<FocusLeaf
+							focusedStyles="on-svg-focus"
+							onEnterPress={props.onClose}
 						>
-							<div class="w-full">
-								<input
-									class="w-full rounded-md border border-gray-300 border-opacity-40 bg-transparent px-2 py-3 text-[15px] text-gray-300 !outline-none placeholder:text-gray-400 placeholder:text-opacity-50 focus:border-yellow-300"
-									type="text"
-									placeholder="Username"
-									onChange={(e) =>
-										setUsername(e.target.value)
-									}
-								/>
-							</div>
-
-							<div class="w-full">
-								<input
-									class="w-full rounded-md border border-gray-300 border-opacity-40 bg-transparent px-2 py-3 text-[15px] text-gray-300 !outline-none placeholder:text-gray-400 placeholder:text-opacity-50 focus:border-yellow-300"
-									type="password"
-									placeholder="Password"
-									onChange={(e) =>
-										setPassword(e.target.value)
-									}
-								/>
-							</div>
-
-							{/* <FocusLeaf focusedStyles="login-button-focus" onEnterPress={loginWebshare}> */}
 							<button
-								class="mt-5 flex items-center justify-center gap-2 rounded-xl border-2 border-transparent bg-yellow-300 px-10 py-5 text-base font-semibold tracking-wide text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300"
-								onClick={loginWebshare}
+								class="cursor-pointer text-white hover:text-yellow-300"
+								onClick={props.onClose}
+							>
+								<IconX
+									class="duration-300 ease-in-out"
+									size={35}
+								/>
+							</button>
+						</FocusLeaf>
+					</div>
+					<div class="relative">
+						<div
+							class={`duration-300 ease-in-out ${
+								props.show ? "visible opacity-100" : ""
+							} ${
+								isAuthenticating()
+									? "!invisible !-translate-y-10 !opacity-0"
+									: ""
+							}`}
+						>
+							<h3 class="mb-2 text-3xl font-semibold text-gray-50">
+								Log in to Webshare
+							</h3>
+							<p class="mb-10 text-sm text-gray-400">
+								Enter your Webshare username and password
+							</p>
+							<form
+								class="mb-4 flex w-full flex-col gap-4"
 								onSubmit={loginWebshare}
 							>
-								Authenticate
-								<IconKey size={24} />
-							</button>
-							{/* </FocusLeaf> */}
-						</form>
-					</div>
-					<div
-						class={`invisible absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-10 opacity-0 duration-300 ease-in-out ${
-							isAuthenticating()
-								? "-!translate-y-0 !visible !-translate-y-1/2 !opacity-100"
-								: ""
-						}`}
-					>
-						<Spinner
-							type={SpinnerType.grid}
-							width={30}
-							height={30}
-							color="#fde047"
-						/>
+								<FocusLeaf
+									isForm
+									class="w-full"
+									focusedStyles="login-input-focus"
+								>
+									<input
+										class="w-full rounded-md border border-gray-300 border-opacity-40 bg-transparent px-2 py-3 text-[15px] text-gray-300 !outline-none placeholder:text-gray-400 placeholder:text-opacity-50 focus:border-yellow-300"
+										type="text"
+										placeholder="Username"
+										onChange={(e) =>
+											setUsername(e.target.value)
+										}
+									/>
+								</FocusLeaf>
+
+								<FocusLeaf
+									isForm
+									class="w-full"
+									focusedStyles="login-input-focus"
+								>
+									<input
+										class="w-full rounded-md border border-gray-300 border-opacity-40 bg-transparent px-2 py-3 text-[15px] text-gray-300 !outline-none placeholder:text-gray-400 placeholder:text-opacity-50 focus:border-yellow-300"
+										type="password"
+										placeholder="Password"
+										onChange={(e) =>
+											setPassword(e.target.value)
+										}
+									/>
+								</FocusLeaf>
+
+								<FocusLeaf
+									focusedStyles="login-button-focus"
+									onEnterPress={loginWebshare}
+								>
+									<button
+										class="mt-5 flex items-center justify-center gap-2 rounded-xl border-2 border-transparent bg-yellow-300 px-10 py-5 text-base font-semibold tracking-wide text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300"
+										onClick={loginWebshare}
+										onSubmit={loginWebshare}
+									>
+										Authenticate
+										<IconKey size={24} />
+									</button>
+								</FocusLeaf>
+							</form>
+						</div>
+						<div
+							class={`invisible absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-10 opacity-0 duration-300 ease-in-out ${
+								isAuthenticating()
+									? "-!translate-y-0 !visible !-translate-y-1/2 !opacity-100"
+									: ""
+							}`}
+						>
+							<Spinner
+								type={SpinnerType.grid}
+								width={30}
+								height={30}
+								color="#fde047"
+							/>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-		// </FocusContext.Provider>
+		</FocusContext.Provider>
 	);
 };
 

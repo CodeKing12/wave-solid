@@ -1,8 +1,5 @@
-// import { Heart, Star1, Image as ImageIcon } from "iconsax-react";
 import { useFocusable } from "@/spatial-nav/useFocusable";
 import { I18nInfoLabel, MediaObj, MediaSource, RatingObj } from "./MediaTypes";
-// import { FocusableComponentLayout, useFocusable } from "@noriginmedia/norigin-spatial-navigation";
-// import Image from "next/image";
 import { resolveArtItem, smallPoster } from "@/utils/general";
 import {
 	IconHeart,
@@ -11,7 +8,7 @@ import {
 	IconStarFilled,
 } from "@tabler/icons-solidjs";
 import { createEffect, createMemo } from "solid-js";
-// import { memo, useCallback, useMemo, useState } from "react";
+import { FocusableComponentLayout } from "@/spatial-nav";
 
 export interface MediaCardProps {
 	id: string;
@@ -21,7 +18,7 @@ export interface MediaCardProps {
 	media: MediaObj;
 	showMediaInfo: (mediaInfo: MediaObj) => void;
 	onEnterPress: (mediaInfo: MediaObj) => void;
-	// onFocus: (focusDetails: FocusableComponentLayout) => void;
+	onFocus: (focusDetails: FocusableComponentLayout) => void;
 }
 
 export function getDisplayDetails(mediaI18n: I18nInfoLabel[]) {
@@ -81,8 +78,12 @@ export function getRatingAggr(ratings: RatingObj | undefined = {}) {
 }
 
 const MediaCard = function MediaCard(props: MediaCardProps) {
-	// console.log("MediaCard is re-rendering")
+	const { setRef, focused, focusSelf } = useFocusable({
+		onEnterPress: () => props.onEnterPress(props.media),
+		onFocus: props.onFocus,
+	});
 	console.log("New MediaCard");
+
 	// const [media] = useContext(MediaContext)
 	// createEffect(() =>
 	//     console.log(media, props.index)
@@ -93,6 +94,7 @@ const MediaCard = function MediaCard(props: MediaCardProps) {
 	//     return props.pageMedia[props.currentPage[props.currentPagination]]
 	//     // Get media from store
 	// })
+
 	const mediaSource = createMemo(() => props.media?._source);
 	const reviews = () => {
 		if (mediaSource()?.ratings) {
@@ -117,10 +119,6 @@ const MediaCard = function MediaCard(props: MediaCardProps) {
 		}
 	};
 	const posterLink = createMemo(() => (poster ? smallPoster(poster()) : ""));
-	const { setRef, focused } = useFocusable({
-		// onEnterPress: () => onEnterPress(media),
-		// onFocus
-	});
 
 	function onImgError(event: any) {
 		console.log("Image Error");
@@ -171,9 +169,6 @@ const MediaCard = function MediaCard(props: MediaCardProps) {
 		}
 	};
 
-	// createEffect(() => console.log(ref()));
-	createEffect(() => (focused ? console.log(focused) : ""));
-
 	// if (!displayDetails) {
 	//     if (media && media.i18n_info_labels) {
 	//         displayDetails = media.i18n_info_labels[media.i18n_info_labels?.length - 1]
@@ -186,33 +181,32 @@ const MediaCard = function MediaCard(props: MediaCardProps) {
 			<div
 				id={props.id}
 				class={`media-card focusable group relative mx-auto h-[340px] w-full max-w-[250px] cursor-pointer overflow-clip rounded-xl border-4 border-transparent bg-black-1 bg-opacity-60 backdrop-blur-2xl duration-[400ms] ease-in-out xsm:max-w-[230px] sm:h-[300px] ${
-					focused ? "border-yellow-300 !duration-300" : ""
+					focused() ? "border-yellow-300 !duration-300" : ""
 				}`}
 				ref={setRef}
 			>
-				{
-					/* eslint-disable @next/next/no-img-element */
-					poster() ? (
-						// <Image width={300} height={400} class="w-full h-full max-h-full object-cover rounded-xl opacity-75" src={smallPoster(poster) || ""} alt={displayDetails?.plot} />
-						<img
-							id={`${props.id}-poster`}
-							width={300}
-							height={400}
-							class="h-full max-h-full w-full rounded-xl object-cover opacity-75"
-							src={posterLink() || ""}
-							alt={displayDetails()?.title}
-							onError={onImgError}
-						/>
-					) : (
-						<IconPhoto
-							size={85}
-							class="group-hover:-fill-yellow-300 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 fill-transparent text-yellow-300 transition-all duration-500 ease-linear"
-						/>
-					)
-					/* eslint-enable @next/next/no-img-element */
-				}
+				{poster() ? (
+					// <Image width={300} height={400} class="w-full h-full max-h-full object-cover rounded-xl opacity-75" src={smallPoster(poster) || ""} alt={displayDetails?.plot} />
+					<img
+						id={`${props.id}-poster`}
+						width={300}
+						height={400}
+						class="h-full max-h-full w-full rounded-xl object-cover opacity-75"
+						src={posterLink() || ""}
+						alt={displayDetails()?.title}
+						onError={onImgError}
+					/>
+				) : (
+					<IconPhoto
+						size={85}
+						class="group-hover:-fill-yellow-300 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 fill-transparent text-yellow-300 transition-all duration-500 ease-linear"
+					/>
+				)}
 				<div
-					class={`invisible absolute bottom-0 h-full w-full rounded-[11px] bg-black bg-opacity-80 px-3 py-5 text-gray-100 opacity-0 duration-[400ms] ease-in-out group-hover:visible group-hover:opacity-100`}
+					class="invisible absolute bottom-0 h-full w-full rounded-[11px] bg-black bg-opacity-80 px-3 py-5 text-gray-100 opacity-0 duration-[400ms] ease-in-out group-hover:visible group-hover:opacity-100"
+					classList={{
+						"!duration-300 !visible !opacity-100": focused(),
+					}}
 					onClick={() => props.showMediaInfo(props.media)}
 				>
 					<div class="flex h-full flex-col justify-between">

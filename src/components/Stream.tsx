@@ -1,6 +1,5 @@
 import { bytesToSize, secondsToHMS } from "@/utils/general";
 import { Match, Show, Switch } from "solid-js";
-// import { Barcode, Clock, Document, MessageText1, PlayCircle, Size, VolumeHigh } from "iconsax-react";
 import { StreamObj } from "./MediaTypes";
 import {
 	IconAspectRatio,
@@ -11,38 +10,40 @@ import {
 	IconLanguage,
 	IconPlayerPlayFilled,
 } from "@tabler/icons-solidjs";
-// import { FocusDetails, useFocusable } from "@noriginmedia/norigin-spatial-navigation";
+import { FocusDetails, useFocusable } from "@/spatial-nav";
 
 interface MediaStreamOptionProps {
 	stream: StreamObj;
 	isEpisode?: boolean;
 	authToken: string;
-	// onFocus?: (focusDetails: FocusDetails) => void,
+	onFocus: (focusDetails: FocusDetails) => void;
 	onStreamClick: (isEnterpress?: boolean) => void;
 }
 
 export default function MediaStreamOption(props: MediaStreamOptionProps) {
-	// const { ref, focused } = useFocusable({
-	//     onEnterPress: () => onStreamClick(true),
-	//     onFocus,
-	//     focusable: authToken && authToken?.length ? true : false
-	// });
+	const { setRef, focused } = useFocusable({
+		onEnterPress: () => props.onStreamClick(true),
+		onFocus: props.onFocus,
+		focusable: props.authToken && props.authToken?.length ? true : false,
+	});
 
 	return (
 		<div
 			class={`flex flex-col items-center justify-between md:flex-row ${
 				props.isEpisode ? "gap-10" : "gap-10 md:gap-16 xl:gap-20"
 			}`}
+			ref={setRef}
 		>
 			<div
-				class={`md:justify-left flex flex-wrap justify-center gap-x-8 gap-y-4 text-[15px] text-gray-300 text-opacity-50 xl:flex-nowrap xl:!gap-8`}
+				class={`md:justify-left flex flex-wrap justify-center gap-x-9 gap-y-4 text-[15px] text-gray-300 text-opacity-50 xl:flex-nowrap xl:!gap-8 ${
+					focused() ? "stream-focus" : ""
+				}`}
 			>
 				<Show when={props.stream.video.length}>
 					<div class="duration flex flex-col items-center gap-1.5">
 						<IconHourglassEmpty size={22} class="icon-stream" />
 						<p>{secondsToHMS(props.stream.video[0].duration)}</p>
 					</div>{" "}
-					: ""
 				</Show>
 
 				<Show when={!props.isEpisode}>
@@ -78,8 +79,8 @@ export default function MediaStreamOption(props: MediaStreamOptionProps) {
 								.join("/")}
 						</p>
 					</div>{" "}
-					: ""
 				</Show>
+
 				<Show when={props.stream.video.length}>
 					<div class="resolution flex flex-col items-center gap-1.5">
 						<IconAspectRatio size={22} class="icon-stream" />
@@ -118,15 +119,21 @@ export default function MediaStreamOption(props: MediaStreamOptionProps) {
 						}}
 					>
 						<IconPlayerPlayFilled
-							size={40}
-							class={`text-yellow-300 duration-300 ease-in-out`}
+							size={30}
+							class={`text-yellow-300 duration-300 ease-in-out ${
+								focused() ? "!text-white" : ""
+							}`}
 						/>
 					</button>
 				</Match>
 
 				<Match when={!props.isEpisode}>
 					<button
-						class={`flex items-center justify-center gap-4 rounded-md border-2 border-transparent bg-yellow-300 px-5 py-3 text-base text-sm font-bold tracking-wide text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 xl:h-16 xl:w-12 xl:!p-0`}
+						class={`flex items-center justify-center gap-4 rounded-md border-2 border-transparent bg-yellow-300 px-5 py-3 text-base text-sm font-bold tracking-wide text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 xl:h-16 xl:w-12 xl:!p-0 ${
+							focused()
+								? "!border-yellow-300 !bg-black-1 !text-yellow-300"
+								: ""
+						}`}
 						onClick={() => props.onStreamClick()}
 					>
 						<span class="font-semibold xl:hidden">Watch</span>

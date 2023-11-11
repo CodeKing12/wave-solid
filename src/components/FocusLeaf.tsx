@@ -1,50 +1,61 @@
-// import { ReactNode, useEffect, useState, useCallback } from "react";
-// import { formatStringAsId } from "@/utils/general";
-// import { FocusableComponentLayout, useFocusable } from "@noriginmedia/norigin-spatial-navigation";
+import { FocusableComponentLayout, useFocusable } from "@/spatial-nav";
+import { formatStringAsId } from "@/utils/general";
+import { JSXElement, createEffect, createSignal } from "solid-js";
 
-// interface FocusLeafProps {
-//     children: ReactNode,
-//     className?: string,
-//     focusedStyles?: string,
-//     isForm?: boolean,
-//     isFocusable?: boolean,
-//     customFocusKey?: string,
-//     onFocus?: (layout: FocusableComponentLayout) => void;
-//     onEnterPress?: () => void,
-// }
+interface FocusLeafProps {
+	children: JSXElement;
+	class?: string;
+	focusedStyles?: string;
+	isForm?: boolean;
+	isFocusable?: boolean;
+	customFocusKey?: string;
+	onFocus?: (layout: FocusableComponentLayout) => void;
+	onEnterPress?: () => void;
+}
 
-// export default function FocusLeaf({ children, className, focusedStyles, customFocusKey, isForm, isFocusable, onFocus, onEnterPress }: FocusLeafProps) {
-//     const [id, setId] = useState<string>("");
+export default function FocusLeaf(props: FocusLeafProps) {
+	const [id, setId] = createSignal<string>("");
 
-//     const handleFocus = useCallback(
-//         (focused: boolean, focusDetails?: FocusableComponentLayout) => {
-//             if (isForm && id) {
-//                 const input: HTMLInputElement | null = document.querySelector(`#${id} input`);
-//                 if (input) {
-//                     focused ? input.focus() : input.blur();
-//                 }
-//             }
-//             if (focused && onFocus && focusDetails) {
-//                 onFocus(focusDetails);
-//             }
-//         },
-//         [isForm, id, onFocus]
-//     );
+	const handleFocus = (
+		focused: boolean,
+		focusDetails?: FocusableComponentLayout,
+	) => {
+		if (props.isForm && id()) {
+			const input: HTMLInputElement | null = document.querySelector(
+				`#${id()} input`,
+			);
+			if (input) {
+				focused ? input.focus() : input.blur();
+			}
+		}
+		if (focused && props.onFocus && focusDetails) {
+			props.onFocus(focusDetails);
+            console.log(focusDetails)
+		}
+	};
 
-//     const { ref, focused, focusKey } = useFocusable({
-//         onFocus: (focusDetails: FocusableComponentLayout) => handleFocus(true, focusDetails),
-//         onBlur: () => handleFocus(false), onEnterPress,
-//         focusable: isFocusable,
-//         focusKey: customFocusKey ? customFocusKey : undefined
-//     });
+	const { setRef, focused, focusKey } = useFocusable({
+		onFocus: (focusDetails: FocusableComponentLayout) =>
+			handleFocus(true, focusDetails),
+		onBlur: () => handleFocus(false),
+		onEnterPress: props.onEnterPress,
+		focusable: props.isFocusable,
+		focusKey: props.customFocusKey ? props.customFocusKey : undefined,
+	});
 
-//     useEffect(() => {
-//         setId(formatStringAsId(focusKey));
-//     }, [focusKey]);
+	createEffect(() => {
+		setId(formatStringAsId(focusKey()));
+	});
 
-//     return (
-//         <div ref={ref} id={isForm ? id : undefined} class={`${className || ""} ${focused ? focusedStyles : ""}`}>
-//             {children}
-//         </div>
-//     )
-// }
+	return (
+		<div
+			ref={setRef}
+			id={props.isForm ? id() : undefined}
+			class={`${props.class || ""} ${
+				focused() ? props.focusedStyles : ""
+			}`}
+		>
+			{props.children}
+		</div>
+	);
+}

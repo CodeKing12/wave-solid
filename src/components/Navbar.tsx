@@ -1,10 +1,8 @@
-// import { useFocusable, FocusContext } from "@noriginmedia/norigin-spatial-navigation";
-// import FocusLeaf from "./FocusLeaf";
-// import { SearchNormal, SearchNormal1 } from "iconsax-react";
-
-import { FocusContext } from "@/spatial-nav";
+import { FocusContext, setFocus } from "@/spatial-nav";
 import { useFocusable } from "@/spatial-nav/useFocusable";
 import { IconSearch, IconZoomFilled } from "@tabler/icons-solidjs";
+import FocusLeaf from "./FocusLeaf";
+import { createEffect } from "solid-js";
 
 interface NavProps {
 	query: string;
@@ -15,28 +13,40 @@ interface NavProps {
 
 const Navbar = function Navbar(props: NavProps) {
 	// console.log("Navbar is re-rendering")
-	const { setRef, focusKey, focused, hasFocusedChild } = useFocusable({});
+	const { setRef, focusKey, focused, hasFocusedChild } = useFocusable();
+
+	createEffect(() => {
+		setFocus("Nav-Favorites");
+	});
 
 	return (
-		<FocusContext.Provider value={focusKey}>
+		<FocusContext.Provider value={focusKey()}>
 			<nav
 				class={`flex flex-col items-center justify-between gap-5 lg:flex-row ${
-					focused ? "border-4 border-yellow-300" : ""
+					hasFocusedChild() ? "border-4 border-yellow-300" : ""
 				}`}
 				ref={setRef}
 			>
 				<div class="flex items-center gap-12 font-medium text-white text-opacity-80">
-					<div>
+					<FocusLeaf
+						focusedStyles="after:block animateUnderline"
+						customFocusKey="Nav-Favorites"
+					>
 						<a class="cursor-pointer" onClick={props.showFavorites}>
 							Favorites
 						</a>
-					</div>
-					<div>
+					</FocusLeaf>
+					<FocusLeaf focusedStyles="after:block animateUnderline">
 						<a class="cursor-pointer">Watched</a>
-					</div>
+					</FocusLeaf>
 				</div>
 
-				<div class="w-full text-[#AEAFB2] lg:w-fit">
+				<FocusLeaf
+					isForm
+					class="w-full text-[#AEAFB2] lg:w-fit"
+					focusedStyles="searchFocus"
+					onEnterPress={props.onSearch}
+				>
 					<form
 						class="group relative"
 						onSubmit={(e) => {
@@ -65,7 +75,7 @@ const Navbar = function Navbar(props: NavProps) {
 							<IconZoomFilled color="#21201E" size={16} />
 						</button>
 					</form>
-				</div>
+				</FocusLeaf>
 			</nav>
 		</FocusContext.Provider>
 	);
