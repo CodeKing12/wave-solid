@@ -1,8 +1,6 @@
-// import { useState, useEffect, useCallback } from "react";
 import { createSignal, createEffect } from "solid-js";
 import { getDisplayDetails, getRatingAggr } from "./MediaCard";
 import { convertSecondsToTime } from "@/utils/general";
-// import { PlayCircle, VideoSlash } from "iconsax-react";
 import MediaStreamOption from "./Stream";
 // import { HashLoader } from "react-spinners";
 import { SeriesObj, StreamObj } from "./MediaTypes";

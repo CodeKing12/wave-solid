@@ -1,6 +1,3 @@
-import { fullscreenShortcut, handlePlayerShortcuts } from "@/utils/general";
-import { useFocusable } from "@noriginmedia/norigin-spatial-navigation";
-import React from "react";
 import videojs from "video.js";
 import Player from "video.js/dist/types/player";
 import "video.js/dist/video-js.css";
