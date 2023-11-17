@@ -10,7 +10,6 @@ import MediaList from "@/components/MediaList";
 import { MediaObj, MediaType } from "@/components/MediaTypes";
 import Login from "@/components/Login";
 import MediaModal from "@/components/MediaModal";
-import dummyMediaInfo from "@/media.json";
 import { useAlert } from "@/AlertContext";
 import axiosInstance from "@/utils/axiosInstance";
 import { checkWebshareStatus } from "@/utils/general";
@@ -25,7 +24,7 @@ import {
 import { IconArrowLeft, IconArrowRight } from "@tabler/icons-solidjs";
 import Sidebar, { PageType } from "./components/Sidebar";
 import { FocusContext, useFocusable } from "./spatial-nav";
-import FocusLeaf from "./components/FocusLeaf";
+import FocusLeaf from "./components/Utilities/FocusLeaf";
 
 type PaginationType = {
 	[page in PageType]: number;

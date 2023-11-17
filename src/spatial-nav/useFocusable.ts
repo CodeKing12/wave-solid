@@ -174,11 +174,11 @@ const useFocusableHook = <P>(
 		SpatialNavigation.addFocusable(tempFocusDetails);
 	});
 
-	// onCleanup(() => {
-	// 	SpatialNavigation.removeFocusable({
-	// 		focusKey: focusKey(),
-	// 	});
-	// });
+	onCleanup(() => {
+		SpatialNavigation.removeFocusable({
+			focusKey: focusKey(),
+		});
+	});
 
 	// const ref: Ref<any> = (el: any) => {
 	// 	const node = el;

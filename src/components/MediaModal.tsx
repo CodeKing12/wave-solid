@@ -20,7 +20,14 @@ import axiosInstance from "@/utils/axiosInstance";
 import EpisodeList from "./EpisodeList";
 import PlayMedia from "./PlayMedia";
 import { IconArrowBackUp, IconHeartPlus, IconX } from "@tabler/icons-solidjs";
-import { For, Show, createEffect, createSignal, onMount } from "solid-js";
+import {
+	For,
+	Match,
+	Show,
+	createEffect,
+	createSignal,
+	onMount,
+} from "solid-js";
 import { Spinner, SpinnerType } from "solid-spinner";
 import {
 	FocusContext,
@@ -29,7 +36,9 @@ import {
 	setFocus,
 	useFocusable,
 } from "@/spatial-nav";
-import FocusLeaf from "./FocusLeaf";
+import FocusLeaf from "./Utilities/FocusLeaf";
+import AVPlayer from "./Player/AVPlayer";
+import { Switch } from "solid-js";
 
 interface MediaModalProps {
 	show: boolean;
@@ -54,6 +63,8 @@ export interface SeriesStreamObj {
 
 const MediaModal = function MediaModal(props: MediaModalProps) {
 	// console.log("MediaModal is re-rendering")
+	const isTizenTv = "tizen" in window;
+	const hasWebApi = "webapis" in window;
 	const { ref, setRef, focusSelf, focusKey } = useFocusable({
 		autoRestoreFocus: true,
 		isFocusBoundary: true,
@@ -704,14 +715,26 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 						</MediaPlayer>
 						</div> */}
 					{/* <AVPlay mediaUrl={mediaUrl} onPlaybackComplete={handlePlaybackComplete} /> */}
-					<PlayMedia
-						show={showPlayer()}
-						url={mediaUrl()}
-						mediaFormat="mp4"
-						mediaType="video/mp4"
-						mediaDetails={displayDetails()}
-						onExit={onPlayerExit}
-					/>
+					<Switch>
+						<Match when={isTizenTv && hasWebApi}>
+							<AVPlayer
+								url={mediaUrl()}
+								show={showPlayer()}
+								onQuit={onPlayerExit}
+								canPlayonTizen={isTizenTv && hasWebApi}
+							/>
+						</Match>
+						<Match when={!(isTizenTv && hasWebApi)}>
+							<PlayMedia
+								show={showPlayer()}
+								url={mediaUrl()}
+								mediaFormat="mp4"
+								mediaType="video/mp4"
+								mediaDetails={displayDetails()}
+								onExit={onPlayerExit}
+							/>
+						</Match>
+					</Switch>
 				</div>
 			</div>
 		</FocusContext.Provider>

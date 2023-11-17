@@ -13,7 +13,7 @@ import { useAlert } from "@/AlertContext";
 import { Spinner, SpinnerType } from "solid-spinner";
 import { IconKey, IconX } from "@tabler/icons-solidjs";
 import { FocusContext, useFocusable } from "@/spatial-nav";
-import FocusLeaf from "./FocusLeaf";
+import FocusLeaf from "./Utilities/FocusLeaf";
 
 interface LoginProps {
 	show: boolean;

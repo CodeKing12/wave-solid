@@ -1,8 +1,8 @@
 import Home from "./Home";
 import { MediaProvider } from "./MediaContext";
-import "./App.css";
+import "./css/App.css";
 import { AlertProvider } from "./AlertContext";
-import Alerts from "./components/Alerts";
+import Alerts from "./components/Utilities/Alerts";
 import { init } from "./spatial-nav";
 
 export default function App() {

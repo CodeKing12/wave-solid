@@ -5,7 +5,7 @@ import "vidstack/player";
 import "vidstack/player/layouts";
 import "vidstack/player/ui";
 import { I18nInfoLabel } from "./MediaTypes";
-import FocusLeaf from "./FocusLeaf";
+import FocusLeaf from "./Utilities/FocusLeaf";
 import { IconPlayerStopFilled } from "@tabler/icons-solidjs";
 import { createEffect } from "solid-js";
 import { FocusContext, useFocusable } from "@/spatial-nav";
@@ -23,7 +23,7 @@ export default function PlayMedia(props: PlayMediaProps) {
 	const { setRef, focusSelf, focusKey, focused } = useFocusable({
 		trackChildren: true,
 		isFocusBoundary: true,
-		focusable: props.show && Boolean(props.url?.length),
+		focusable: props.show,
 		// focusBoundaryDirections: ["left", "right"]
 	});
 

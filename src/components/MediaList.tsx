@@ -1,9 +1,7 @@
-import { Index, createEffect } from "solid-js";
+import { Index } from "solid-js";
 import MediaCard from "./MediaCard";
 import { MediaObj } from "./MediaTypes";
 import { Spinner, SpinnerType } from "solid-spinner";
-import { FocusContext } from "@/spatial-nav/useFocusContext";
-import { useFocusable } from "@/spatial-nav/useFocusable";
 import { FocusableComponentLayout } from "@/spatial-nav";
 
 export interface MediaListProps {

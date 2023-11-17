@@ -5,7 +5,7 @@ import {
 	JSXElement,
 	Accessor,
 } from "solid-js";
-import { AlertData, AlertInfo } from "./components/Alert";
+import { AlertData, AlertInfo } from "./components/Utilities/Alert";
 
 // Define your AlertContextValues interface
 interface AlertContextValues {

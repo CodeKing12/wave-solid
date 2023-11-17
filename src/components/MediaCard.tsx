@@ -1,5 +1,5 @@
 import { useFocusable } from "@/spatial-nav/useFocusable";
-import { I18nInfoLabel, MediaObj, MediaSource, RatingObj } from "./MediaTypes";
+import { I18nInfoLabel, MediaObj, RatingObj } from "./MediaTypes";
 import { resolveArtItem, smallPoster } from "@/utils/general";
 import {
 	IconHeart,
@@ -7,7 +7,7 @@ import {
 	IconStar,
 	IconStarFilled,
 } from "@tabler/icons-solidjs";
-import { createEffect, createMemo } from "solid-js";
+import { createMemo } from "solid-js";
 import { FocusableComponentLayout } from "@/spatial-nav";
 
 export interface MediaCardProps {
@@ -239,8 +239,8 @@ const MediaCard = function MediaCard(props: MediaCardProps) {
 							</button>
 
 							{/* <button class="px-10 py-3 bg-yellow-300 text-black-1 rounded-xl text-sm tracking-wide font-semibold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300">
-                                Watch
-                            </button> */}
+									Watch
+								</button> */}
 						</div>
 					</div>
 				</div>

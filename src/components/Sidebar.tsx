@@ -14,8 +14,8 @@ import {
 	IconMovie,
 	IconStereoGlasses,
 } from "@tabler/icons-solidjs";
-import { JSXElement } from "solid-js";
-import FocusLeaf from "./FocusLeaf";
+import { JSXElement, createEffect } from "solid-js";
+import FocusLeaf from "./Utilities/FocusLeaf";
 
 export type PageType =
 	| ""
@@ -95,9 +95,9 @@ const Sidebar = function Sidebar(props: SidebarProps) {
 		onArrowPress: () => true,
 	});
 
-	// createEffect(() => {
-	//     focusSelf();
-	// });
+	createEffect(() => {
+		focusSelf();
+	});
 
 	return (
 		<aside

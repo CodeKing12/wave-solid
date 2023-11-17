@@ -2,7 +2,7 @@ import { convertSecondsToTime, formatDate } from "@/utils/general";
 import { MediaSource, I18nInfoLabel } from "./MediaTypes";
 import { IconStarFilled } from "@tabler/icons-solidjs";
 import { FocusContext, useFocusable } from "@/spatial-nav";
-import FocusLeaf from "./FocusLeaf";
+import FocusLeaf from "./Utilities/FocusLeaf";
 import { For, Show } from "solid-js";
 
 export interface MediaDetailsProps {

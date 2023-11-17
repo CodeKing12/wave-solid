@@ -1,7 +1,7 @@
 import { FocusContext, setFocus } from "@/spatial-nav";
 import { useFocusable } from "@/spatial-nav/useFocusable";
 import { IconSearch, IconZoomFilled } from "@tabler/icons-solidjs";
-import FocusLeaf from "./FocusLeaf";
+import FocusLeaf from "./Utilities/FocusLeaf";
 import { createEffect } from "solid-js";
 
 interface NavProps {
