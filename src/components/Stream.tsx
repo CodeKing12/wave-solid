@@ -1,5 +1,5 @@
 import { bytesToSize, secondsToHMS } from "@/utils/general";
-import { Match, Show, Switch } from "solid-js";
+import { Match, Show, Switch, createEffect } from "solid-js";
 import { StreamObj } from "./MediaTypes";
 import {
 	IconAspectRatio,
@@ -24,8 +24,16 @@ export default function MediaStreamOption(props: MediaStreamOptionProps) {
 	const { setRef, focused } = useFocusable({
 		onEnterPress: () => props.onStreamClick(true),
 		onFocus: props.onFocus,
-		focusable: props.authToken && props.authToken?.length ? true : false,
+		focusable: Boolean(props.authToken && props.authToken?.length),
 	});
+	createEffect(() =>
+		console.log(
+			"Stream Authtoken",
+			Boolean(props.authToken && props.authToken?.length),
+			props.authToken,
+			props.authToken.length,
+		),
+	);
 
 	return (
 		<div
@@ -129,7 +137,7 @@ export default function MediaStreamOption(props: MediaStreamOptionProps) {
 
 				<Match when={!props.isEpisode}>
 					<button
-						class={`flex items-center justify-center gap-4 rounded-md border-2 border-transparent bg-yellow-300 px-5 py-3 text-base text-sm font-bold tracking-wide text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 xl:h-16 xl:w-12 xl:!p-0 ${
+						class={`flex items-center justify-center gap-4 rounded-md border-2 border-transparent bg-yellow-300 px-5 py-3 text-sm font-bold tracking-wide text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 xl:h-16 xl:w-12 xl:!p-0 ${
 							focused()
 								? "!border-yellow-300 !bg-black-1 !text-yellow-300"
 								: ""

@@ -318,13 +318,13 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 	}
 
 	function exitModal() {
-		props.onExit();
-		// setTimeout(() => {
 		setSelectedSeason(undefined);
 		setSelectedEpisode(undefined);
 		setShowEpisodes(false);
 		setShowPlayer(false);
 		setMediaUrl(undefined);
+		props.onExit();
+		// setTimeout(() => {
 		// }, 600)
 	}
 
@@ -518,11 +518,12 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 								}}
 							>
 								<button
-									class={`invisible flex h-14 w-14 items-center justify-center rounded-xl border-4 border-transparent bg-yellow-300 text-black-1 opacity-0 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 ${
-										showEpisodes() && selectedSeason()
-											? "!visible !opacity-100"
-											: ""
-									}`}
+									class="invisible flex h-14 w-14 items-center justify-center rounded-xl border-4 border-transparent bg-yellow-300 text-black-1 opacity-0 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300"
+									classList={{
+										"!visible !opacity-100":
+											showEpisodes() &&
+											Boolean(selectedSeason()),
+									}}
 									onClick={() => {
 										setShowEpisodes(false);
 										setSelectedSeason(undefined);
@@ -545,96 +546,142 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 							}
 						>
 							<div
-								class={`mb-6- mt-12 ${
-									seasons()[props.media?._id]?.length
-										? ""
-										: "w-[600px]"
-								}`}
+								class="mb-6- mt-12"
+								classList={{
+									"w-[600px]":
+										!seasons()[props.media?._id ?? ""]
+											?.length,
+								}}
 							>
 								<p class="mb-5 text-center text-base opacity-60">
 									Available{" "}
 									{showEpisodes() ? "Episodes" : "Seasons"}
 								</p>
-								<div class="relative min-h-[250px] w-full">
+								<div
+									class="relative min-h-[250px] w-full"
+									ref={tvMediaRef}
+								>
 									<div
 										class={`absolute top-0 flex w-full max-w-full flex-wrap gap-8 duration-300 ease-in-out ${
 											selectedSeason() &&
-											seasons()[props.media?._id]?.length
+											seasons()[props.media?._id ?? ""]
+												?.length
 												? "invisible -translate-y-16 opacity-0"
 												: ""
 										}`}
 									>
-										{seasons()[props?.media?._id]
-											?.length ? (
-											seasons()[props.media?._id].map(
-												(seriesMedia, index) =>
-													seriesMedia._source
-														.info_labels
-														.mediatype ===
-													"season" ? (
-														<Season
-															season={seriesMedia}
-															onClick={() => {
-																onSeasonClick(
-																	seriesMedia,
-																);
-															}}
-															isVisible={Boolean(
-																!selectedSeason &&
-																	seasons()[
-																		props
-																			.media
-																			?._id ||
-																			0
-																	]?.length,
-															)}
-														/>
-													) : (
-														<Episode
-															authToken={
-																props.authToken
-															}
-															episode={
+										<Show
+											when={
+												seasons()[
+													props.media?._id ?? ""
+												]?.length
+											}
+											fallback={
+												<Spinner
+													type={SpinnerType.rings}
+													width={70}
+													height={70}
+													color="#fde047"
+													class="relative left-1/2 mt-5 -translate-x-1/2 -translate-y-1/2"
+												/>
+											}
+										>
+											<For
+												each={
+													seasons()[
+														props.media?._id ?? ""
+													]
+												}
+											>
+												{(seriesMedia) => (
+													<Switch>
+														<Match
+															when={
 																seriesMedia
+																	._source
+																	.info_labels
+																	.mediatype ===
+																"season"
 															}
-															onClick={() =>
-																getEpisodeStreams(
-																	seriesMedia,
-																)
-															}
-															episodeStreams={
-																episodeStreams()[
-																	storeKeyRef()
-																]?.[
+														>
+															<Season
+																season={
 																	seriesMedia
-																		._id
-																]
+																}
+																onClick={() => {
+																	onSeasonClick(
+																		seriesMedia,
+																	);
+																	setFocus(
+																		"FAVE-BTN",
+																	);
+																}}
+																onFocus={
+																	onEpisodeFocus
+																}
+																isVisible={Boolean(
+																	!selectedSeason() &&
+																		seasons()[
+																			props
+																				.media
+																				?._id ||
+																				0
+																		]
+																			?.length,
+																)}
+															/>
+														</Match>
+														<Match
+															when={
+																seriesMedia
+																	._source
+																	.info_labels
+																	.mediatype !==
+																"season"
 															}
-															onEpisodeStreamClick={(
-																stream,
-																isEnterpress,
-															) =>
-																handleStreamPlay(
+														>
+															<Episode
+																authToken={
+																	props.authToken
+																}
+																episode={
+																	seriesMedia
+																}
+																onClick={() =>
+																	getEpisodeStreams(
+																		seriesMedia,
+																	)
+																}
+																episodeStreams={
+																	episodeStreams()[
+																		storeKeyRef()
+																	]?.[
+																		seriesMedia
+																			._id
+																	]
+																}
+																onEpisodeStreamClick={(
 																	stream,
 																	isEnterpress,
-																)
-															}
-															isLoadingStreams={
-																isLoadingEpisodeStreams() ===
-																seriesMedia._id
-															}
-														/>
-													),
-											)
-										) : (
-											<Spinner
-												type={SpinnerType.rings}
-												width={70}
-												height={70}
-												color="#fde047"
-												class="relative left-1/2 mt-5 -translate-x-1/2 -translate-y-1/2"
-											/>
-										)}
+																) =>
+																	handleStreamPlay(
+																		stream,
+																		isEnterpress,
+																	)
+																}
+																isLoadingStreams={
+																	isLoadingEpisodeStreams() ===
+																	seriesMedia._id
+																}
+																onFocus={
+																	onEpisodeFocus
+																}
+															/>
+														</Match>
+													</Switch>
+												)}
+											</For>
+										</Show>
 									</div>
 									<div
 										class={`invisible absolute top-0 flex max-w-full translate-y-16 flex-col gap-10 opacity-0 duration-500 ease-in-out ${
@@ -667,6 +714,14 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 												)
 											}
 											isLoadingEpisodeStreams={isLoadingEpisodeStreams()}
+											onEpisodeFocus={onEpisodeFocus}
+											onEpisodeStreamFocus={
+												onEpisodeFocus
+											}
+											isFocusable={Boolean(
+												showEpisodes() &&
+													selectedSeason(),
+											)}
 										/>
 										{/* <div class="flex flex-col gap-4 flex-wrap max-w-full">
 													{
@@ -675,14 +730,14 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 												</div> */}
 									</div>
 									<div
-										class={`invisible absolute bottom-0 top-0 flex h-full w-full items-center justify-center rounded-xl opacity-0 backdrop-blur-sm duration-300 ease-linear ${
-											showEpisodes() &&
-											!episodes()[
-												selectedSeason()?._id || ""
-											]?.length
-												? "!visible !opacity-100"
-												: ""
-										}`}
+										class="invisible absolute bottom-0 top-0 flex h-full w-full items-center justify-center rounded-xl opacity-0 backdrop-blur-sm duration-300 ease-linear"
+										classList={{
+											"!visible !opacity-100":
+												showEpisodes() &&
+												!episodes()[
+													selectedSeason()?._id || ""
+												]?.length,
+										}}
 									>
 										<Spinner
 											type={SpinnerType.oval}
@@ -696,9 +751,8 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 						</Show>
 					</div>
 					<div
-						class={`invisible absolute bottom-0 top-0 flex h-full w-full items-center justify-center rounded-xl opacity-0 backdrop-blur-sm duration-300 ease-linear ${
-							isLoadingUrl() ? "!visible !opacity-100" : ""
-						}`}
+						class="invisible absolute bottom-0 top-0 flex h-full w-full items-center justify-center rounded-xl opacity-0 backdrop-blur-sm duration-300 ease-linear"
+						classList={{ "!visible !opacity-100": isLoadingUrl() }}
 					>
 						<Spinner
 							type={SpinnerType.spinningCircles}

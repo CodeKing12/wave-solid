@@ -41,11 +41,12 @@ const Login = function Login(props: LoginProps) {
 	const [username, setUsername] = createSignal("");
 	const [password, setPassword] = createSignal("");
 	const [isAuthenticating, setIsAuthenticating] = createSignal(false);
-	const { setRef, focusSelf, hasFocusedChild, focusKey } = useFocusable({
+	const { setRef, focusSelf, focusKey } = useFocusable({
 		focusable: props.show,
 		trackChildren: true,
 		autoRestoreFocus: true,
 		isFocusBoundary: props.show,
+		preferredChildFocusKey: "LOGIN_USERNAME_INPUT",
 	});
 	const { addAlert } = useAlert();
 
@@ -179,6 +180,7 @@ const Login = function Login(props: LoginProps) {
 									isForm
 									class="w-full"
 									focusedStyles="login-input-focus"
+									customFocusKey="LOGIN_USERNAME_INPUT"
 								>
 									<input
 										class="w-full rounded-md border border-gray-300 border-opacity-40 bg-transparent px-2 py-3 text-[15px] text-gray-300 !outline-none placeholder:text-gray-400 placeholder:text-opacity-50 focus:border-yellow-300"

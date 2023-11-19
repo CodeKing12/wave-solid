@@ -1,22 +1,21 @@
-import { createSignal, createEffect } from "solid-js";
+import { createEffect } from "solid-js";
 import { getDisplayDetails, getRatingAggr } from "./MediaCard";
 import { convertSecondsToTime } from "@/utils/general";
-import MediaStreamOption from "./Stream";
-// import { HashLoader } from "react-spinners";
 import { SeriesObj, StreamObj } from "./MediaTypes";
-// import { FocusDetails, setFocus, useFocusable } from "@noriginmedia/norigin-spatial-navigation";
 import StreamEpisodes from "./StreamEpisodes";
 import { IconMovieOff, IconPlayerPlayFilled } from "@tabler/icons-solidjs";
 import { Spinner, SpinnerType } from "solid-spinner";
+import { FocusDetails, setFocus, useFocusable } from "@/spatial-nav";
+import { Show } from "solid-js";
 
 export interface EpisodeProps {
 	authToken: string;
 	episode: SeriesObj;
 	episodeStreams: StreamObj[];
 	isLoadingStreams: boolean;
-	// onFocus: ({ y }: { y: number }) => void;
+	onFocus: ({ y }: { y: number }) => void;
 	onClick: () => void;
-	// onEpisodeStreamFocus?: (focusDetails: FocusDetails) => void;
+	onEpisodeStreamFocus?: (focusDetails: FocusDetails) => void;
 	onEpisodeStreamClick: (stream: StreamObj, isEnterpress?: boolean) => void;
 }
 
@@ -24,44 +23,41 @@ export default function Episode(props: EpisodeProps) {
 	const episodeDetails = getDisplayDetails(
 		props.episode._source.i18n_info_labels,
 	);
-	const hasNoStreams =
+	const hasNoStreams = () =>
 		Array.isArray(props.episodeStreams) && !props.episodeStreams?.length;
-	const [showStreams, setShowStreams] = createSignal(false);
-	let { rating, voteCount } = getRatingAggr(props.episode._source.ratings);
-	const focused = false;
+	// const [showStreams, setShowStreams] = createSignal(false);
+	let { rating } = getRatingAggr(props.episode._source.ratings);
 
-	// const onFocusStream = useCallback(
-	//     () => {
-	//         setFocus(episode._id)
-	//     }, [episode._id]
-	// )
+	const onFocusStream = () => {
+		setFocus(props.episode._id);
+	};
 
-	// function modifyStreamOffset(focusDetails: FocusDetails) {
-	//     focusDetails.y += parseFloat(ref.current.offsetTop)
-	//     onEpisodeStreamFocus?.(focusDetails)
-	// }
+	const { ref, setRef, focused } = useFocusable({
+		onEnterPress: props.onClick,
+		onFocus: props.episodeStreams?.length ? onFocusStream : props.onFocus,
+	});
 
-	// const { ref, focused } = useFocusable({
-	//     onEnterPress: onClick,
-	//     onFocus: episodeStreams?.length ? onFocusStream : onFocus
-	// });
+	function modifyStreamOffset(focusDetails: FocusDetails) {
+		focusDetails.y += parseFloat(ref()?.offsetTop.toString() ?? "");
+		props.onEpisodeStreamFocus?.(focusDetails);
+	}
 
-	// useEffect(() => {
-	//     // console.log(Boolean(episodeStreams?.length))
-	//     episodeStreams?.length ? setFocus(episode._id) : ""
-	// }, [episodeStreams, episode._id])
-
-	// useEffect(() => {
-	//     console.log(showStreams)
-	// }, [showStreams])
+	createEffect(() => {
+		// console.log(Boolean(episodeStreams?.length))
+		if (props.episodeStreams?.length) {
+			setFocus(props.episode._id);
+		}
+	});
 
 	return (
 		<div
-			class={`relative max-w-full rounded-xl border-2 border-transparent px-6 py-4 transition-all duration-[400ms] ease-in-out hover:border-yellow-300 hover:border-opacity-100 ${
-				props.episodeStreams?.length
-					? "border-yellow-300 border-opacity-60"
-					: ""
-			} ${focused ? "!border-yellow-300 !border-opacity-100" : ""}`}
+			class="relative max-w-full rounded-xl border-2 border-transparent px-6 py-4 transition-all duration-[400ms] ease-in-out hover:border-yellow-300 hover:border-opacity-100"
+			classList={{
+				"!border-yellow-300 !border-opacity-100": focused(),
+				"border-yellow-300 border-opacity-60":
+					props.episodeStreams?.length > 0,
+			}}
+			ref={setRef}
 		>
 			<article class="flex w-full items-center space-x-6 duration-[400ms] ease-in-out">
 				<img
@@ -126,7 +122,7 @@ export default function Episode(props: EpisodeProps) {
 								)}
 							</dd>
 						</div>
-						{hasNoStreams ? (
+						{hasNoStreams() ? (
 							<div class="ml-auto">
 								<IconMovieOff class="text-yellow-300" />
 							</div>
@@ -141,9 +137,9 @@ export default function Episode(props: EpisodeProps) {
 				</div>
 				<button
 					class={`!ml-10 flex h-16 w-12 min-w-[48px] items-center justify-center rounded-md border-2 border-black-1 border-transparent bg-yellow-300 text-base font-bold tracking-wide text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 ${
-						hasNoStreams ? "pointer-events-none opacity-40" : ""
+						hasNoStreams() ? "pointer-events-none opacity-40" : ""
 					} ${
-						focused && !hasNoStreams
+						focused() && !hasNoStreams()
 							? "!border-yellow-300 !bg-black-1 !text-yellow-300"
 							: ""
 					}`}
@@ -157,25 +153,19 @@ export default function Episode(props: EpisodeProps) {
 				authToken={props.authToken}
 				episodeStreams={props.episodeStreams}
 				onEpisodeStreamClick={props.onEpisodeStreamClick}
+				onEpisodeStreamFocus={modifyStreamOffset}
 				customFocusKey={props.episode._id}
 			/>
 
 			<div
-				class={`h-0 duration-300 ease-linear ${
-					hasNoStreams ? "remove-element h-6" : ""
-				}`}
+				class="h-0 duration-300 ease-linear"
+				classList={{ "remove-element h-6": hasNoStreams() }}
 			>
-				{hasNoStreams ? (
-					<p
-						class={`text-center font-medium text-gray-300 ${
-							hasNoStreams ? "" : ""
-						}`}
-					>
+				<Show when={hasNoStreams()}>
+					<p class="text-center font-medium text-gray-300">
 						No streams available
 					</p>
-				) : (
-					""
-				)}
+				</Show>
 			</div>
 			{/* If you want a smoother height increase animation, you can comment out the loader below (and its wrapper div) */}
 			<div

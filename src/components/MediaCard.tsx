@@ -180,7 +180,7 @@ const MediaCard = function MediaCard(props: MediaCardProps) {
 		mediaSource ? (
 			<div
 				id={props.id}
-				class={`media-card focusable group relative mx-auto h-[340px] w-full max-w-[250px] cursor-pointer overflow-clip rounded-xl border-4 border-transparent bg-black-1 bg-opacity-60 backdrop-blur-2xl duration-[400ms] ease-in-out xsm:max-w-[230px] sm:h-[300px] ${
+				class={`media-card focusable group relative mx-auto h-[340px] w-full max-w-[250px] cursor-pointer overflow-clip rounded-xl border-4 border-transparent bg-black-1 bg-opacity-60 backdrop-blur-2xl duration-[400ms] ease-in-out xsm:max-w-[230px] sm:h-[330px] ${
 					focused() ? "border-yellow-300 !duration-300" : ""
 				}`}
 				ref={setRef}

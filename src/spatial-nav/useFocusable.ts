@@ -162,13 +162,13 @@ const useFocusableHook = <P>(
 			onUpdateFocus: (isFocused = false) => setFocused(isFocused),
 			onUpdateHasFocusedChild: (isFocused = false) =>
 				setHasFocusedChild(isFocused),
-			saveLastFocusedChild: props.saveLastFocusedChild || true,
+			saveLastFocusedChild: props.saveLastFocusedChild ?? true,
 			trackChildren: props.trackChildren || false,
 			isFocusBoundary: props.isFocusBoundary || false,
 			focusBoundaryDirections: props.focusBoundaryDirections,
-			autoRestoreFocus: props.autoRestoreFocus || true,
+			autoRestoreFocus: props.autoRestoreFocus ?? true,
 			forceFocus: props.forceFocus || false,
-			focusable: props.focusable || true,
+			focusable: props.focusable ?? true,
 		};
 
 		SpatialNavigation.addFocusable(tempFocusDetails);
