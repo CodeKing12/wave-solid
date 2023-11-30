@@ -18,7 +18,7 @@ import Episode from "./Episode";
 import Season from "./Season";
 import axiosInstance from "@/utils/axiosInstance";
 import EpisodeList from "./EpisodeList";
-import PlayMedia from "./PlayMedia";
+// import PlayMedia from "./PlayMedia";
 import { IconArrowBackUp, IconHeartPlus, IconX } from "@tabler/icons-solidjs";
 import {
 	For,
@@ -82,6 +82,7 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 	createEffect(() => {
 		if (props.show) {
 			setFocus("MEDIA-TITLE");
+			console.log(props.media);
 			// focusSelf();
 		} else {
 			if (modalContent) {
@@ -331,8 +332,6 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 	const onDetailFocus = ({ y }: { y: number }) => {
 		//   console.log("Detail Scroll")
 		if (ref()) {
-			console.log(y);
-
 			// @ts-ignore
 			ref().scrollTo({
 				top: y,
@@ -377,13 +376,10 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 	return (
 		<FocusContext.Provider value={focusKey()}>
 			<div
-				class={`media-modal invisible fixed bottom-0 left-0 right-0 top-0 z-0 h-screen w-screen -translate-y-20 bg-black-1 p-10 px-5 py-16 opacity-0 duration-500 ease-in-out xs:px-7 xsm:px-10 md:px-16 lg:px-20 xl:overflow-hidden ${
+				class={`media-modal invisible fixed bottom-0 left-0 right-0 top-0 z-0 h-screen w-screen bg-black-1 p-10 px-5 py-16 opacity-0 duration-500 ease-in-out xs:px-7 xsm:px-10 md:px-16 lg:px-20 xl:overflow-hidden ${
 					showPlayer() ? "" : "overflow-y-scroll"
-				} ${
-					props.show
-						? "!visible !z-[200] !translate-y-0 !opacity-100"
-						: ""
-				}`}
+				} ${props.show ? "!visible !z-[100] !opacity-100" : ""}`}
+				// -translate-y-20 !translate-y-0
 			>
 				<FocusLeaf
 					class="absolute right-0 top-0"
@@ -397,7 +393,7 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 						<IconX size={30} />
 					</button>
 				</FocusLeaf>
-				<div class="relative flex flex-col justify-center gap-14 xl:h-full xl:flex-row xl:gap-20">
+				<div class="relative flex flex-col justify-center space-y-14 xl:h-full xl:flex-row xl:space-x-20 xl:space-y-0">
 					<div class="poster relative mx-auto h-[500px] w-full max-w-[350px] rounded-[30px] bg-[#191919] bg-opacity-75 xl:h-full xl:w-[450px] xl:min-w-[450px]">
 						{/* xl:w-[500px] */}
 						<Show when={images()?.poster}>
@@ -778,7 +774,7 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 								canPlayonTizen={isTizenTv && hasWebApi}
 							/>
 						</Match>
-						<Match when={!(isTizenTv && hasWebApi)}>
+						{/* <Match when={!(isTizenTv && hasWebApi)}>
 							<PlayMedia
 								show={showPlayer()}
 								url={mediaUrl()}
@@ -787,7 +783,7 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 								mediaDetails={displayDetails()}
 								onExit={onPlayerExit}
 							/>
-						</Match>
+						</Match> */}
 					</Switch>
 				</div>
 			</div>

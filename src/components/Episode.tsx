@@ -29,12 +29,27 @@ export default function Episode(props: EpisodeProps) {
 	let { rating } = getRatingAggr(props.episode._source.ratings);
 
 	const onFocusStream = () => {
-		setFocus(props.episode._id);
+		// console.log("Focused");
+		console.log(
+			props.episode._id,
+			props.episodeStreams?.length,
+			props.episodeStreams,
+		);
+		setFocus(props.episodeStreams[0]._id);
 	};
+
+	function handleFocus(handler: any) {
+		console.log(props.episodeStreams?.length);
+		if (props.episodeStreams?.length) {
+			onFocusStream();
+		} else {
+			props.onFocus(handler);
+		}
+	}
 
 	const { ref, setRef, focused } = useFocusable({
 		onEnterPress: props.onClick,
-		onFocus: props.episodeStreams?.length ? onFocusStream : props.onFocus,
+		onFocus: handleFocus,
 	});
 
 	function modifyStreamOffset(focusDetails: FocusDetails) {
@@ -43,9 +58,15 @@ export default function Episode(props: EpisodeProps) {
 	}
 
 	createEffect(() => {
-		// console.log(Boolean(episodeStreams?.length))
+		console.log("No. of Episode Streams: ", props.episodeStreams?.length);
 		if (props.episodeStreams?.length) {
-			setFocus(props.episode._id);
+			// console.log(
+			// 	"Doing this",
+			// 	props.episode._id,
+			// 	props.episode._source.info_labels.originaltitle,
+			// 	props.episodeStreams?.length,
+			// );
+			setFocus(props.episodeStreams[0]._id);
 		}
 	});
 
@@ -54,7 +75,7 @@ export default function Episode(props: EpisodeProps) {
 			class="relative max-w-full rounded-xl border-2 border-transparent px-6 py-4 transition-all duration-[400ms] ease-in-out hover:border-yellow-300 hover:border-opacity-100"
 			classList={{
 				"!border-yellow-300 !border-opacity-100": focused(),
-				"border-yellow-300 border-opacity-60":
+				"border-yellow-300 border-opacity-30":
 					props.episodeStreams?.length > 0,
 			}}
 			ref={setRef}
@@ -83,6 +104,7 @@ export default function Episode(props: EpisodeProps) {
 							<dd>{rating.toFixed(1)}</dd>
 						</div>
 						<div>
+							<p class="block">{props.episode._id}</p>
 							<dt class="sr-only">Episode Number</dt>
 							<dd class="rounded px-1.5 ring-1 ring-slate-200">
 								S{props.episode._source.info_labels.season || 1}{" "}

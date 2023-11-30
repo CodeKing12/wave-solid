@@ -130,7 +130,7 @@ export default function MediaCard({
 							</p>
 						</div>
 						<div class="mt-2 flex items-center justify-between">
-							<div class="flex gap-0.5">
+							<div class="flex space-x-0.5">
 								{Array(Math.round(rating))
 									.fill("")
 									.map((value, index) => {

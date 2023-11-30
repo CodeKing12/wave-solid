@@ -58,9 +58,9 @@ const NavItem = function NavItem(props: SidebarItemProps) {
 	return (
 		<a
 			ref={setRef}
-			class={`flex w-full cursor-pointer items-center gap-5 border-r-2 border-yellow-300 border-opacity-0 px-8 py-2 text-base opacity-80 hover:border-opacity-100 hover:fill-yellow-300 hover:text-yellow-300 active:font-semibold ${
+			class={`flex w-full cursor-pointer items-center space-x-5 border-transparent border-opacity-0 px-8 py-2 text-base opacity-80 hover:border-opacity-100 hover:fill-yellow-300 hover:text-yellow-300 active:font-semibold ${
 				props.page === props.current
-					? "border-r-4 border-opacity-100 fill-yellow-300 text-yellow-300 opacity-100"
+					? "border-r-4 border-yellow-300 border-opacity-100 fill-yellow-300 text-yellow-300 opacity-100"
 					: ""
 			} ${
 				focused()
@@ -135,7 +135,7 @@ const Sidebar = function Sidebar(props: SidebarProps) {
 				</p>
 				<FocusContext.Provider value={focusKey()}>
 					<div
-						class="flex flex-col gap-5 fill-white text-white"
+						class="flex flex-col space-y-5 fill-white text-white"
 						classList={{
 							"!border-yellow-300 !border-2": focused(),
 							hasFocusedChildren: hasFocusedChild(),
@@ -208,7 +208,7 @@ const Sidebar = function Sidebar(props: SidebarProps) {
 					onEnterPress={props.onLogout}
 				>
 					<button
-						class="group mt-auto flex items-center gap-3 px-8 py-2 text-[17px] font-medium text-white text-opacity-70 duration-500 ease-in-out hover:text-yellow-300"
+						class="group mt-auto flex items-center space-x-3 px-8 py-2 text-[17px] font-medium text-white text-opacity-70 duration-500 ease-in-out hover:text-yellow-300"
 						onClick={props.onLogout}
 					>
 						Logout
@@ -222,7 +222,7 @@ const Sidebar = function Sidebar(props: SidebarProps) {
 					onEnterPress={props.onLoginClick}
 				>
 					<button
-						class="group mt-auto flex items-center gap-3 border-2 border-l-0 border-yellow-300 bg-yellow-300 bg-opacity-90 px-8 py-2.5 font-semibold text-black-1 duration-500 ease-in-out hover:bg-transparent hover:text-yellow-300"
+						class="group mt-auto flex items-center space-x-3 border-2 border-l-0 border-yellow-300 bg-yellow-300 bg-opacity-90 px-8 py-2.5 font-semibold text-black-1 duration-500 ease-in-out hover:bg-transparent hover:text-yellow-300"
 						onClick={props.onLoginClick}
 					>
 						Login

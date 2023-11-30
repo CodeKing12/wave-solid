@@ -3,6 +3,7 @@ import MediaCard from "./MediaCard";
 import { MediaObj } from "./MediaTypes";
 import { Spinner, SpinnerType } from "solid-spinner";
 import { FocusableComponentLayout } from "@/spatial-nav";
+import "@/css/media.css";
 
 export interface MediaListProps {
 	media?: MediaObj[];
@@ -42,13 +43,10 @@ const MediaList = function MediaList(props: MediaListProps) {
 				{/* <div class={`flex justify-center flex-wrap gap-4 ${isModalOpen ? "!overflow-hidden" : ""}`}> */}
 				<div
 					id="media-list"
-					class={`grid grid-cols-1 flex-wrap justify-center gap-x-1 gap-y-4 xs:grid-cols-2 sm:grid-cols-3 md:gap-x-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 ${
+					// class={`grid grid-cols-1 flex-wrap justify-center space-x-1 space-y-4 xs:grid-cols-2 sm:grid-cols-3 md:space-x-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 ${
+					class={`-mt-4 flex flex-wrap space-x-1.5 [&>div]:mt-4 ${
 						props.isModalOpen ? "!overflow-hidden" : ""
-					} ${
-						props.isSidebarOpen
-							? "lg:!grid-cols-4 xl:!grid-cols-5 2xl:!grid-cols-6"
-							: "listIsHidden"
-					}`}
+					} ${props.isSidebarOpen ? "" : "sidebarVisible"}`}
 				>
 					{/* grid-cols-1 sm:grid-cols-2 */}
 					{/* fallback={<Spinner type={SpinnerType.puff} width={70} height={70} color="#fde047" class="!absolute top-[37%] left-1/2 -translate-x-1/2 -translate-y-1/2" />} */}

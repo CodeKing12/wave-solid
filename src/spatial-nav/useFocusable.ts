@@ -8,7 +8,6 @@ import {
 	Accessor,
 } from "solid-js";
 import noop from "lodash/noop";
-import { Ref } from "solid-js";
 import uniqueId from "lodash/uniqueId";
 import {
 	SpatialNavigation,
@@ -70,36 +69,38 @@ export interface UseFocusableResult {
 	hasFocusedChild: Accessor<boolean>;
 	focusKey: Accessor<string>;
 }
-// defaultProps = {
-// 	focusable: true,
-// 	saveLastFocusedChild: true,
-// 	trackChildren: false,
-// 	autoRestoreFocus: true,
-// 	forceFocus: false,
-// 	isFocusBoundary: false,
-// 	focusBoundaryDirections,
-// 	focusKey: propFocusKey,
-// 	preferredChildFocusKey,
-// 	onEnterPress = noop,
-// 	onEnterRelease = noop,
-// 	onArrowPress = () => true,
-// 	onFocus = noop,
-// 	onBlur = noop,
-// 	extraProps,
-// }
+const defaultProps = {
+	focusable: true,
+	saveLastFocusedChild: true,
+	trackChildren: false,
+	autoRestoreFocus: true,
+	forceFocus: false,
+	isFocusBoundary: false,
+	focusBoundaryDirections: undefined,
+	focusKey: undefined,
+	preferredChildFocusKey: undefined,
+	onEnterPress: noop,
+	onEnterRelease: noop,
+	onArrowPress: () => true,
+	onFocus: noop,
+	onBlur: noop,
+	extraProps: undefined,
+};
 
 const useFocusableHook = <P>(
 	props: UseFocusableConfig<P> = {},
 ): UseFocusableResult => {
-	const onEnterPressHandler = (details: KeyPressDetails) => {
-		if (props.onEnterPress) {
-			props.onEnterPress(props.extraProps, details);
+	const config = () => ({ ...defaultProps, ...props });
+
+	const onEnterPressHandler = (details?: KeyPressDetails) => {
+		if (config().onEnterPress) {
+			config().onEnterPress(config().extraProps, details);
 		}
 	};
 
 	const onEnterReleaseHandler = () => {
-		if (props.onEnterRelease) {
-			props.onEnterRelease(props.extraProps);
+		if (config().onEnterRelease) {
+			config().onEnterRelease(config().extraProps);
 		}
 	};
 
@@ -107,8 +108,8 @@ const useFocusableHook = <P>(
 		direction: string,
 		details: KeyPressDetails,
 	) => {
-		if (props.onArrowPress) {
-			props.onArrowPress(direction, props.extraProps, details);
+		if (config().onArrowPress) {
+			config().onArrowPress(direction, config().extraProps, details);
 		}
 	};
 
@@ -116,8 +117,8 @@ const useFocusableHook = <P>(
 		layout: FocusableComponentLayout,
 		details: FocusDetails,
 	) => {
-		if (props.onFocus) {
-			props.onFocus(layout, props.extraProps, details);
+		if (config().onFocus) {
+			config().onFocus(layout, config().extraProps, details);
 		}
 	};
 
@@ -125,8 +126,8 @@ const useFocusableHook = <P>(
 		layout: FocusableComponentLayout,
 		details: FocusDetails,
 	) => {
-		if (props.onBlur) {
-			props.onBlur(layout, props.extraProps, details);
+		if (config().onBlur) {
+			config().onBlur(layout, config().extraProps, details);
 		}
 	};
 
@@ -143,17 +144,39 @@ const useFocusableHook = <P>(
 	const parentFocusKey = useFocusContext();
 
 	const focusKey = createMemo(
-		() => props.focusKey || uniqueId("sn:focusable-item-"),
+		() => config().focusKey || uniqueId("sn:focusable-item-"),
 	);
 
 	onMount(() => {
 		const node = ref();
 
-		const tempFocusDetails = {
+		// const tempFocusDetails = {
+		// 	focusKey: focusKey(),
+		// 	node,
+		// 	parentFocusKey,
+		// 	preferredChildFocusKey: config().preferredChildFocusKey,
+		// 	onEnterPress: onEnterPressHandler,
+		// 	onEnterRelease: onEnterReleaseHandler,
+		// 	onArrowPress: onArrowPressHandler,
+		// 	onFocus: onFocusHandler,
+		// 	onBlur: onBlurHandler,
+		// 	onUpdateFocus: (isFocused = false) => setFocused(isFocused),
+		// 	onUpdateHasFocusedChild: (isFocused = false) =>
+		// 		setHasFocusedChild(isFocused),
+		// 	saveLastFocusedChild: config().saveLastFocusedChild,
+		// 	trackChildren: config().trackChildren,
+		// 	isFocusBoundary: config().isFocusBoundary,
+		// 	focusBoundaryDirections: config().focusBoundaryDirections,
+		// 	autoRestoreFocus: config().autoRestoreFocus,
+		// 	forceFocus: config().forceFocus,
+		// 	focusable: config().focusable,
+		// };
+
+		SpatialNavigation.addFocusable({
 			focusKey: focusKey(),
 			node,
 			parentFocusKey,
-			preferredChildFocusKey: props.preferredChildFocusKey,
+			preferredChildFocusKey: config().preferredChildFocusKey,
 			onEnterPress: onEnterPressHandler,
 			onEnterRelease: onEnterReleaseHandler,
 			onArrowPress: onArrowPressHandler,
@@ -162,16 +185,14 @@ const useFocusableHook = <P>(
 			onUpdateFocus: (isFocused = false) => setFocused(isFocused),
 			onUpdateHasFocusedChild: (isFocused = false) =>
 				setHasFocusedChild(isFocused),
-			saveLastFocusedChild: props.saveLastFocusedChild ?? true,
-			trackChildren: props.trackChildren || false,
-			isFocusBoundary: props.isFocusBoundary || false,
-			focusBoundaryDirections: props.focusBoundaryDirections,
-			autoRestoreFocus: props.autoRestoreFocus ?? true,
-			forceFocus: props.forceFocus || false,
-			focusable: props.focusable ?? true,
-		};
-
-		SpatialNavigation.addFocusable(tempFocusDetails);
+			saveLastFocusedChild: config().saveLastFocusedChild,
+			trackChildren: config().trackChildren,
+			isFocusBoundary: config().isFocusBoundary,
+			focusBoundaryDirections: config().focusBoundaryDirections,
+			autoRestoreFocus: config().autoRestoreFocus,
+			forceFocus: config().forceFocus,
+			focusable: config().focusable,
+		});
 	});
 
 	onCleanup(() => {
@@ -188,7 +209,7 @@ const useFocusableHook = <P>(
 	// 		focusKey: focusKey(),
 	// 		node,
 	// 		parentFocusKey,
-	// 		preferredChildFocusKey: props.preferredChildFocusKey,
+	// 		preferredChildFocusKey: config().preferredChildFocusKey,
 	// 		onEnterPress: onEnterPressHandler,
 	// 		onEnterRelease: onEnterReleaseHandler,
 	// 		onArrowPress: onArrowPressHandler,
@@ -197,13 +218,13 @@ const useFocusableHook = <P>(
 	// 		onUpdateFocus: (isFocused = false) => setFocused(isFocused),
 	// 		onUpdateHasFocusedChild: (isFocused = false) =>
 	// 			setHasFocusedChild(isFocused),
-	// 		saveLastFocusedChild: props.saveLastFocusedChild || true,
-	// 		trackChildren: props.trackChildren || false,
-	// 		isFocusBoundary: props.isFocusBoundary || false,
-	// 		focusBoundaryDirections: props.focusBoundaryDirections,
-	// 		autoRestoreFocus: props.autoRestoreFocus || true,
-	// 		forceFocus: props.forceFocus || false,
-	// 		focusable: props.focusable || true,
+	// 		saveLastFocusedChild: config().saveLastFocusedChild || true,
+	// 		trackChildren: config().trackChildren || false,
+	// 		isFocusBoundary: config().isFocusBoundary || false,
+	// 		focusBoundaryDirections: config().focusBoundaryDirections,
+	// 		autoRestoreFocus: config().autoRestoreFocus || true,
+	// 		forceFocus: config().forceFocus || false,
+	// 		focusable: config().focusable || true,
 	// 	});
 	// 	return el;
 	// };
@@ -217,10 +238,10 @@ const useFocusableHook = <P>(
 
 		SpatialNavigation.updateFocusable(focusKey(), {
 			node,
-			preferredChildFocusKey: props.preferredChildFocusKey,
-			focusable: props.focusable || true,
-			isFocusBoundary: props.isFocusBoundary || false,
-			focusBoundaryDirections: props.focusBoundaryDirections,
+			preferredChildFocusKey: config().preferredChildFocusKey,
+			focusable: config().focusable || true,
+			isFocusBoundary: config().isFocusBoundary || false,
+			focusBoundaryDirections: config().focusBoundaryDirections,
 			onEnterPress: onEnterPressHandler,
 			onEnterRelease: onEnterReleaseHandler,
 			onArrowPress: onArrowPressHandler,

@@ -29,7 +29,7 @@ export default function Alert(props: AlertProps) {
 		setTimeout(() => setShow(true), 500);
 		const timer = setTimeout(() => {
 			props.onRemove(props.id);
-		}, 50000);
+		}, 5000);
 
 		return () => {
 			clearTimeout(timer);

@@ -3,7 +3,7 @@ import { FocusContext, FocusDetails, useFocusable } from "@/spatial-nav";
 import Episode from "./Episode";
 import { SeasonStreamObj, SeriesData } from "./MediaModal";
 import { SeriesObj, StreamObj } from "./MediaTypes";
-import { For, createEffect } from "solid-js";
+import { For, Index, createEffect } from "solid-js";
 
 interface EpisodeListProps {
 	authToken: string;

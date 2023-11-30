@@ -1,0 +1,7 @@
+.navbar .search-form input {
+	background-color: rgba(55, 65, 81, 0.1);
+}
+
+.navbar .search-form .icon {
+	transform: translateY(-50%);
+}

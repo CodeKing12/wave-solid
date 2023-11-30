@@ -55,7 +55,7 @@ export default function MediaDetails(props: MediaDetailsProps) {
 					onFocus={props.onFocus}
 				>
 					<div class="mb-8 grid gap-7 text-[17px] md:grid-cols-2">
-						<p class="flex flex-col gap-2">
+						<p class="flex flex-col space-y-2">
 							<span class="text-[15px] opacity-40">
 								Release Date:{" "}
 							</span>
@@ -65,7 +65,7 @@ export default function MediaDetails(props: MediaDetailsProps) {
 								)}
 							</span>
 						</p>
-						<p class="flex flex-col gap-2">
+						<p class="flex flex-col space-y-2">
 							<span class="text-[15px] opacity-40">
 								Genre(s):{" "}
 							</span>
@@ -81,7 +81,7 @@ export default function MediaDetails(props: MediaDetailsProps) {
 								props.movieDetails?.info_labels.director.length
 							}
 						>
-							<p class="flex flex-col gap-2">
+							<p class="flex flex-col space-y-2">
 								<span class="text-[15px] opacity-40">
 									{props.movieDetails?.info_labels.director
 										.length || 0 > 1
@@ -101,7 +101,7 @@ export default function MediaDetails(props: MediaDetailsProps) {
 						<Show
 							when={props.movieDetails?.info_labels.studio.length}
 						>
-							<p class="flex flex-col gap-2">
+							<p class="flex flex-col space-y-2">
 								<span class="text-[15px] opacity-40">
 									{props.movieDetails?.info_labels.studio
 										.length || 0 > 1
@@ -126,7 +126,7 @@ export default function MediaDetails(props: MediaDetailsProps) {
 					onFocus={props.onFocus}
 				>
 					<div class="mb-8 grid gap-7 text-[17px] md:grid-cols-2">
-						<p class="flex flex-col gap-2">
+						<p class="flex flex-col space-y-2">
 							<span class="text-[15px] opacity-40">
 								Run Time:{" "}
 							</span>
@@ -136,16 +136,16 @@ export default function MediaDetails(props: MediaDetailsProps) {
 								)}
 							</span>
 						</p>
-						<div class="flex flex-col gap-2">
+						<div class="flex flex-col space-y-2">
 							<span class="text-[15px] opacity-40">Rating: </span>
-							<div class="flex items-center gap-2">
+							<div class="flex items-center space-x-2">
 								<span class="">
 									{(props.rating * 2) % 1 === 0
 										? (props.rating * 2).toString()
 										: (props.rating * 2).toFixed(1)}
 									/10
 								</span>
-								<div class="flex items-center gap-0.5">
+								<div class="flex items-center space-x-0.5">
 									<For
 										each={Array(
 											Math.round(props.rating),
@@ -186,7 +186,7 @@ export default function MediaDetails(props: MediaDetailsProps) {
 						focusedStyles="on-focus"
 						onFocus={props.onFocus}
 					>
-						<p class="flex flex-col gap-2">
+						<p class="flex flex-col space-y-2">
 							<span class="text-[15px] opacity-40">Cast: </span>
 							<span class="leading-loose opacity-90">
 								{props.movieDetails?.cast

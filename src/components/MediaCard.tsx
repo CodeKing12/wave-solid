@@ -9,6 +9,7 @@ import {
 } from "@tabler/icons-solidjs";
 import { createMemo } from "solid-js";
 import { FocusableComponentLayout } from "@/spatial-nav";
+import "@/css/media.css";
 
 export interface MediaCardProps {
 	id: string;
@@ -180,30 +181,32 @@ const MediaCard = function MediaCard(props: MediaCardProps) {
 		mediaSource ? (
 			<div
 				id={props.id}
-				class={`media-card focusable group relative mx-auto h-[340px] w-full max-w-[250px] cursor-pointer overflow-clip rounded-xl border-4 border-transparent bg-black-1 bg-opacity-60 backdrop-blur-2xl duration-[400ms] ease-in-out xsm:max-w-[230px] sm:h-[330px] ${
+				class={`media-card focusable group relative w-full cursor-pointer overflow-clip rounded-xl border-4 border-transparent bg-black-1 bg-opacity-60 backdrop-blur-2xl duration-[400ms] ease-in-out ${
 					focused() ? "border-yellow-300 !duration-300" : ""
 				}`}
 				ref={setRef}
 			>
-				{poster() ? (
-					// <Image width={300} height={400} class="w-full h-full max-h-full object-cover rounded-xl opacity-75" src={smallPoster(poster) || ""} alt={displayDetails?.plot} />
-					<img
-						id={`${props.id}-poster`}
-						width={300}
-						height={400}
-						class="h-full max-h-full w-full rounded-xl object-cover opacity-75"
-						src={posterLink() || ""}
-						alt={displayDetails()?.title}
-						onError={onImgError}
-					/>
-				) : (
-					<IconPhoto
-						size={85}
-						class="group-hover:-fill-yellow-300 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 fill-transparent text-yellow-300 transition-all duration-500 ease-linear"
-					/>
-				)}
+				<div class="media-poster relative h-full min-h-full">
+					{poster() ? (
+						// <Image width={300} height={400} class="w-full h-full max-h-full object-cover rounded-xl opacity-75" src={smallPoster(poster) || ""} alt={displayDetails?.plot} />
+						<img
+							id={`${props.id}-poster`}
+							width={300}
+							height={400}
+							class="h-full max-h-full w-full rounded-xl object-cover opacity-75"
+							src={posterLink() || ""}
+							alt={displayDetails()?.title}
+							onError={onImgError}
+						/>
+					) : (
+						<IconPhoto
+							size={85}
+							class="group-hover:-fill-yellow-300 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 fill-transparent text-yellow-300 transition-all duration-500 ease-linear"
+						/>
+					)}
+				</div>
 				<div
-					class="invisible absolute bottom-0 h-full w-full rounded-[11px] bg-black bg-opacity-80 px-3 py-5 text-gray-100 opacity-0 duration-[400ms] ease-in-out group-hover:visible group-hover:opacity-100"
+					class="details-overlay invisible absolute bottom-0 h-full w-full rounded-[11px] px-3 py-5 text-gray-100 opacity-0 duration-[400ms] ease-in-out group-hover:visible group-hover:opacity-100"
 					classList={{
 						"!duration-300 !visible !opacity-100": focused(),
 					}}
@@ -211,7 +214,7 @@ const MediaCard = function MediaCard(props: MediaCardProps) {
 				>
 					<div class="flex h-full flex-col justify-between">
 						<div>
-							<h5 class="mb-1 text-[15px] font-medium duration-300 ease-linear group-hover:text-yellow-300 sm:text-base lg:text-[17px]">
+							<h5 class="mb-1 text-[15px] font-medium duration-300 ease-linear group-hover:text-yellow-300 sm:text-base xl:text-[17px]">
 								{displayDetails()?.title ||
 									mediaSource()?.info_labels?.originaltitle}
 							</h5>
@@ -222,7 +225,7 @@ const MediaCard = function MediaCard(props: MediaCardProps) {
 								</p>
 							</div>
 							<div class="mt-2 flex items-center justify-between">
-								<div class="flex scale-90 gap-0.5 sm:scale-100">
+								<div class="flex scale-90 space-x-0.5 sm:scale-100">
 									{starRatings()}
 								</div>
 								<p class="text-sm font-medium leading-normal text-gray-300 text-opacity-70">
@@ -231,7 +234,7 @@ const MediaCard = function MediaCard(props: MediaCardProps) {
 							</div>
 						</div>
 						<div class="flex items-center justify-between">
-							<button class="group flex items-center gap-4 rounded-2xl border-none bg-[rgba(249,249,249,0.20)] p-3 text-lg font-bold tracking-wide text-[#F9F9F9] !outline-none backdrop-blur-[5px] hover:bg-[#F9F9F9] hover:text-black-1">
+							<button class="group flex items-center space-x-4 rounded-2xl border-none bg-[rgba(249,249,249,0.20)] p-3 text-lg font-bold tracking-wide text-[#F9F9F9] !outline-none backdrop-blur-[5px] hover:bg-[#F9F9F9] hover:text-black-1">
 								<IconHeart
 									width={20}
 									class="group-hover:-fill-black-1"
