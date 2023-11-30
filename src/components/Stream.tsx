@@ -27,7 +27,6 @@ export default function MediaStreamOption(props: MediaStreamOptionProps) {
 		focusable: Boolean(props.authToken && props.authToken?.length),
 		focusKey: props.stream._id,
 	});
-	createEffect(() => console.log("Stream Component is Here"));
 
 	return (
 		<div

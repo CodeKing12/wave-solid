@@ -20,10 +20,15 @@ export default function Season(props: SeasonProps) {
 	// let { rating, voteCount } = getRatingAggr(props.season._source.ratings);
 	const { setRef, focused } = useFocusable({
 		onEnterPress: props.onClick,
-		focusable: props.isVisible ?? false,
+		get focusable() {
+			return props.isVisible;
+		},
 		focusKey: props.season._id,
 		onFocus: props.onFocus,
 	});
+	// createEffect(() =>
+	// 	console.log("Season ", props.season._id, props.isVisible),
+	// );
 	// console.log(seasonDetails, season)
 
 	return (

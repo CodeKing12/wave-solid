@@ -20,9 +20,10 @@ interface EpisodeListProps {
 
 export default function EpisodeList(props: EpisodeListProps) {
 	const { setRef, focusKey } = useFocusable({
-		focusable: props.isFocusable,
+		get focusable() {
+			return props.isFocusable;
+		},
 	});
-	createEffect(() => console.log(props.isFocusable));
 
 	return (
 		<FocusContext.Provider value={focusKey()}>

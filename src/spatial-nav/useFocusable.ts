@@ -6,6 +6,7 @@ import {
 	onCleanup,
 	Setter,
 	Accessor,
+	mergeProps,
 } from "solid-js";
 import noop from "lodash/noop";
 import uniqueId from "lodash/uniqueId";
@@ -88,19 +89,23 @@ const defaultProps = {
 };
 
 const useFocusableHook = <P>(
-	props: UseFocusableConfig<P> = {},
+	props: UseFocusableConfig<P>,
 ): UseFocusableResult => {
-	const config = () => ({ ...defaultProps, ...props });
+	const config = mergeProps(defaultProps, props);
+
+	// createEffect(() =>
+	// 	console.log("Updated: ", config.focusKey, props, config),
+	// );
 
 	const onEnterPressHandler = (details?: KeyPressDetails) => {
-		if (config().onEnterPress) {
-			config().onEnterPress(config().extraProps, details);
+		if (config.onEnterPress) {
+			config.onEnterPress(config.extraProps, details);
 		}
 	};
 
 	const onEnterReleaseHandler = () => {
-		if (config().onEnterRelease) {
-			config().onEnterRelease(config().extraProps);
+		if (config.onEnterRelease) {
+			config.onEnterRelease(config.extraProps);
 		}
 	};
 
@@ -108,8 +113,8 @@ const useFocusableHook = <P>(
 		direction: string,
 		details: KeyPressDetails,
 	) => {
-		if (config().onArrowPress) {
-			config().onArrowPress(direction, config().extraProps, details);
+		if (config.onArrowPress) {
+			config.onArrowPress(direction, config.extraProps, details);
 		}
 	};
 
@@ -117,8 +122,8 @@ const useFocusableHook = <P>(
 		layout: FocusableComponentLayout,
 		details: FocusDetails,
 	) => {
-		if (config().onFocus) {
-			config().onFocus(layout, config().extraProps, details);
+		if (config.onFocus) {
+			config.onFocus(layout, config.extraProps, details);
 		}
 	};
 
@@ -126,8 +131,8 @@ const useFocusableHook = <P>(
 		layout: FocusableComponentLayout,
 		details: FocusDetails,
 	) => {
-		if (config().onBlur) {
-			config().onBlur(layout, config().extraProps, details);
+		if (config.onBlur) {
+			config.onBlur(layout, config.extraProps, details);
 		}
 	};
 
@@ -144,7 +149,7 @@ const useFocusableHook = <P>(
 	const parentFocusKey = useFocusContext();
 
 	const focusKey = createMemo(
-		() => config().focusKey || uniqueId("sn:focusable-item-"),
+		() => config.focusKey || uniqueId("sn:focusable-item-"),
 	);
 
 	onMount(() => {
@@ -154,7 +159,7 @@ const useFocusableHook = <P>(
 		// 	focusKey: focusKey(),
 		// 	node,
 		// 	parentFocusKey,
-		// 	preferredChildFocusKey: config().preferredChildFocusKey,
+		// 	preferredChildFocusKey: config.preferredChildFocusKey,
 		// 	onEnterPress: onEnterPressHandler,
 		// 	onEnterRelease: onEnterReleaseHandler,
 		// 	onArrowPress: onArrowPressHandler,
@@ -163,20 +168,20 @@ const useFocusableHook = <P>(
 		// 	onUpdateFocus: (isFocused = false) => setFocused(isFocused),
 		// 	onUpdateHasFocusedChild: (isFocused = false) =>
 		// 		setHasFocusedChild(isFocused),
-		// 	saveLastFocusedChild: config().saveLastFocusedChild,
-		// 	trackChildren: config().trackChildren,
-		// 	isFocusBoundary: config().isFocusBoundary,
-		// 	focusBoundaryDirections: config().focusBoundaryDirections,
-		// 	autoRestoreFocus: config().autoRestoreFocus,
-		// 	forceFocus: config().forceFocus,
-		// 	focusable: config().focusable,
+		// 	saveLastFocusedChild: config.saveLastFocusedChild,
+		// 	trackChildren: config.trackChildren,
+		// 	isFocusBoundary: config.isFocusBoundary,
+		// 	focusBoundaryDirections: config.focusBoundaryDirections,
+		// 	autoRestoreFocus: config.autoRestoreFocus,
+		// 	forceFocus: config.forceFocus,
+		// 	focusable: config.focusable,
 		// };
 
 		SpatialNavigation.addFocusable({
 			focusKey: focusKey(),
 			node,
 			parentFocusKey,
-			preferredChildFocusKey: config().preferredChildFocusKey,
+			preferredChildFocusKey: config.preferredChildFocusKey,
 			onEnterPress: onEnterPressHandler,
 			onEnterRelease: onEnterReleaseHandler,
 			onArrowPress: onArrowPressHandler,
@@ -185,13 +190,13 @@ const useFocusableHook = <P>(
 			onUpdateFocus: (isFocused = false) => setFocused(isFocused),
 			onUpdateHasFocusedChild: (isFocused = false) =>
 				setHasFocusedChild(isFocused),
-			saveLastFocusedChild: config().saveLastFocusedChild,
-			trackChildren: config().trackChildren,
-			isFocusBoundary: config().isFocusBoundary,
-			focusBoundaryDirections: config().focusBoundaryDirections,
-			autoRestoreFocus: config().autoRestoreFocus,
-			forceFocus: config().forceFocus,
-			focusable: config().focusable,
+			saveLastFocusedChild: config.saveLastFocusedChild,
+			trackChildren: config.trackChildren,
+			isFocusBoundary: config.isFocusBoundary,
+			focusBoundaryDirections: config.focusBoundaryDirections,
+			autoRestoreFocus: config.autoRestoreFocus,
+			forceFocus: config.forceFocus,
+			focusable: config.focusable,
 		});
 	});
 
@@ -209,7 +214,7 @@ const useFocusableHook = <P>(
 	// 		focusKey: focusKey(),
 	// 		node,
 	// 		parentFocusKey,
-	// 		preferredChildFocusKey: config().preferredChildFocusKey,
+	// 		preferredChildFocusKey: config.preferredChildFocusKey,
 	// 		onEnterPress: onEnterPressHandler,
 	// 		onEnterRelease: onEnterReleaseHandler,
 	// 		onArrowPress: onArrowPressHandler,
@@ -218,13 +223,13 @@ const useFocusableHook = <P>(
 	// 		onUpdateFocus: (isFocused = false) => setFocused(isFocused),
 	// 		onUpdateHasFocusedChild: (isFocused = false) =>
 	// 			setHasFocusedChild(isFocused),
-	// 		saveLastFocusedChild: config().saveLastFocusedChild || true,
-	// 		trackChildren: config().trackChildren || false,
-	// 		isFocusBoundary: config().isFocusBoundary || false,
-	// 		focusBoundaryDirections: config().focusBoundaryDirections,
-	// 		autoRestoreFocus: config().autoRestoreFocus || true,
-	// 		forceFocus: config().forceFocus || false,
-	// 		focusable: config().focusable || true,
+	// 		saveLastFocusedChild: config.saveLastFocusedChild || true,
+	// 		trackChildren: config.trackChildren || false,
+	// 		isFocusBoundary: config.isFocusBoundary || false,
+	// 		focusBoundaryDirections: config.focusBoundaryDirections,
+	// 		autoRestoreFocus: config.autoRestoreFocus || true,
+	// 		forceFocus: config.forceFocus || false,
+	// 		focusable: config.focusable || true,
 	// 	});
 	// 	return el;
 	// };
@@ -238,10 +243,10 @@ const useFocusableHook = <P>(
 
 		SpatialNavigation.updateFocusable(focusKey(), {
 			node,
-			preferredChildFocusKey: config().preferredChildFocusKey,
-			focusable: config().focusable || true,
-			isFocusBoundary: config().isFocusBoundary || false,
-			focusBoundaryDirections: config().focusBoundaryDirections,
+			preferredChildFocusKey: config.preferredChildFocusKey,
+			focusable: config.focusable ?? true,
+			isFocusBoundary: config.isFocusBoundary ?? false,
+			focusBoundaryDirections: config.focusBoundaryDirections,
 			onEnterPress: onEnterPressHandler,
 			onEnterRelease: onEnterReleaseHandler,
 			onArrowPress: onArrowPressHandler,
