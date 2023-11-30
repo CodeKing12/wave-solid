@@ -1,4 +1,4 @@
-import { Index } from "solid-js";
+import { Index, Show } from "solid-js";
 import MediaCard from "./MediaCard";
 import { MediaObj } from "./MediaTypes";
 import { Spinner, SpinnerType } from "solid-spinner";
@@ -7,6 +7,7 @@ import "@/css/media.css";
 
 export interface MediaListProps {
 	media?: MediaObj[];
+	isLoading: boolean;
 	isModalOpen?: boolean;
 	isSidebarOpen: boolean;
 	onCardFocus: (focusDetails: FocusableComponentLayout) => void;
@@ -51,8 +52,8 @@ const MediaList = function MediaList(props: MediaListProps) {
 					{/* grid-cols-1 sm:grid-cols-2 */}
 					{/* fallback={<Spinner type={SpinnerType.puff} width={70} height={70} color="#fde047" class="!absolute top-[37%] left-1/2 -translate-x-1/2 -translate-y-1/2" />} */}
 					{/* Can use this for the placeholder: <Suspense></Suspense> */}
-					<Index
-						each={props.media}
+					<Show
+						when={!props.isLoading}
 						fallback={
 							<Spinner
 								type={SpinnerType.puff}
@@ -63,17 +64,19 @@ const MediaList = function MediaList(props: MediaListProps) {
 							/>
 						}
 					>
-						{(show, index) => (
-							<MediaCard
-								id={show()?._id}
-								index={index}
-								media={show()}
-								showMediaInfo={onCardSelect}
-								onFocus={props.onCardFocus}
-								onEnterPress={onCardPress}
-							/>
-						)}
-					</Index>
+						<Index each={props.media}>
+							{(show, index) => (
+								<MediaCard
+									id={show()?._id}
+									index={index}
+									media={show()}
+									showMediaInfo={onCardSelect}
+									onFocus={props.onCardFocus}
+									onEnterPress={onCardPress}
+								/>
+							)}
+						</Index>
+					</Show>
 				</div>
 			</div>
 		</>

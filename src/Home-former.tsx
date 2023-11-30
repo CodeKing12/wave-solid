@@ -20,7 +20,6 @@ import {
 	createMemo,
 	createResource,
 	createSignal,
-	Show,
 } from "solid-js";
 import { IconArrowLeft, IconArrowRight } from "@tabler/icons-solidjs";
 import Sidebar, { PageType } from "./components/Sidebar";
@@ -38,27 +37,35 @@ interface TokenObj {
 
 interface mediaSignalsObj {
 	currentPageNum: number;
-	// searchHistory: string[];
+	searchHistory: string[];
 }
 
 interface PageMediaObj {
 	totals: number;
-	// media: {
-	// 	[page in PageType]: MediaObj[][];
-	// };
-	media: MediaObj[];
+	media: {
+		[page in PageType]: MediaObj[][];
+	};
 }
 
 export default function Home() {
-	const { setRef, focusKey, focusSelf } = useFocusable({
+	const { setRef, focusKey, hasFocusedChild, focusSelf } = useFocusable({
 		forceFocus: true,
 	});
 
+	const [loading, setLoading] = createSignal(false);
 	const [isAuthenticated, setIsAuthenticated] = createSignal(false);
 	const [openLogin, setOpenLogin] = createSignal(false);
 	const [authToken, setAuthToken] = createSignal("");
 
+	// const dummyMedia: MediaType = {}
+	// allPages.map((page) => dummyMedia[page] = [Array(mediaPerPage).fill({})])
+	// console.log(dummyMedia)
+	const [media, setMedia] = createSignal<MediaType>({});
+
 	const [page, setPage] = createSignal<PageType>("movies");
+	const [totals, setTotals] = createSignal<PaginationType>(
+		{} as PaginationType,
+	);
 
 	const dummyPagination: any = {};
 	allPages.map((page) => (dummyPagination[page] = 0));
@@ -66,7 +73,9 @@ export default function Home() {
 		createSignal<PaginationType>(dummyPagination);
 
 	const [hideSidebar, setHideSidebar] = createSignal(false);
+	let prevPagination = pagination();
 	const [query, setQuery] = createSignal("");
+	const [searchHistory, setSearchHistory] = createSignal<string[]>([]);
 
 	const [selectedMedia, setSelectedMedia] = createSignal<
 		MediaObj | undefined
@@ -120,6 +129,8 @@ export default function Home() {
 		// document.addEventListener("keydown", displayInputs)
 	});
 
+	// const fetched = []
+
 	const updatePagination = (page: PageType, increment?: number) => {
 		// const prevPageValue = pagination()[page] || 0
 		setPagination((prevPagination) => ({
@@ -127,6 +138,16 @@ export default function Home() {
 			[page]: increment ? prevPagination[page] + increment : 0,
 		}));
 	};
+	const currentMedia = createMemo(() => media()[page()]);
+	const currentPageIndex = createMemo(() => pagination()[page()]);
+
+	const mediaSignals = createMemo(() => {
+		const signal: mediaSignalsObj = {
+			currentPageNum: pagination()[page()],
+			searchHistory: searchHistory(),
+		};
+		return signal;
+	});
 
 	async function fetchPageMedia(
 		k: any,
@@ -134,6 +155,7 @@ export default function Home() {
 	) {
 		const info: mediaSignalsObj = {
 			currentPageNum: pagination()[page()],
+			searchHistory: searchHistory(),
 		};
 		// Should only update signal when there is no data to display. This way the resource fetcher is only called when there is no data stored
 		try {
@@ -153,7 +175,13 @@ export default function Home() {
 
 			const newState: PageMediaObj = {
 				totals: response.data.hits.total.value,
-				media: response.data.hits.hits,
+				media: {
+					...(prevValue?.media || []),
+					[page()]: [
+						...(prevValue?.media[page()] || []),
+						response.data.hits.hits,
+					],
+				},
 			};
 
 			return newState;
@@ -162,20 +190,48 @@ export default function Home() {
 		}
 	}
 
-	const [pageMedia] = createResource(
-		() => [page(), query(), pagination()],
-		fetchPageMedia,
-	);
+	const [pageMedia, { refetch }] = createResource(fetchPageMedia);
+	createEffect(() => {
+		const pageMediaLength = pageMedia()?.media[page()]?.length ?? 0;
+		if (pagination()[page()] + 1 > pageMediaLength) {
+			console.log("Should refetch");
+			refetch();
+		} else {
+			// addMedia(pageMedia()?.media[page()]?.[currentPageIndex()])
+			console.log("Don't refetch");
+		}
+	});
 
-	const searchMedia = (query: string) => {
-		if (query.length) {
-			setQuery(query);
+	// createEffect(() => {
+	//   const isSearch = searchHistory()[searchHistory().length - 1] === query()
+	//   if (!pagination.hasOwnProperty(page())) {
+	//     updatePagination(page())
+	//   }
+	//   if (!media.hasOwnProperty(page()) || currentPageIndex() > prevPagination[page()] || isSearch) {
+	//     console.log(currentPageIndex(), currentMedia(), isSearch)
+	//     // Temp Fix is adding 1 to it. Think of a better fix in the morning
+	//     if ((currentPageIndex() + 1 >= currentMedia().length || isSearch)) {
+	//       setLoading(true);
+	//       // if (page() === "search" && currentPageIndex() <= 0) {
+	//       //   media()[page()] = []
+	//       // }
+	//     }
+	//   }
+	//   prevPagination = pagination();
+	// })
+
+	const searchMedia = () => {
+		if (
+			query().length &&
+			query() !== searchHistory()[searchHistory().length - 1]
+		) {
+			setSearchHistory([...searchHistory(), query()]);
 			updatePagination("search");
 
 			if (page() !== "search") {
 				setPage("search");
 			}
-		} else if (!query.length) {
+		} else if (!query().length) {
 			setPage("movies");
 		}
 	};
@@ -222,6 +278,7 @@ export default function Home() {
 		setModalPlaceholder(placeholderUrl || "");
 	};
 
+	const navUpdateQuery = (query: string) => setQuery(query);
 	const navShowFavorites = () => console.log("Clicked Favorites");
 	const hideSidebarHandler = (isHidden: boolean) => setHideSidebar(isHidden);
 	const openLoginHandler = () => setOpenLogin(true);
@@ -237,8 +294,23 @@ export default function Home() {
 		setPage(newPage);
 	};
 
+	const dummyData = Array(100).fill({});
+
+	const getCurrentPageMedia = createMemo(() => {
+		// console.log("getPageMedia", media(), page(), pagination())
+		// console.log(media()[page()]?.[pagination()[page()]][0])
+		// return media()[page()]?.[pagination()[page()]]
+		console.log(page(), currentPageIndex());
+		const currentPageData =
+			pageMedia()?.media[page()]?.[currentPageIndex()];
+		console.log(currentPageData);
+
+		return currentPageData;
+	});
+
 	const getPaginationData = createMemo(() => {
-		return Math.ceil((pageMedia()?.totals ?? 0) / mediaPerPage);
+		const currentTotals = pageMedia()?.totals;
+		return currentTotals ?? 0;
 	});
 
 	return (
@@ -264,88 +336,101 @@ export default function Home() {
 					ref={mainRef}
 				>
 					<Navbar
+						query={query()}
+						updateQuery={navUpdateQuery}
 						onSearch={searchMedia}
 						showFavorites={navShowFavorites}
 					/>
 
 					<div class={`relative mt-6 flex-1`} ref={setRef}>
 						<MediaList
-							media={pageMedia()?.media}
-							isLoading={pageMedia.loading}
+							media={getCurrentPageMedia()}
 							onMediaModalOpen={onMediaCardClick}
 							onCardFocus={onCardFocus}
 							isSidebarOpen={hideSidebar()}
 						/>
-					</div>
-					<div
-						class={`mt-12 flex flex-col items-center space-x-7 sm:flex-row sm:justify-between sm:space-x-0 ${
-							pageMedia.loading
-								? "pointer-events-none opacity-40"
-								: "pointer-events-auto opacity-100"
-						}`}
-					>
-						<FocusLeaf
-							class={
-								pagination()[page()] === 0
-									? "cursor-not-allowed"
-									: ""
-							}
-							focusedStyles="[&>button]:!bg-black-1 [&>button]:!border-yellow-300 [&>button]:!text-yellow-300"
-							isFocusable={pagination()[page()] !== 0}
-							onEnterPress={() => updatePagination(page(), -1)}
+						<div
+							class={`mt-12 flex flex-col items-center space-x-7 sm:flex-row sm:justify-between sm:space-x-0 ${
+								loading()
+									? "pointer-events-none opacity-40"
+									: "pointer-events-auto opacity-100"
+							}`}
 						>
-							<button
-								class={`flex items-center space-x-4 rounded-xl border-2 border-transparent bg-yellow-300 px-9 py-3 text-lg font-semibold text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 ${
-									pagination()[page()] === 0
-										? "pointer-events-none opacity-40"
+							<FocusLeaf
+								class={
+									pagination()[page()] + 1 === 1
+										? "cursor-not-allowed"
 										: ""
-								}`}
-								onClick={() => updatePagination(page(), -1)}
+								}
+								focusedStyles="[&>button]:!bg-black-1 [&>button]:!border-yellow-300 [&>button]:!text-yellow-300"
+								isFocusable={pagination()[page()] + 1 !== 1}
+								onEnterPress={() =>
+									updatePagination(page(), -1)
+								}
 							>
-								{/* <ArrowLeft size={32} variant='Bold' /> */}
-								<IconArrowLeft size={32} />
-								Previous
-							</button>
-						</FocusLeaf>
+								<button
+									class={`flex items-center space-x-4 rounded-xl border-2 border-transparent bg-yellow-300 px-9 py-3 text-lg font-semibold text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 ${
+										pagination()[page()] + 1 === 1
+											? "pointer-events-none opacity-40"
+											: ""
+									}`}
+									onClick={() => updatePagination(page(), -1)}
+								>
+									{/* <ArrowLeft size={32} variant='Bold' /> */}
+									<IconArrowLeft size={32} />
+									Previous
+								</button>
+							</FocusLeaf>
 
-						{/* {typeof pagination()[page()] == "number" &&
-						pagination()[page()] >= 0 ? ( */}
-						<Show when={!pageMedia.loading}>
-							<p class="text-lg font-semibold text-gray-300">
-								Page:{" "}
-								<span class="ml-2 text-yellow-300">
-									{pagination()[page()] + 1}
-								</span>{" "}
-								/ {getPaginationData()}
-							</p>
-						</Show>
+							{typeof pagination()[page()] == "number" &&
+							pagination()[page()] >= 0 ? (
+								<p class="text-lg font-semibold text-gray-300">
+									Page:{" "}
+									<span class="ml-2 text-yellow-300">
+										{pagination()[page()] + 1}
+									</span>{" "}
+									/{" "}
+									{Math.ceil(
+										getPaginationData() / mediaPerPage,
+									)}
+								</p>
+							) : (
+								""
+							)}
 
-						<FocusLeaf
-							class={
-								pagination()[page()] + 1 === getPaginationData()
-									? "cursor-not-allowed"
-									: ""
-							}
-							focusedStyles="[&>button]:!bg-black-1 [&>button]:!border-yellow-300 [&>button]:!text-yellow-300"
-							isFocusable={
-								pagination()[page()] + 1 !== getPaginationData()
-							}
-							onEnterPress={() => updatePagination(page(), +1)}
-						>
-							<button
-								class={`space-x4 flex items-center rounded-xl border-2 border-transparent bg-yellow-300 px-9 py-3 text-lg font-semibold text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 ${
+							<FocusLeaf
+								class={
 									pagination()[page()] + 1 ===
-									getPaginationData()
-										? "pointer-events-none opacity-40"
+									Math.ceil(totals()[page()] / mediaPerPage)
+										? "cursor-not-allowed"
 										: ""
-								}`}
-								onClick={() => updatePagination(page(), +1)}
+								}
+								focusedStyles="[&>button]:!bg-black-1 [&>button]:!border-yellow-300 [&>button]:!text-yellow-300"
+								isFocusable={
+									pagination()[page()] + 1 !==
+									Math.ceil(totals()[page()] / mediaPerPage)
+								}
+								onEnterPress={() =>
+									updatePagination(page(), +1)
+								}
 							>
-								Next
-								{/* <ArrowRight size={32} variant='Bold' /> */}
-								<IconArrowRight size={32} />
-							</button>
-						</FocusLeaf>
+								<button
+									class={`space-x4 flex items-center rounded-xl border-2 border-transparent bg-yellow-300 px-9 py-3 text-lg font-semibold text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 ${
+										pagination()[page()] + 1 ===
+										Math.ceil(
+											totals()[page()] / mediaPerPage,
+										)
+											? "pointer-events-none opacity-40"
+											: ""
+									}`}
+									onClick={() => updatePagination(page(), +1)}
+								>
+									Next
+									{/* <ArrowRight size={32} variant='Bold' /> */}
+									<IconArrowRight size={32} />
+								</button>
+							</FocusLeaf>
+						</div>
 					</div>
 				</section>
 			</FocusContext.Provider>

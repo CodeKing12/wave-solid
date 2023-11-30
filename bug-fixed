@@ -1,1 +1,3 @@
-Fixed focusable bug where elements with { focusable: false } in the useFocusable config are still focused
+Fixed the bug where the search only works once by implementing the axios-cache-interceptor for axios requests and removing the self-implemented data caching logic.
+
+Bug: When an Episode Stream is fetched, the entire EpisodeStreams is re-rendered when

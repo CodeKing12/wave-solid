@@ -30,7 +30,7 @@ export default function FocusLeaf(props: FocusLeafProps) {
 		}
 		if (focused && props.onFocus && focusDetails) {
 			props.onFocus(focusDetails);
-            console.log(focusDetails)
+			console.log(focusDetails);
 		}
 	};
 
