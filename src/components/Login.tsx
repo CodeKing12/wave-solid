@@ -190,7 +190,7 @@ const Login = function Login(props: LoginProps) {
 										class="w-full rounded-md border border-gray-300 border-opacity-40 bg-transparent px-2 py-3 text-[15px] text-gray-300 !outline-none placeholder:text-gray-400 placeholder:text-opacity-50 focus:border-yellow-300"
 										type="text"
 										placeholder="Username"
-										onChange={(e) =>
+										onInput={(e) =>
 											setUsername(e.target.value)
 										}
 									/>
@@ -205,7 +205,7 @@ const Login = function Login(props: LoginProps) {
 										class="w-full rounded-md border border-gray-300 border-opacity-40 bg-transparent px-2 py-3 text-[15px] text-gray-300 !outline-none placeholder:text-gray-400 placeholder:text-opacity-50 focus:border-yellow-300"
 										type="password"
 										placeholder="Password"
-										onChange={(e) =>
+										onInput={(e) =>
 											setPassword(e.target.value)
 										}
 									/>

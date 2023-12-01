@@ -44,6 +44,7 @@ export const PATH_SEARCH = "/api/search/";
 export const PATH_FILE_INFO = "/api/file_info/";
 export const authAxiosConfig = {
 	headers: { "Content-Type": "application/x-www-form-urlencoded" },
+	cache: false,
 };
 
 export const proxyUrl = "http://localhost:5000/video";

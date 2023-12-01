@@ -645,11 +645,6 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 																episode={
 																	seriesMedia
 																}
-																onClick={() =>
-																	getEpisodeStreams(
-																		seriesMedia,
-																	)
-																}
 																episodeStreams={
 																	episodeStreams()[
 																		storeKeyRef()

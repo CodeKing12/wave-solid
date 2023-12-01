@@ -33,15 +33,7 @@ export default function EpisodeList(props: EpisodeListProps) {
 						<Episode
 							authToken={props.authToken}
 							episode={episode}
-							onClick={() => props.onEpisodeClick(episode)}
-							episodeStreams={
-								props.episodeStreams?.[episode?._id] ||
-								undefined
-							}
 							onEpisodeStreamClick={props.onEpisodeStreamClick}
-							isLoadingStreams={
-								props.isLoadingEpisodeStreams === episode?._id
-							}
 							onFocus={props.onEpisodeFocus}
 							onEpisodeStreamFocus={props.onEpisodeStreamFocus}
 						/>

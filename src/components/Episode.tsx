@@ -1,6 +1,6 @@
-import { createEffect } from "solid-js";
+import { createEffect, createResource } from "solid-js";
 import { getDisplayDetails, getRatingAggr } from "./MediaCard";
-import { convertSecondsToTime } from "@/utils/general";
+import { convertSecondsToTime, getMediaStreams } from "@/utils/general";
 import { SeriesObj, StreamObj } from "./MediaTypes";
 import StreamEpisodes from "./StreamEpisodes";
 import { IconMovieOff, IconPlayerPlayFilled } from "@tabler/icons-solidjs";
@@ -11,10 +11,9 @@ import { Show } from "solid-js";
 export interface EpisodeProps {
 	authToken: string;
 	episode: SeriesObj;
-	episodeStreams: StreamObj[];
-	isLoadingStreams: boolean;
+	// episodeStreams: StreamObj[];
+	// isLoadingStreams: boolean;
 	onFocus: ({ y }: { y: number }) => void;
-	onClick: () => void;
 	onEpisodeStreamFocus?: (focusDetails: FocusDetails) => void;
 	onEpisodeStreamClick: (stream: StreamObj, isEnterpress?: boolean) => void;
 }
@@ -24,23 +23,38 @@ export default function Episode(props: EpisodeProps) {
 		props.episode._source.i18n_info_labels,
 	);
 	const hasNoStreams = () =>
-		Array.isArray(props.episodeStreams) && !props.episodeStreams?.length;
-	// const [showStreams, setShowStreams] = createSignal(false);
+		Array.isArray(episodeStreams()) && !episodeStreams()?.length;
 	let { rating } = getRatingAggr(props.episode._source.ratings);
 
+	async function getEpisodeStreams(
+		_: boolean,
+		{ value, refetching }: { value?: StreamObj[]; refetching: unknown },
+	) {
+		if (!value && refetching) {
+			try {
+				const epiStreams = await getMediaStreams(props.episode);
+				return epiStreams;
+			} catch (error) {
+				console.log(error);
+			}
+		}
+	}
+
+	const [episodeStreams, { refetch }] =
+		createResource<StreamObj[]>(getEpisodeStreams);
+
+	function handleClick() {
+		if (!episodeStreams()) {
+			refetch();
+		}
+	}
+
 	const onFocusStream = () => {
-		// console.log("Focused");
-		console.log(
-			props.episode._id,
-			props.episodeStreams?.length,
-			props.episodeStreams,
-		);
-		setFocus(props.episodeStreams[0]._id);
+		setFocus(props.episode._id);
 	};
 
 	function handleFocus(handler: any) {
-		console.log(props.episodeStreams?.length);
-		if (props.episodeStreams?.length) {
+		if (episodeStreams()?.length && props.authToken.length) {
 			onFocusStream();
 		} else {
 			props.onFocus(handler);
@@ -48,7 +62,7 @@ export default function Episode(props: EpisodeProps) {
 	}
 
 	const { ref, setRef, focused } = useFocusable({
-		onEnterPress: props.onClick,
+		onEnterPress: handleClick,
 		onFocus: handleFocus,
 	});
 
@@ -58,15 +72,8 @@ export default function Episode(props: EpisodeProps) {
 	}
 
 	createEffect(() => {
-		console.log("No. of Episode Streams: ", props.episodeStreams?.length);
-		if (props.episodeStreams?.length) {
-			// console.log(
-			// 	"Doing this",
-			// 	props.episode._id,
-			// 	props.episode._source.info_labels.originaltitle,
-			// 	props.episodeStreams?.length,
-			// );
-			setFocus(props.episodeStreams[0]._id);
+		if (episodeStreams()?.length) {
+			setFocus(episodeStreams()?.[0]._id ?? "");
 		}
 	});
 
@@ -76,7 +83,7 @@ export default function Episode(props: EpisodeProps) {
 			classList={{
 				"!border-yellow-300 !border-opacity-100": focused(),
 				"border-yellow-300 border-opacity-30":
-					props.episodeStreams?.length > 0,
+					(episodeStreams()?.length ?? 0) > 0,
 			}}
 			ref={setRef}
 		>
@@ -104,7 +111,6 @@ export default function Episode(props: EpisodeProps) {
 							<dd>{rating.toFixed(1)}</dd>
 						</div>
 						<div>
-							<p class="block">{props.episode._id}</p>
 							<dt class="sr-only">Episode Number</dt>
 							<dd class="rounded px-1.5 ring-1 ring-slate-200">
 								S{props.episode._source.info_labels.season || 1}{" "}
@@ -165,7 +171,7 @@ export default function Episode(props: EpisodeProps) {
 							? "!border-yellow-300 !bg-black-1 !text-yellow-300"
 							: ""
 					}`}
-					onClick={props.onClick}
+					onClick={handleClick}
 				>
 					<IconPlayerPlayFilled size={28} />
 				</button>
@@ -173,7 +179,7 @@ export default function Episode(props: EpisodeProps) {
 
 			<StreamEpisodes
 				authToken={props.authToken}
-				episodeStreams={props.episodeStreams}
+				episodeStreams={episodeStreams()}
 				onEpisodeStreamClick={props.onEpisodeStreamClick}
 				onEpisodeStreamFocus={modifyStreamOffset}
 				customFocusKey={props.episode._id}
@@ -181,7 +187,7 @@ export default function Episode(props: EpisodeProps) {
 
 			<div
 				class="h-0 duration-300 ease-linear"
-				classList={{ "remove-element h-6": hasNoStreams() }}
+				classList={{ "remove-element !h-6": hasNoStreams() }}
 			>
 				<Show when={hasNoStreams()}>
 					<p class="text-center font-medium text-gray-300">
@@ -191,9 +197,10 @@ export default function Episode(props: EpisodeProps) {
 			</div>
 			{/* If you want a smoother height increase animation, you can comment out the loader below (and its wrapper div) */}
 			<div
-				class={`invisible absolute left-0 right-0 top-0 flex h-full w-full items-center justify-center rounded-2xl opacity-0 backdrop-blur-sm duration-300 ease-in-out ${
-					props.isLoadingStreams ? "!visible !opacity-100" : ""
-				}`}
+				class="invisible absolute left-0 right-0 top-0 flex h-full w-full items-center justify-center rounded-2xl opacity-0 backdrop-blur-sm duration-300 ease-in-out"
+				classList={{
+					"!visible !opacity-100": episodeStreams.loading,
+				}}
 			>
 				<Spinner
 					type={SpinnerType.ballTriangle}
