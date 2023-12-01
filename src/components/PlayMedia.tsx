@@ -23,7 +23,9 @@ export default function PlayMedia(props: PlayMediaProps) {
 	const { setRef, focusSelf, focusKey, focused } = useFocusable({
 		trackChildren: true,
 		isFocusBoundary: true,
-		focusable: props.show,
+		get focusable() {
+			return props.show;
+		},
 		// focusBoundaryDirections: ["left", "right"]
 	});
 

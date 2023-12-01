@@ -42,10 +42,14 @@ const Login = function Login(props: LoginProps) {
 	const [password, setPassword] = createSignal("");
 	const [isAuthenticating, setIsAuthenticating] = createSignal(false);
 	const { setRef, focusSelf, focusKey } = useFocusable({
-		focusable: props.show,
+		get focusable() {
+			return props.show;
+		},
 		trackChildren: true,
 		autoRestoreFocus: true,
-		isFocusBoundary: props.show,
+		get isFocusBoundary() {
+			return props.show;
+		},
 		preferredChildFocusKey: "LOGIN_USERNAME_INPUT",
 	});
 	const { addAlert } = useAlert();

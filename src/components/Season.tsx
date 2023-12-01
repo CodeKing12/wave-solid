@@ -23,7 +23,9 @@ export default function Season(props: SeasonProps) {
 		get focusable() {
 			return props.isVisible;
 		},
-		focusKey: props.season._id,
+		get focusKey() {
+			return props.season._id;
+		},
 		onFocus: props.onFocus,
 	});
 	// createEffect(() =>

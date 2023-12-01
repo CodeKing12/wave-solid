@@ -24,8 +24,12 @@ export default function MediaStreamOption(props: MediaStreamOptionProps) {
 	const { setRef, focused } = useFocusable({
 		onEnterPress: () => props.onStreamClick(true),
 		onFocus: props.onFocus,
-		focusable: Boolean(props.authToken && props.authToken?.length),
-		focusKey: props.stream._id,
+		get focusable() {
+			return Boolean(props.authToken && props.authToken?.length);
+		},
+		get focusKey() {
+			return props.stream._id;
+		},
 	});
 
 	return (

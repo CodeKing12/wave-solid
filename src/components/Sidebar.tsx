@@ -90,7 +90,9 @@ const Sidebar = function Sidebar(props: SidebarProps) {
 		// updateAllLayouts, -- to force update all layouts when needed
 		// getCurrentFocusKey -- to get the current focus key
 	} = useFocusable({
-		focusable: !props.isHidden,
+		get focusable() {
+			return !props.isHidden;
+		},
 		autoRestoreFocus: true,
 		onArrowPress: () => true,
 	});

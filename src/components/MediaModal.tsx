@@ -68,7 +68,9 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 	const { ref, setRef, focusSelf, focusKey } = useFocusable({
 		autoRestoreFocus: true,
 		isFocusBoundary: true,
-		focusable: props.show,
+		get focusable() {
+			return props.show;
+		},
 		preferredChildFocusKey: "MEDIA-DETAILS",
 		// focusBoundaryDirections: ["left", "right"]
 	});

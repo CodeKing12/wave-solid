@@ -39,8 +39,15 @@ export default function FocusLeaf(props: FocusLeafProps) {
 			handleFocus(true, focusDetails),
 		onBlur: () => handleFocus(false),
 		onEnterPress: props.onEnterPress,
-		focusable: props.isFocusable,
-		focusKey: props.customFocusKey ? props.customFocusKey : undefined,
+		get focusable() {
+			return props.isFocusable;
+		},
+		get focusKey() {
+			const newKey = props.customFocusKey
+				? props.customFocusKey
+				: undefined;
+			return newKey;
+		},
 	});
 
 	createEffect(() => {

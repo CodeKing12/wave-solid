@@ -14,7 +14,9 @@ interface StreamEpisodesProps {
 
 export default function StreamEpisodes(props: StreamEpisodesProps) {
 	const { setRef, focusKey } = useFocusable({
-		focusKey: props.customFocusKey,
+		get focusKey() {
+			return props.customFocusKey;
+		},
 	});
 
 	return (
