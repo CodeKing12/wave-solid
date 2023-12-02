@@ -177,7 +177,7 @@ const Login = function Login(props: LoginProps) {
 								Enter your Webshare username and password
 							</p>
 							<form
-								class="mb-4 flex w-full flex-col gap-4"
+								class="mb-4 flex w-full flex-col space-y-4"
 								onSubmit={loginWebshare}
 							>
 								<FocusLeaf
@@ -216,11 +216,11 @@ const Login = function Login(props: LoginProps) {
 									onEnterPress={loginWebshare}
 								>
 									<button
-										class="mt-5 flex items-center justify-center gap-2 rounded-xl border-2 border-transparent bg-yellow-300 px-10 py-5 text-base font-semibold tracking-wide text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300"
+										class="mt-5 flex items-center justify-center space-x-2 rounded-xl border-2 border-transparent bg-yellow-300 px-10 py-5 text-base font-semibold tracking-wide text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300"
 										onClick={loginWebshare}
 										onSubmit={loginWebshare}
 									>
-										Authenticate
+										<span>Authenticate</span>
 										<IconKey size={24} />
 									</button>
 								</FocusLeaf>

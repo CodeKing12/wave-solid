@@ -1,1 +1,1 @@
-Fixed the bugs with the layout that caused imbalanced navigation, prevented the placeholder icons from showing, and disabled navigation of media-cards on 2018 Tizen TVs
+Fixed the bug that made the MediaModal lose focus when you navigate to that component while the list of episodes is still loading, fixed all gap- spacing issues in most of the MediaModal and Login related components. I also removed the Play button from all Streams when the user is not yet authenticated and removed the current page indicator when the list of pages has not yet been retrieved.

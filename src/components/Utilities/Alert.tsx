@@ -38,7 +38,7 @@ export default function Alert(props: AlertProps) {
 
 	return (
 		<div
-			class="invisible flex -translate-y-[calc(100%+12px)] items-center gap-3 rounded-[40px] border-2 bg-neutral-900 px-8 py-3.5 opacity-0 duration-500 ease-in-out"
+			class="invisible flex -translate-y-[calc(100%+12px)] items-center space-x-3 rounded-[40px] border-2 bg-neutral-900 px-8 py-3.5 opacity-0 duration-500 ease-in-out"
 			classList={{
 				"!visible z-[9999] !translate-y-0 !opacity-100": show(),
 				"border-yellow-300": props.type === "success",
@@ -57,7 +57,7 @@ export default function Alert(props: AlertProps) {
 					""
 				)}
 			</div>
-			<div class="flex flex-col gap-0.5">
+			<div class="flex flex-col space-y-0.5">
 				<p class="font-medium text-gray-200">{props.title}</p>
 				{props.message ? (
 					<p class="text-sm font-medium text-gray-500">

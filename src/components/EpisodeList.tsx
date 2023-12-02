@@ -3,7 +3,7 @@ import { FocusContext, FocusDetails, useFocusable } from "@/spatial-nav";
 import Episode from "./Episode";
 import { SeasonStreamObj, SeriesData } from "./MediaModal";
 import { SeriesObj, StreamObj } from "./MediaTypes";
-import { For, Index, createEffect } from "solid-js";
+import { For } from "solid-js";
 
 interface EpisodeListProps {
 	authToken: string;
@@ -21,13 +21,19 @@ interface EpisodeListProps {
 export default function EpisodeList(props: EpisodeListProps) {
 	const { setRef, focusKey } = useFocusable({
 		get focusable() {
-			return props.isFocusable;
+			return (
+				props.isFocusable &&
+				props.episodes[props.selectedSeason?._id || ""]?.length > 0
+			);
 		},
 	});
 
 	return (
 		<FocusContext.Provider value={focusKey()}>
-			<div class="flex max-w-full flex-col flex-wrap gap-4" ref={setRef}>
+			<div
+				class="flex max-w-full flex-col flex-wrap space-y-4"
+				ref={setRef}
+			>
 				<For each={props.episodes[props.selectedSeason?._id || ""]}>
 					{(episode) => (
 						<Episode

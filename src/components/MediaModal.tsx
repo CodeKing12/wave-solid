@@ -50,7 +50,7 @@ interface MediaModalProps {
 }
 
 export interface SeriesData {
-	[mediaId: string]: SeriesObj[];
+	[seasonId: string]: SeriesObj[];
 }
 
 export type SeasonStreamObj = {
@@ -439,14 +439,14 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 								class={`media-streams mb-6 mt-12 w-full opacity-100 duration-300 ease-in-out`}
 								classList={{
 									"w-[600px]": !streams()?.length,
-									"pointer-events-none opacity-40":
+									"pointer-events-none":
 										!props.authToken.length,
 								}}
 							>
 								<p class="mb-5 text-center text-base opacity-60">
 									Available Streams
 								</p>
-								<div class="flex flex-col gap-20 md:gap-16 lg:gap-12 xl:gap-10">
+								<div class="flex flex-col space-y-20 md:space-y-16 lg:space-y-12 xl:space-y-10">
 									<Show
 										when={streams()?.length}
 										fallback={
@@ -487,7 +487,7 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 								</div>
 							</div>
 						)}
-						<div class="mt-16 flex flex-col items-center justify-center xsm:flex-row xsm:items-start xsm:justify-start xl:mt-10 xl:gap-12">
+						<div class="mt-16 flex flex-col items-center justify-center xsm:flex-row xsm:items-start xsm:justify-start xl:mt-10 xl:space-x-12">
 							<FocusLeaf
 								focusedStyles="[&>button]:!bg-opacity-5 [&>button]:!border-white [&>button]:!text-white"
 								customFocusKey="FAVE-BTN"
@@ -495,9 +495,9 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 									onEpisodeFocus(focusDetails, true)
 								}
 							>
-								<button class="flex items-center gap-4 rounded-xl border-4 border-transparent bg-white px-10 py-3 text-[15px] font-bold tracking-wide text-black-1 hover:border-white hover:bg-opacity-5 hover:text-white">
+								<button class="flex items-center space-x-4 rounded-xl border-4 border-transparent bg-white px-10 py-3 text-[15px] font-bold tracking-wide text-black-1 hover:border-white hover:bg-opacity-5 hover:text-white">
 									<IconHeartPlus size={32} />
-									Add to Favorites
+									<span>Add to Favorites</span>
 								</button>
 							</FocusLeaf>
 
@@ -560,7 +560,7 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 									ref={tvMediaRef}
 								>
 									<div
-										class={`absolute top-0 flex w-full max-w-full flex-wrap gap-8 duration-300 ease-in-out ${
+										class={`absolute top-0 flex w-full max-w-full flex-wrap space-x-8 duration-300 ease-in-out ${
 											selectedSeason() &&
 											seasons()[props.media?._id ?? ""]
 												?.length
@@ -677,7 +677,7 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 										</Show>
 									</div>
 									<div
-										class={`invisible absolute top-0 flex max-w-full translate-y-16 flex-col gap-10 opacity-0 duration-500 ease-in-out ${
+										class={`invisible absolute top-0 flex max-w-full translate-y-16 flex-col space-y-10 opacity-0 duration-500 ease-in-out ${
 											showEpisodes() &&
 											selectedSeason &&
 											episodes()[

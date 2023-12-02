@@ -43,7 +43,7 @@ interface AudioSliderProps {
 
 function AudioSlider(props: AudioSliderProps) {
 	return (
-		<div class="flex items-center gap-1">
+		<div class="flex items-center space-x-1">
 			<ControlIcon onclick={props.toggleMute}>
 				<Switch>
 					<Match when={props.currentVolume >= 50 && !props.isMute}>
@@ -127,7 +127,7 @@ function AudioSlider(props: AudioSliderProps) {
 
 function TimeSlider(props: TimeSliderProps) {
 	return (
-		<div class="flex w-full items-center gap-1">
+		<div class="flex w-full items-center space-x-1">
 			<RangeSlider
 				min={0}
 				max={props.mediaDuration}
@@ -662,7 +662,7 @@ export default function AVPlayer(props: AVPlayerProps) {
 						></path>
 					</svg>
 				</button>
-				<div class="mb-1 flex h-[45px] w-full items-center gap-4 px-16 text-[17px] font-semibold text-white">
+				<div class="mb-1 flex h-[45px] w-full items-center space-x-4 px-16 text-[17px] font-semibold text-white">
 					<p>{formatMilliseconds(elapsedTime())}</p>
 					<TimeSlider
 						elapsedTime={elapsedTime()}
@@ -681,7 +681,7 @@ export default function AVPlayer(props: AVPlayerProps) {
 						/>
 					</div>
 
-					<div class="flex items-center gap-7">
+					<div class="flex items-center space-x-7">
 						<ControlIcon onclick={() => jumpMedia("BACKWARD")}>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -756,7 +756,7 @@ export default function AVPlayer(props: AVPlayerProps) {
 						</ControlIcon>
 					</div>
 
-					<div class="flex w-[400px] justify-end gap-2">
+					<div class="flex w-[400px] justify-end space-x-2">
 						<ChangeAudioTrack
 							currentAudioTrack={currentAudioTrack()}
 							allAudioTracks={availableAudio()}

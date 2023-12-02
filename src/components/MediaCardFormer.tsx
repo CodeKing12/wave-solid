@@ -160,7 +160,7 @@ export default function MediaCard({
 						</div>
 					</div>
 					<div class="flex items-center justify-between">
-						<button class="group flex items-center gap-4 rounded-2xl border-none bg-[rgba(249,249,249,0.20)] p-3 text-lg font-bold tracking-wide text-[#F9F9F9] !outline-none backdrop-blur-[5px] hover:bg-[#F9F9F9] hover:text-black-1">
+						<button class="group flex items-center space-x-4 rounded-2xl border-none bg-[rgba(249,249,249,0.20)] p-3 text-lg font-bold tracking-wide text-[#F9F9F9] !outline-none backdrop-blur-[5px] hover:bg-[#F9F9F9] hover:text-black-1">
 							<Heart
 								width={20}
 								class="group-hover:-fill-black-1"

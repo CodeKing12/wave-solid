@@ -7,7 +7,7 @@ function Alerts() {
 
 	return (
 		<Show when={alerts() || alerts().length}>
-			<div class="fixed left-1/2 top-0 z-[9999] flex h-fit -translate-x-1/2 flex-col gap-2.5 pt-3 duration-500 ease-in-out">
+			<div class="fixed left-1/2 top-0 z-[9999] flex h-fit -translate-x-1/2 flex-col space-y-2.5 pt-3 duration-500 ease-in-out">
 				<For each={alerts()}>
 					{(alert) => (
 						<Alert

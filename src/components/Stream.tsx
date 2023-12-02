@@ -35,31 +35,36 @@ export default function MediaStreamOption(props: MediaStreamOptionProps) {
 	return (
 		<div
 			class={`flex flex-col items-center justify-between md:flex-row ${
-				props.isEpisode ? "gap-10" : "gap-10 md:gap-16 xl:gap-20"
+				props.isEpisode
+					? "space-y-10 md:space-x-10 md:space-y-0"
+					: "space-y-10 md:space-x-16 md:space-y-0 xl:space-x-20"
 			}`}
+			classList={{
+				"opacity-60": props.authToken.length <= 0,
+			}}
 			ref={setRef}
 		>
 			<div
-				class={`md:justify-left flex flex-wrap justify-center gap-x-9 gap-y-4 text-[15px] text-gray-300 text-opacity-50 xl:flex-nowrap xl:!gap-8 ${
+				class={`md:justify-left -my-4 flex flex-wrap justify-center space-x-9 text-[15px] text-gray-300 xl:flex-nowrap xl:!space-x-8 [&>div]:my-4 ${
 					focused() ? "stream-focus" : ""
 				}`}
 			>
 				<Show when={props.stream.video.length}>
-					<div class="duration flex flex-col items-center gap-1.5">
+					<div class="duration flex flex-col items-center space-y-1.5">
 						<IconHourglassEmpty size={22} class="icon-stream" />
 						<p>{secondsToHMS(props.stream.video[0].duration)}</p>
 					</div>{" "}
 				</Show>
 
 				<Show when={!props.isEpisode}>
-					<div class="size flex flex-col items-center gap-1.5">
+					<div class="size flex flex-col items-center space-y-1.5">
 						<IconFileInfo size={22} class="icon-stream" />
 						<p>{bytesToSize(props.stream.size)}</p>
 					</div>
 				</Show>
 
 				<Show when={props.stream.audio.length}>
-					<div class="audio flex flex-col items-center gap-1.5">
+					<div class="audio flex flex-col items-center space-y-1.5">
 						<IconLanguage size={22} class="icon-stream" />
 						<p>
 							{props.stream.audio
@@ -73,7 +78,7 @@ export default function MediaStreamOption(props: MediaStreamOptionProps) {
 				</Show>
 
 				<Show when={props.stream.subtitles.length}>
-					<div class="subtitles flex flex-col items-center gap-1.5">
+					<div class="subtitles flex flex-col items-center space-y-1.5">
 						<IconBadgeCc size={22} class="icon-stream" />
 						<p>
 							{props.stream.subtitles
@@ -87,7 +92,7 @@ export default function MediaStreamOption(props: MediaStreamOptionProps) {
 				</Show>
 
 				<Show when={props.stream.video.length}>
-					<div class="resolution flex flex-col items-center gap-1.5">
+					<div class="resolution flex flex-col items-center space-y-1.5">
 						<IconAspectRatio size={22} class="icon-stream" />
 						<p>
 							{props.stream.video
@@ -105,7 +110,7 @@ export default function MediaStreamOption(props: MediaStreamOptionProps) {
 						!props.isEpisode
 					}
 				>
-					<div class="codec flex flex-col items-center gap-1.5">
+					<div class="codec flex flex-col items-center space-y-1.5">
 						<IconFileBarcode size={22} class="icon-stream" />
 						<p>
 							{props.stream.video[0].codec +
@@ -117,7 +122,7 @@ export default function MediaStreamOption(props: MediaStreamOptionProps) {
 			</div>
 
 			<Switch>
-				<Match when={props.isEpisode}>
+				<Match when={props.isEpisode && props.authToken}>
 					<button
 						onClick={() => {
 							props.onStreamClick();
@@ -132,9 +137,9 @@ export default function MediaStreamOption(props: MediaStreamOptionProps) {
 					</button>
 				</Match>
 
-				<Match when={!props.isEpisode}>
+				<Match when={!props.isEpisode && props.authToken}>
 					<button
-						class={`flex items-center justify-center gap-4 rounded-md border-2 border-transparent bg-yellow-300 px-5 py-3 text-sm font-bold tracking-wide text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 xl:h-16 xl:w-12 xl:!p-0 ${
+						class={`flex items-center justify-center space-x-4 rounded-md border-2 border-transparent bg-yellow-300 px-5 py-3 text-sm font-bold tracking-wide text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 xl:h-16 xl:w-12 xl:!p-0 ${
 							focused()
 								? "!border-yellow-300 !bg-black-1 !text-yellow-300"
 								: ""

@@ -311,7 +311,7 @@ export default function Home() {
 
 						{/* {typeof pagination()[page()] == "number" &&
 						pagination()[page()] >= 0 ? ( */}
-						<Show when={!pageMedia.loading}>
+						<Show when={!pageMedia.loading && getPaginationData()}>
 							<p class="text-lg font-semibold text-gray-300">
 								Page:{" "}
 								<span class="ml-2 text-yellow-300">

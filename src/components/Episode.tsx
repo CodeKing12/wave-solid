@@ -72,7 +72,7 @@ export default function Episode(props: EpisodeProps) {
 	}
 
 	createEffect(() => {
-		if (episodeStreams()?.length) {
+		if (episodeStreams()?.length && props.authToken) {
 			setFocus(episodeStreams()?.[0]._id ?? "");
 		}
 	});

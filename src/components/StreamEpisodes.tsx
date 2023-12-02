@@ -22,7 +22,7 @@ export default function StreamEpisodes(props: StreamEpisodesProps) {
 	return (
 		<FocusContext.Provider value={focusKey()}>
 			<div
-				class="invisible flex -translate-y-10 flex-col gap-5 opacity-0 duration-500 ease-in-out"
+				class="invisible flex -translate-y-10 flex-col space-y-6 opacity-0 duration-500 ease-in-out"
 				classList={{
 					"!visible mt-5 !translate-y-0 !opacity-100":
 						(props.episodeStreams?.length ?? 0) > 0,
