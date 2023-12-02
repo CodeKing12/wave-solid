@@ -1,3 +1,1 @@
-Fixed the bug where the search only works once by implementing the axios-cache-interceptor for axios requests and removing the self-implemented data caching logic.
-
-Bug: When an Episode Stream is fetched, the entire EpisodeStreams is re-rendered when
+Fixed the bugs with the layout that caused imbalanced navigation, prevented the placeholder icons from showing, and disabled navigation of media-cards on 2018 Tizen TVs

@@ -257,9 +257,10 @@ export default function Home() {
 
 			<FocusContext.Provider value={focusKey()}>
 				<section
-					class={`xxl:px-[72px] flex h-screen min-h-screen flex-1 flex-col overflow-auto px-3 pb-16 pt-10 font-poppins duration-500 ease-in-out xs:px-4 xsm:px-8 md:px-14 lg:ml-[300px] xl:px-16 ${
+					class={`flex h-screen min-h-screen flex-1 flex-col overflow-auto px-3 pb-16 pt-10 font-poppins duration-500 ease-in-out xs:px-4 xsm:px-8 md:px-14 lg:ml-[300px] xl:px-16 ${
 						hideSidebar() ? "!ml-0" : ""
 					}`}
+					// 3xl:px-[72px]
 					id="main-display"
 					ref={mainRef}
 				>

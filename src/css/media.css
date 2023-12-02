@@ -2,10 +2,13 @@
 	background-color: rgba(0, 0, 0, 0.8);
 }
 
+.media-card {
+	height: 300px;
+}
+
 @media only screen and (max-width: 400px) {
 	.media-card {
 		width: calc(100% / 1.2);
-		height: calc(100% / 1 * 0.5625);
 		margin-left: auto !important;
 		margin-right: auto !important;
 	}
@@ -14,28 +17,25 @@
 @media only screen and (min-width: 400px) {
 	.media-card {
 		width: calc(100% / 2.2);
-		height: calc(100% / 2 * 0.5625);
 	}
 }
 
 @media only screen and (min-width: 675px) {
 	.media-card {
-		width: calc(100% / 3.1);
-		height: calc(100% / 3 * 0.5625);
+		width: calc(100% / 3.2);
 	}
 }
 
 @media only screen and (min-width: 875px) {
 	.media-card {
 		width: calc(100% / 4.2);
-		height: calc(100% / 4 * 0.5625);
 	}
 }
 
 @media only screen and (min-width: 1075px) {
 	.media-card {
-		width: calc(100% / 5.2);
-		height: calc(100% / 5 * 0.5625);
+		width: calc(100% / 5.3);
+		/* height: calc(100% / 5 * 0.5625); */
 	}
 
 	/* Show a lesser number of cards per row when the 
@@ -45,42 +45,58 @@
 
 	#media-list.sidebarVisible .media-card {
 		width: calc(100% / 3.2);
-		height: calc(100% / 3 * 0.5625);
+		/* height: calc(100% / 3 * 0.5625); */
 	}
 }
 
 @media only screen and (min-width: 1207px) {
 	.media-card {
 		width: calc(100% / 5.2);
-		height: calc(100% / 5 * 0.5625);
 	}
 
 	#media-list.sidebarVisible .media-card {
 		width: calc(100% / 4.2);
-		height: calc(100% / 4 * 0.5625);
 	}
 }
 
 @media only screen and (min-width: 1400px) {
 	.media-card {
-		width: calc(100% / 6.2);
-		height: calc(100% / 6 * 0.5625);
+		width: calc(100% / 6.3);
 	}
 
 	#media-list.sidebarVisible .media-card {
-		width: calc(100% / 5.2);
-		height: calc(100% / 5 * 0.5625);
+		width: calc(100% / 5.3);
 	}
 }
 
 @media only screen and (min-width: 1543px) {
 	.media-card {
 		width: calc(100% / 7.3);
-		height: calc(100% / 7 * 0.5625);
+		/* height: calc(100% / 7 * 0.5625); */
+		/* height: calc(100vh * 0.38); */
 	}
 
 	#media-list.sidebarVisible .media-card {
-		width: calc(100% / 6.2);
-		height: calc(100% / 6 * 0.5625);
+		width: calc(100% / 6.3);
+		/* height: calc(100vh * 0.38); */
+		/* height: calc(100vh * (100% / (6 * 0.5625))); */
+	}
+}
+
+@media only screen and (min-height: 100px) and (max-height: 700px) {
+	.media-card {
+		height: 280px;
+	}
+}
+
+@media only screen and (min-height: 700px) and (max-height: 1000px) {
+	.media-card {
+		height: 290px;
+	}
+}
+
+@media only screen and (min-height: 1000px) and (max-height: 1500px) {
+	.media-card {
+		height: 300px;
 	}
 }
