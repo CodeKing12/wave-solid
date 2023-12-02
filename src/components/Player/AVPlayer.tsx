@@ -579,7 +579,7 @@ export default function AVPlayer(props: AVPlayerProps) {
 
 	return (
 		<section
-			class="fixed inset-0 h-full w-full duration-500 ease-in-out"
+			class="fixed inset-0 !mx-0 h-full w-full duration-500 ease-in-out"
 			classList={{ "opacity-0 invisible": !props.show }}
 		>
 			<Show when={props.canPlayonTizen}>
