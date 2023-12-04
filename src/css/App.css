@@ -146,7 +146,7 @@ input {
 }
 
 .icon-stream {
-	@apply text-white text-opacity-60 duration-300 ease-in-out;
+	@apply text-white text-opacity-50 duration-300 ease-in-out;
 }
 
 .stream-focus .icon-stream {

@@ -1,4 +1,8 @@
-import { FocusableComponentLayout, useFocusable } from "@/spatial-nav";
+import {
+	FocusableComponentLayout,
+	KeyPressDetails,
+	useFocusable,
+} from "@/spatial-nav";
 import { formatStringAsId } from "@/utils/general";
 import { JSXElement, createEffect, createSignal } from "solid-js";
 
@@ -9,12 +13,19 @@ interface FocusLeafProps {
 	isForm?: boolean;
 	isFocusable?: boolean;
 	customFocusKey?: string;
+	hasFocusedChildStyles?: string | boolean;
 	onFocus?: (layout: FocusableComponentLayout) => void;
 	onEnterPress?: () => void;
+	onArrowPress?: (direction: string, details: KeyPressDetails) => boolean;
 }
 
 export default function FocusLeaf(props: FocusLeafProps) {
 	const [id, setId] = createSignal<string>("");
+
+	const selectedFocusedChildStyles =
+		typeof props.hasFocusedChildStyles === "boolean"
+			? props.focusedStyles
+			: props.hasFocusedChildStyles;
 
 	const handleFocus = (
 		focused: boolean,
@@ -34,13 +45,17 @@ export default function FocusLeaf(props: FocusLeafProps) {
 		}
 	};
 
-	const { setRef, focused, focusKey } = useFocusable({
+	const { setRef, focused, focusKey, hasFocusedChild } = useFocusable({
 		onFocus: (focusDetails: FocusableComponentLayout) =>
 			handleFocus(true, focusDetails),
 		onBlur: () => handleFocus(false),
+		onArrowPress: props.onArrowPress,
 		onEnterPress: props.onEnterPress,
+		get trackChildren() {
+			return Boolean(props.hasFocusedChildStyles);
+		},
 		get focusable() {
-			return props.isFocusable;
+			return props.isFocusable ?? true;
 		},
 		get focusKey() {
 			const newKey = props.customFocusKey
@@ -61,6 +76,10 @@ export default function FocusLeaf(props: FocusLeafProps) {
 			class={`${props.class || ""} ${
 				focused() ? props.focusedStyles : ""
 			}`}
+			classList={{
+				[selectedFocusedChildStyles ||
+				"has-focused-child-but-no-styles"]: hasFocusedChild(),
+			}}
 		>
 			{props.children}
 		</div>

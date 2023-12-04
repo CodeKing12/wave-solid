@@ -213,7 +213,7 @@ const Sidebar = function Sidebar(props: SidebarProps) {
 						class="group mt-auto flex items-center space-x-3 px-8 py-2 text-[17px] font-medium text-white text-opacity-70 duration-500 ease-in-out hover:text-yellow-300"
 						onClick={props.onLogout}
 					>
-						Logout
+						<span>Logout</span>
 						<IconLogout2 class="text-yellow-300 duration-500 ease-in-out group-hover:text-white" />
 					</button>
 				</FocusLeaf>

@@ -40,7 +40,7 @@ export default function MediaStreamOption(props: MediaStreamOptionProps) {
 					: "space-y-10 md:space-x-16 md:space-y-0 xl:space-x-20"
 			}`}
 			classList={{
-				"opacity-60": props.authToken.length <= 0,
+				"opacity-50": props.authToken.length <= 0,
 			}}
 			ref={setRef}
 		>
@@ -147,7 +147,7 @@ export default function MediaStreamOption(props: MediaStreamOptionProps) {
 						onClick={() => props.onStreamClick()}
 					>
 						<span class="font-semibold xl:hidden">Watch</span>
-						<IconPlayerPlayFilled size={28} />
+						<IconPlayerPlayFilled class="xl:!ml-0" size={28} />
 					</button>
 				</Match>
 			</Switch>

@@ -645,14 +645,6 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 																episode={
 																	seriesMedia
 																}
-																episodeStreams={
-																	episodeStreams()[
-																		storeKeyRef()
-																	]?.[
-																		seriesMedia
-																			._id
-																	]
-																}
 																onEpisodeStreamClick={(
 																	stream,
 																	isEnterpress,
@@ -661,10 +653,6 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 																		stream,
 																		isEnterpress,
 																	)
-																}
-																isLoadingStreams={
-																	isLoadingEpisodeStreams() ===
-																	seriesMedia._id
 																}
 																onFocus={
 																	onEpisodeFocus

@@ -23,6 +23,8 @@ import { stream_p } from "./Stream";
 import { md5crypt } from "./MD5";
 import { sha1 } from "./Sha";
 import axiosInstance from "./axiosInstance";
+import { FocusDetails, setFocus } from "@/spatial-nav";
+import { Setter } from "solid-js";
 // import Player from "video.js/dist/types/player";
 
 export function parseXml(data: string, param: string) {
@@ -388,6 +390,32 @@ export function formatMilliseconds(milliseconds: number) {
 		minutes,
 	).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
 	return formattedTime;
+}
+
+export function closeMenuOnBlur(
+	direction: string,
+	menuSetter: Setter<boolean>,
+) {
+	if (["left", "right", "down"].includes(direction)) {
+		menuSetter(false);
+	}
+	return true;
+}
+
+export function controlShowEffect(
+	controlShow: boolean,
+	focusSelfFunc: (focusDetails?: FocusDetails | undefined) => void,
+	isFocused: boolean,
+	hasFocusedChild: boolean,
+	onBlurFocusKey: string,
+) {
+	if (controlShow) {
+		focusSelfFunc();
+	} else {
+		if (isFocused || hasFocusedChild) {
+			setFocus(onBlurFocusKey);
+		}
+	}
 }
 
 // export function fullscreenShortcut(lastEnterTimestamp: number, player: Player) {
