@@ -6,6 +6,8 @@ import {
 import { formatStringAsId } from "@/utils/general";
 import { JSXElement, createEffect, createSignal } from "solid-js";
 
+type directions = "up" | "left" | "right" | "down";
+
 interface FocusLeafProps {
 	children: JSXElement;
 	class?: string;
@@ -14,6 +16,8 @@ interface FocusLeafProps {
 	isFocusable?: boolean;
 	customFocusKey?: string;
 	hasFocusedChildStyles?: string | boolean;
+	isFocusBoundary?: boolean;
+	focusBoundaryDirections?: directions[];
 	onFocus?: (layout: FocusableComponentLayout) => void;
 	onEnterPress?: () => void;
 	onArrowPress?: (direction: string, details: KeyPressDetails) => boolean;
@@ -62,6 +66,12 @@ export default function FocusLeaf(props: FocusLeafProps) {
 				? props.customFocusKey
 				: undefined;
 			return newKey;
+		},
+		get isFocusBoundary() {
+			return props.isFocusBoundary;
+		},
+		get focusBoundaryDirections() {
+			return props.focusBoundaryDirections;
 		},
 	});
 

@@ -18,13 +18,14 @@ import Episode from "./Episode";
 import Season from "./Season";
 import axiosInstance from "@/utils/axiosInstance";
 import EpisodeList from "./EpisodeList";
-// import PlayMedia from "./PlayMedia";
+import PlayMedia from "./PlayMedia";
 import { IconArrowBackUp, IconHeartPlus, IconX } from "@tabler/icons-solidjs";
 import {
 	For,
 	Match,
 	Show,
 	createEffect,
+	createMemo,
 	createSignal,
 	onMount,
 } from "solid-js";
@@ -139,7 +140,7 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 	const [mediaUrl, setMediaUrl] = createSignal<string | undefined>("");
 	const [isLoadingEpisodeStreams, setIsLoadingEpisodeStreams] =
 		createSignal("");
-	let { rating, voteCount } = getRatingAggr(movieDetails()?.ratings);
+	const reviews = createMemo(() => getRatingAggr(movieDetails()?.ratings));
 	const streamClasses = [
 		".size",
 		".audio",
@@ -396,11 +397,11 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 					</button>
 				</FocusLeaf>
 				<div class="relative flex flex-col justify-center space-y-14 xl:h-full xl:flex-row xl:space-x-20 xl:space-y-0">
-					<div class="poster relative mx-auto h-[500px] w-full max-w-[350px] rounded-[30px] bg-[#191919] bg-opacity-75 xl:h-full xl:w-[450px] xl:min-w-[450px]">
+					<div class="poster relative mx-auto h-[500px] w-full max-w-[350px] rounded-[30px] bg-[#191919] bg-opacity-75 xl:h-full xl:w-[350px] xl:min-w-[350px] 2xl:w-[570px] 2xl:min-w-[570px]">
 						{/* xl:w-[500px] */}
 						<Show when={images()?.poster}>
 							<img
-								width={600}
+								width={1000}
 								height={600}
 								src={images()?.poster}
 								class="h-full w-full rounded-[30px] object-cover"
@@ -421,8 +422,8 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 							movieTitle={movieTitle()}
 							displayDetails={displayDetails()}
 							movieDetails={movieDetails()}
-							rating={rating}
-							voteCount={voteCount}
+							rating={reviews().rating}
+							voteCount={reviews().voteCount}
 							onFocus={onDetailFocus}
 						/>
 						{props.authToken.length ? (
@@ -759,7 +760,7 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 								canPlayonTizen={isTizenTv && hasWebApi}
 							/>
 						</Match>
-						{/* <Match when={!(isTizenTv && hasWebApi)}>
+						<Match when={!(isTizenTv && hasWebApi)}>
 							<PlayMedia
 								show={showPlayer()}
 								url={mediaUrl()}
@@ -768,7 +769,7 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 								mediaDetails={displayDetails()}
 								onExit={onPlayerExit}
 							/>
-						</Match> */}
+						</Match>
 					</Switch>
 				</div>
 			</div>

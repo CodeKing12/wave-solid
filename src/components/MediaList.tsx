@@ -45,7 +45,7 @@ const MediaList = function MediaList(props: MediaListProps) {
 				<div
 					id="media-list"
 					// class={`grid grid-cols-1 flex-wrap justify-center space-x-1 space-y-4 xs:grid-cols-2 sm:grid-cols-3 md:space-x-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 ${
-					class={`-mx-1 -mt-4 flex flex-wrap [&>div]:mx-1 [&>div]:mt-4 ${
+					class={`-mx-1 -mt-4 flex flex-wrap justify-center [&>div]:mx-1 [&>div]:mt-4 ${
 						props.isModalOpen ? "!overflow-hidden" : ""
 					} ${props.isSidebarOpen ? "" : "sidebarVisible"}`}
 				>

@@ -35,7 +35,7 @@ const Navbar = function Navbar(props: NavProps) {
 				ref={setRef}
 			>
 				<div class="flex flex-col items-center justify-between space-y-5 lg:flex-row lg:space-y-0">
-					<div class="flex items-center space-x-12 font-medium text-white text-opacity-80">
+					<div class="flex items-center space-x-12 text-lg font-medium text-white text-opacity-80">
 						<FocusLeaf
 							focusedStyles="after:block animateUnderline"
 							customFocusKey="Nav-Favorites"
@@ -63,7 +63,7 @@ const Navbar = function Navbar(props: NavProps) {
 							onSubmit={handleSearch}
 						>
 							<input
-								class="h-14 w-full rounded-xl border border-[rgba(249,249,249,0.10)] px-14 py-3 text-sm text-white outline-none placeholder:text-sm placeholder:text-gray-300 lg:w-[350px]"
+								class="h-14 w-full rounded-xl border border-[rgba(249,249,249,0.10)] px-14 py-3 text-base text-white outline-none placeholder:text-base placeholder:text-gray-300 lg:w-[350px]"
 								placeholder="Search Movies or TV Shows"
 								onInput={(e) => setSearchTerm(e.target.value)}
 							/>

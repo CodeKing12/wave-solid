@@ -58,13 +58,13 @@ const NavItem = function NavItem(props: SidebarItemProps) {
 	return (
 		<a
 			ref={setRef}
-			class={`flex w-full cursor-pointer items-center space-x-5 border-transparent border-opacity-0 px-8 py-2 text-base opacity-80 hover:border-opacity-100 hover:fill-yellow-300 hover:text-yellow-300 active:font-semibold ${
+			class={`flex w-full cursor-pointer items-center space-x-5 border-transparent border-opacity-0 px-8 py-2 text-[17px] font-medium opacity-70 hover:border-opacity-100 hover:fill-yellow-300 hover:text-yellow-300 active:font-semibold ${
 				props.page === props.current
-					? "border-r-4 border-yellow-300 border-opacity-100 fill-yellow-300 text-yellow-300 opacity-100"
+					? "border-r-4 border-yellow-300 border-opacity-100 fill-yellow-300 text-yellow-300 !opacity-100"
 					: ""
 			} ${
 				focused()
-					? "!border-x-4 !border-yellow-300 [&>svg]:!text-yellow-300"
+					? "!border-x-4 !border-yellow-300 !opacity-100 [&>svg]:!text-yellow-300"
 					: ""
 			}`}
 			onClick={() => props.onItemClick(props.page)}
@@ -104,7 +104,7 @@ const Sidebar = function Sidebar(props: SidebarProps) {
 	return (
 		<aside
 			id="sidenav"
-			class={`sidenav fixed bottom-0 left-0 top-0 z-[100] h-full min-h-screen w-[300px] bg-black-1 pb-6 pt-20 duration-500 ease-in-out ${
+			class={`sidenav fixed bottom-0 left-0 top-0 z-[100] h-full min-h-screen w-[320px] bg-black-1 pb-6 pt-20 duration-500 ease-in-out ${
 				props.isHidden ? "!-left-[300px]" : ""
 			} ${props.finishedLoading ? "" : "is-loading"}`}
 		>

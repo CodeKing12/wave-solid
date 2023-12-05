@@ -78,7 +78,7 @@ export default function PlayMedia(props: PlayMediaProps) {
 	return (
 		<FocusContext.Provider value={focusKey()}>
 			<section
-				class="invisible fixed bottom-0 top-0 h-full w-full bg-black opacity-0 duration-500 ease-in-out"
+				class="invisible fixed bottom-0 top-0 h-full w-full bg-black opacity-0 duration-500 ease-in-out xl:!ml-0"
 				classList={{ "!visible !opacity-100": props.show }}
 				ref={setRef}
 			>

@@ -114,7 +114,7 @@ const MediaCard = function MediaCard(props: MediaCardProps) {
 	});
 	const displayDetails = () => {
 		if (mediaSource()?.i18n_info_labels) {
-			getDisplayDetails(mediaSource().i18n_info_labels);
+			return getDisplayDetails(mediaSource().i18n_info_labels);
 		} else {
 			return {} as I18nInfoLabel;
 		}

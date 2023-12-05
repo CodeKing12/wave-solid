@@ -3,7 +3,7 @@ import { MediaSource, I18nInfoLabel } from "./MediaTypes";
 import { IconStarFilled } from "@tabler/icons-solidjs";
 import { FocusContext, useFocusable } from "@/spatial-nav";
 import FocusLeaf from "./Utilities/FocusLeaf";
-import { For, Show } from "solid-js";
+import { For, Show, createSignal } from "solid-js";
 
 export interface MediaDetailsProps {
 	movieTitle: string;
@@ -15,6 +15,7 @@ export interface MediaDetailsProps {
 }
 
 export default function MediaDetails(props: MediaDetailsProps) {
+	const [fullCast, setFullCast] = createSignal(false);
 	const { setRef, focusKey } = useFocusable({
 		autoRestoreFocus: true,
 		focusKey: "MEDIA-DETAILS",
@@ -42,7 +43,7 @@ export default function MediaDetails(props: MediaDetailsProps) {
 						focusedStyles="on-focus"
 						onFocus={props.onFocus}
 					>
-						<p class="mb-8 leading-loose xl:max-w-[750px]">
+						<p class="mb-8 text-lg leading-loose xl:max-w-[750px]">
 							{/* xl:max-w-[600px] */}
 							{props.displayDetails?.plot}
 						</p>
@@ -54,7 +55,7 @@ export default function MediaDetails(props: MediaDetailsProps) {
 					focusedStyles="on-focus"
 					onFocus={props.onFocus}
 				>
-					<div class="mb-8 grid gap-7 text-[17px] md:grid-cols-2">
+					<div class="mb-8 grid gap-7 text-lg md:grid-cols-2">
 						<p class="flex flex-col space-y-2">
 							<span class="text-[15px] opacity-40">
 								Release Date:{" "}
@@ -125,7 +126,7 @@ export default function MediaDetails(props: MediaDetailsProps) {
 					focusedStyles="on-focus"
 					onFocus={props.onFocus}
 				>
-					<div class="mb-8 grid gap-7 text-[17px] md:grid-cols-2">
+					<div class="mb-8 grid gap-7 text-lg md:grid-cols-2">
 						<p class="flex flex-col space-y-2">
 							<span class="text-[15px] opacity-40">
 								Run Time:{" "}
@@ -185,13 +186,28 @@ export default function MediaDetails(props: MediaDetailsProps) {
 						class="content"
 						focusedStyles="on-focus"
 						onFocus={props.onFocus}
+						onEnterPress={() => setFullCast(!fullCast())}
 					>
 						<p class="flex flex-col space-y-2">
 							<span class="text-[15px] opacity-40">Cast: </span>
-							<span class="leading-loose opacity-90">
+							<span
+								class="leading-[32px] opacity-90"
+								classList={{
+									// Make the maximum height a multiple of the line-height
+									"!max-h-[96px] overflow-hidden block ":
+										!fullCast(),
+								}}
+							>
 								{props.movieDetails?.cast
 									.map((actor) => actor.name)
 									.join(", ")}
+							</span>
+							<span class="cursor-pointer text-yellow-300">
+								<a onclick={() => setFullCast(!fullCast())}>
+									{fullCast()
+										? "Shorten Cast"
+										: "View Full Cast"}
+								</a>
 							</span>
 						</p>
 					</FocusLeaf>

@@ -239,3 +239,8 @@ video-js.video-js {
 .player[data-view-type="video"] {
 	aspect-ratio: 16 /9;
 }
+
+.media-stream p,
+.media-stream span {
+	@apply transition-all duration-300 ease-in-out;
+}

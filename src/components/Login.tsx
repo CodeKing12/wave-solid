@@ -50,7 +50,7 @@ const Login = function Login(props: LoginProps) {
 		get isFocusBoundary() {
 			return props.show;
 		},
-		preferredChildFocusKey: "LOGIN_USERNAME_INPUT",
+		preferredChildFocusKey: "LOGIN_QUIT_BUTTON",
 	});
 	const { addAlert } = useAlert();
 
@@ -148,6 +148,7 @@ const Login = function Login(props: LoginProps) {
 						<FocusLeaf
 							focusedStyles="on-svg-focus"
 							onEnterPress={props.onClose}
+							customFocusKey="LOGIN_QUIT_BUTTON"
 						>
 							<button
 								class="cursor-pointer text-white hover:text-yellow-300"

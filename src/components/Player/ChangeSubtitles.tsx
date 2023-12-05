@@ -51,7 +51,7 @@ function AvailableSubtitles(props: AvailableSubtitlesProps) {
 		// -translate-y- must be higher than the height of the timeline component for proper visibility
 		<FocusContext.Provider value={focusKey()}>
 			<div
-				class="absolute bottom-full right-0 flex -translate-y-12 flex-col gap-1 rounded-md bg-neutral-950 bg-opacity-90 py-3 backdrop-blur-sm duration-[400ms] ease-in-out"
+				class="absolute bottom-full right-0 flex -translate-y-12 flex-col space-y-1 rounded-md bg-neutral-950 bg-opacity-90 py-3 backdrop-blur-sm duration-[400ms] ease-in-out"
 				classList={{
 					"!opacity-0 !invisible !-translate-y-24": !props.show,
 				}}
@@ -64,7 +64,7 @@ function AvailableSubtitles(props: AvailableSubtitlesProps) {
 					onEnterPress={() => props.onClick()}
 				>
 					<button
-						class="flex w-60 items-center gap-3 bg-white bg-opacity-0 px-6 py-3 text-left text-[17px] font-medium capitalize duration-300 ease-in-out hover:bg-opacity-10"
+						class="flex w-60 items-center space-x-3 bg-white bg-opacity-0 px-6 py-3 text-left text-[17px] font-medium capitalize duration-300 ease-in-out hover:bg-opacity-10"
 						onclick={() => props.onClick()}
 					>
 						<span
@@ -87,7 +87,7 @@ function AvailableSubtitles(props: AvailableSubtitlesProps) {
 							onEnterPress={() => props.onClick(subtitle.index)}
 						>
 							<button
-								class="flex w-60 items-center gap-3 bg-white bg-opacity-0 px-6 py-3 text-left text-[17px] font-medium capitalize duration-300 ease-in-out hover:bg-opacity-10"
+								class="flex w-60 items-center space-x-3 bg-white bg-opacity-0 px-6 py-3 text-left text-[17px] font-medium capitalize duration-300 ease-in-out hover:bg-opacity-10"
 								onclick={() => props.onClick(subtitle.index)}
 							>
 								<span
