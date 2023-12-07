@@ -24,6 +24,9 @@ export default function Episode(props: EpisodeProps) {
 	);
 	const hasNoStreams = () =>
 		Array.isArray(episodeStreams()) && !episodeStreams()?.length;
+	const hasStreams = () =>
+		// Using `//` converts the length value to a boolean
+		Array.isArray(episodeStreams()) && !!episodeStreams()?.length;
 	let { rating } = getRatingAggr(props.episode._source.ratings);
 
 	async function getEpisodeStreams(
@@ -95,7 +98,7 @@ export default function Episode(props: EpisodeProps) {
 					height="50"
 					class="h-20 w-16 flex-none rounded-md bg-slate-100 object-cover"
 				/>
-				<div class="relative min-w-0 flex-auto">
+				<div class="relative min-w-0 flex-auto xl:min-w-[400px]">
 					<h2 class="mr-28 truncate font-semibold text-white text-opacity-80">
 						{episodeDetails.title ||
 							`Season ${props.episode._source.info_labels.season}: Episode ${props.episode._source.info_labels.episode}`}
@@ -164,13 +167,13 @@ export default function Episode(props: EpisodeProps) {
 					</dl>
 				</div>
 				<button
-					class={`!ml-10 flex h-16 w-12 min-w-[48px] items-center justify-center rounded-md border-2 border-black-1 border-transparent bg-yellow-300 text-base font-bold tracking-wide text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 ${
-						hasNoStreams() ? "pointer-events-none opacity-40" : ""
-					} ${
-						focused() && !hasNoStreams()
-							? "!border-yellow-300 !bg-black-1 !text-yellow-300"
-							: ""
-					}`}
+					class="!ml-10 flex h-16 w-12 min-w-[48px] items-center justify-center rounded-md border-2 border-black-1 border-transparent bg-yellow-300 text-base font-bold tracking-wide text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300"
+					classList={{
+						"pointer-events-none opacity-40": hasNoStreams(),
+						"!border-yellow-300 !bg-black-1 !text-yellow-300":
+							focused() && !hasNoStreams(),
+						hidden: hasStreams() || hasNoStreams(),
+					}}
 					onClick={handleClick}
 				>
 					<IconPlayerPlayFilled size={28} />
@@ -187,7 +190,7 @@ export default function Episode(props: EpisodeProps) {
 
 			<div
 				class="h-0 duration-300 ease-linear"
-				classList={{ "remove-element !h-6": hasNoStreams() }}
+				classList={{ "remove-element h-6": hasNoStreams() }}
 			>
 				<Show when={hasNoStreams()}>
 					<p class="text-center font-medium text-gray-300">

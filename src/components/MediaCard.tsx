@@ -1,18 +1,21 @@
 import { useFocusable } from "@/spatial-nav/useFocusable";
 import { I18nInfoLabel, MediaObj, RatingObj } from "./MediaTypes";
-import { resolveArtItem, smallPoster } from "@/utils/general";
+import {
+	checkExplicitContent,
+	resolveArtItem,
+	smallPoster,
+} from "@/utils/general";
 import {
 	IconHeart,
 	IconPhoto,
 	IconStar,
 	IconStarFilled,
 } from "@tabler/icons-solidjs";
-import { createMemo } from "solid-js";
+import { createEffect, createMemo } from "solid-js";
 import { FocusableComponentLayout } from "@/spatial-nav";
 import "@/css/media.css";
 
 export interface MediaCardProps {
-	id: string;
 	// currentPagination: number,
 	// currentPage: PageType,
 	index: number;
@@ -79,24 +82,27 @@ export function getRatingAggr(ratings: RatingObj | undefined = {}) {
 }
 
 const MediaCard = function MediaCard(props: MediaCardProps) {
+	function handleEnterPress() {
+		if (!isExplicitContent()) {
+			props.onEnterPress(props.media);
+		}
+	}
 	const { setRef, focused, focusSelf } = useFocusable({
-		onEnterPress: () => props.onEnterPress(props.media),
+		onEnterPress: handleEnterPress,
 		onFocus: props.onFocus,
 	});
 	console.log("New MediaCard");
 
-	// const [media] = useContext(MediaContext)
-	// createEffect(() =>
-	//     console.log(media, props.index)
-	// )
-
-	// const
-	// const media = createMemo(() => {
-	//     return props.pageMedia[props.currentPage[props.currentPagination]]
-	//     // Get media from store
-	// })
+	createEffect(() => {
+		if (props.media && props.index === 0) {
+			focusSelf();
+		}
+	});
 
 	const mediaSource = createMemo(() => props.media?._source);
+	const isExplicitContent = createMemo(() =>
+		checkExplicitContent(mediaSource()),
+	);
 	const reviews = () => {
 		if (mediaSource()?.ratings) {
 			return getRatingAggr(mediaSource()?.ratings);
@@ -170,30 +176,34 @@ const MediaCard = function MediaCard(props: MediaCardProps) {
 		}
 	};
 
-	// if (!displayDetails) {
-	//     if (media && media.i18n_info_labels) {
-	//         displayDetails = media.i18n_info_labels[media.i18n_info_labels?.length - 1]
-	//     }
-	// }
+	function handleCardClick() {
+		focusSelf();
+		if (!isExplicitContent()) {
+			props.showMediaInfo(props.media);
+		}
+	}
 
 	return (
 		//   <div class={`w-[240px] h-[330px] rounded-xl bg-black-1 backdrop-blur-2xl bg-opacity-60 cursor-pointer group relative overflow-clip duration-[400ms] ease-in-out border-4 border-transparent ${focused ? "!duration-300 border-yellow-300" : ""}`} ref={ref}>
 		mediaSource ? (
 			<div
-				id={props.id}
-				class={`media-card focusable group relative w-full cursor-pointer overflow-clip rounded-xl border-4 border-transparent bg-black-1 bg-opacity-60 backdrop-blur-2xl duration-[400ms] ease-in-out ${
-					focused() ? "border-yellow-300 !duration-300" : ""
-				}`}
+				id={props.media._id}
+				class="media-card focusable group relative w-full cursor-pointer overflow-clip rounded-xl border-4 border-transparent bg-black-1 bg-opacity-60 backdrop-blur-2xl duration-[400ms] ease-in-out"
+				classList={{
+					"border-yellow-300 !duration-300": focused(),
+				}}
 				ref={setRef}
+				onClick={handleCardClick}
 			>
 				<div class="media-poster relative h-full min-h-full">
 					{poster() ? (
 						// <Image width={300} height={400} class="w-full h-full max-h-full object-cover rounded-xl opacity-75" src={smallPoster(poster) || ""} alt={displayDetails?.plot} />
 						<img
-							id={`${props.id}-poster`}
+							id={`${props.media._id}-poster`}
 							width={300}
 							height={400}
-							class="h-full max-h-full w-full rounded-xl object-cover opacity-80"
+							class="h-full max-h-full w-full rounded-xl object-cover opacity-80 duration-200 ease-in-out"
+							classList={{ "!blur-3xl": isExplicitContent() }}
 							src={posterLink() || ""}
 							alt={displayDetails()?.title}
 							onError={onImgError}
@@ -210,7 +220,6 @@ const MediaCard = function MediaCard(props: MediaCardProps) {
 					classList={{
 						"!duration-300 !visible !opacity-100": focused(),
 					}}
-					onClick={() => props.showMediaInfo(props.media)}
 				>
 					<div class="flex h-full flex-col justify-between">
 						<div>

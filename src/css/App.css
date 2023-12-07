@@ -72,7 +72,8 @@ input {
 }
 
 .searchFocus input {
-	border-color: rgba(209, 213, 219, 0.5);
+	border-width: 3px;
+	border-color: rgba(209, 213, 219, 0.3);
 }
 
 .searchFocus input::placeholder {

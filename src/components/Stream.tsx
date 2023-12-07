@@ -34,15 +34,15 @@ export default function MediaStreamOption(props: MediaStreamOptionProps) {
 		return uniqueArray.join("/");
 	}
 
+	function copyUrlToClipboard() {}
+
 	return (
 		<div
-			class={`media-stream flex flex-col items-center justify-between md:flex-row ${
-				props.isEpisode
-					? "space-y-10 md:space-x-10 md:space-y-0"
-					: "space-y-10 md:space-x-16 md:space-y-0 xl:space-x-20"
-			}`}
+			class="media-stream flex flex-col items-center justify-between md:flex-row"
 			classList={{
 				"opacity-50": props.authToken.length <= 0,
+				"space-y-10 md:space-x-16 md:space-y-0 xl:space-x-20":
+					props.isEpisode,
 			}}
 			ref={setRef}
 		>
@@ -157,9 +157,7 @@ export default function MediaStreamOption(props: MediaStreamOptionProps) {
 				</Show>
 				<Show
 					when={
-						props.stream.video.length &&
-						props.stream.audio.length &&
-						!props.isEpisode
+						props.stream.video.length && props.stream.audio.length
 					}
 				>
 					<div class="codec flex flex-col items-center space-y-2">
@@ -185,56 +183,100 @@ export default function MediaStreamOption(props: MediaStreamOptionProps) {
 				</Show>
 			</div>
 
-			<Switch>
-				<Match when={props.isEpisode && props.authToken}>
-					<button
-						onClick={() => {
-							props.onStreamClick();
-						}}
-					>
-						<svg
-							class="text-yellow-300 duration-300 ease-in-out"
-							classList={{ "!text-white": focused() }}
-							xmlns="http://www.w3.org/2000/svg"
-							width="40"
-							height="40"
-							viewBox="0 0 24 24"
-							fill="none"
-						>
-							<path
-								d="M11.969 2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10-4.47-10-10-10Zm3 12.23-2.9 1.67a2.284 2.284 0 0 1-2.3 0 2.285 2.285 0 0 1-1.15-2v-3.35c0-.83.43-1.58 1.15-2 .72-.42 1.58-.42 2.31 0l2.9 1.67c.72.42 1.15 1.16 1.15 2 0 .84-.43 1.59-1.16 2.01Z"
-								fill="currentColor"
-							></path>
-						</svg>
-					</button>
-				</Match>
+			<div class="flex gap-4">
+				<Switch>
+					<Match when={props.isEpisode && props.authToken}>
+						<button onClick={copyUrlToClipboard}>
+							<svg
+								class="text-yellow-300 duration-300 ease-in-out"
+								classList={{ "!text-white": focused() }}
+								xmlns="http://www.w3.org/2000/svg"
+								width="30"
+								height="30"
+								viewBox="0 0 24 24"
+								fill="none"
+							>
+								<path
+									d="M14.35 2h-4.7c-1.04 0-1.89.84-1.89 1.88v.94c0 1.04.84 1.88 1.88 1.88h4.71c1.04 0 1.88-.84 1.88-1.88v-.94C16.24 2.84 15.39 2 14.35 2Z"
+									fill="currentColor"
+								></path>
+								<path
+									d="M17.24 4.82c0 1.59-1.3 2.89-2.89 2.89h-4.7c-1.59 0-2.89-1.3-2.89-2.89 0-.56-.6-.91-1.1-.65a4.472 4.472 0 0 0-2.37 3.95v9.41C3.29 19.99 5.3 22 7.76 22h8.48c2.46 0 4.47-2.01 4.47-4.47V8.12c0-1.71-.96-3.2-2.37-3.95-.5-.26-1.1.09-1.1.65Zm-4.86 12.13H8c-.41 0-.75-.34-.75-.75s.34-.75.75-.75h4.38c.41 0 .75.34.75.75s-.34.75-.75.75Zm2.62-4H8c-.41 0-.75-.34-.75-.75s.34-.75.75-.75h7c.41 0 .75.34.75.75s-.34.75-.75.75Z"
+									fill="currentColor"
+								></path>
+							</svg>
+						</button>
 
-				<Match when={!props.isEpisode && props.authToken}>
-					<button
-						class={`flex items-center justify-center space-x-4 rounded-md border-2 border-transparent bg-yellow-300 px-5 py-3 text-sm font-bold tracking-wide text-black-1 opacity-40 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 xl:h-16 xl:w-12 xl:!p-0 ${
-							focused()
-								? "!border-yellow-300 !bg-black-1 !text-yellow-300 !opacity-100"
-								: ""
-						}`}
-						onClick={() => props.onStreamClick()}
-					>
-						<span class="font-semibold xl:hidden">Watch</span>
-						<svg
-							class="xl:!ml-0"
-							xmlns="http://www.w3.org/2000/svg"
-							width="30"
-							height="30"
-							viewBox="0 0 24 24"
-							fill="none"
+						<button
+							onClick={() => {
+								props.onStreamClick();
+							}}
 						>
-							<path
-								d="M11.969 2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10-4.47-10-10-10Zm3 12.23-2.9 1.67a2.284 2.284 0 0 1-2.3 0 2.285 2.285 0 0 1-1.15-2v-3.35c0-.83.43-1.58 1.15-2 .72-.42 1.58-.42 2.31 0l2.9 1.67c.72.42 1.15 1.16 1.15 2 0 .84-.43 1.59-1.16 2.01Z"
-								fill="currentColor"
-							></path>
-						</svg>
-					</button>
-				</Match>
-			</Switch>
+							<svg
+								class="text-yellow-300 duration-300 ease-in-out"
+								classList={{ "!text-white": focused() }}
+								xmlns="http://www.w3.org/2000/svg"
+								width="44"
+								height="44"
+								viewBox="0 0 24 24"
+								fill="none"
+							>
+								<path
+									d="M11.969 2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10-4.47-10-10-10Zm3 12.23-2.9 1.67a2.284 2.284 0 0 1-2.3 0 2.285 2.285 0 0 1-1.15-2v-3.35c0-.83.43-1.58 1.15-2 .72-.42 1.58-.42 2.31 0l2.9 1.67c.72.42 1.15 1.16 1.15 2 0 .84-.43 1.59-1.16 2.01Z"
+									fill="currentColor"
+								></path>
+							</svg>
+						</button>
+					</Match>
+
+					<Match when={!props.isEpisode && props.authToken}>
+						<button onClick={copyUrlToClipboard}>
+							<svg
+								class="text-yellow-300 duration-300 ease-in-out"
+								classList={{ "!text-white": focused() }}
+								xmlns="http://www.w3.org/2000/svg"
+								width="34"
+								height="34"
+								viewBox="0 0 24 24"
+								fill="none"
+							>
+								<path
+									d="M14.35 2h-4.7c-1.04 0-1.89.84-1.89 1.88v.94c0 1.04.84 1.88 1.88 1.88h4.71c1.04 0 1.88-.84 1.88-1.88v-.94C16.24 2.84 15.39 2 14.35 2Z"
+									fill="currentColor"
+								></path>
+								<path
+									d="M17.24 4.82c0 1.59-1.3 2.89-2.89 2.89h-4.7c-1.59 0-2.89-1.3-2.89-2.89 0-.56-.6-.91-1.1-.65a4.472 4.472 0 0 0-2.37 3.95v9.41C3.29 19.99 5.3 22 7.76 22h8.48c2.46 0 4.47-2.01 4.47-4.47V8.12c0-1.71-.96-3.2-2.37-3.95-.5-.26-1.1.09-1.1.65Zm-4.86 12.13H8c-.41 0-.75-.34-.75-.75s.34-.75.75-.75h4.38c.41 0 .75.34.75.75s-.34.75-.75.75Zm2.62-4H8c-.41 0-.75-.34-.75-.75s.34-.75.75-.75h7c.41 0 .75.34.75.75s-.34.75-.75.75Z"
+									fill="currentColor"
+								></path>
+							</svg>
+						</button>
+
+						<button
+							class="flex items-center justify-center space-x-4 rounded-md border-2 border-transparent bg-yellow-300 px-5 py-3 text-sm font-bold tracking-wide text-black-1 opacity-40 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 xl:h-16 xl:w-12 xl:!p-0"
+							classList={{
+								"!border-yellow-300 !bg-black-1 !text-yellow-300 !opacity-100":
+									focused(),
+							}}
+							onClick={() => props.onStreamClick()}
+						>
+							<span class="font-semibold xl:hidden">Watch</span>
+							<svg
+								class="xl:!ml-0"
+								xmlns="http://www.w3.org/2000/svg"
+								width="30"
+								height="30"
+								viewBox="0 0 24 24"
+								fill="none"
+							>
+								<path
+									d="M11.969 2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10-4.47-10-10-10Zm3 12.23-2.9 1.67a2.284 2.284 0 0 1-2.3 0 2.285 2.285 0 0 1-1.15-2v-3.35c0-.83.43-1.58 1.15-2 .72-.42 1.58-.42 2.31 0l2.9 1.67c.72.42 1.15 1.16 1.15 2 0 .84-.43 1.59-1.16 2.01Z"
+									fill="currentColor"
+								></path>
+							</svg>
+						</button>
+					</Match>
+				</Switch>
+			</div>
 		</div>
 	);
 }

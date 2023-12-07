@@ -161,6 +161,7 @@ export interface MediaSource {
 	i18n_info_labels: I18nInfoLabel[];
 	info_labels: MediaInfoLabels;
 	available_streams: AvailableStreams;
+	tags: string[];
 }
 
 export interface MediaStream {}

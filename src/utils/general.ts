@@ -4,6 +4,7 @@ import {
 	Info2,
 	LeanMediaStream,
 	MediaObj,
+	MediaSource,
 	SeriesObj,
 	StreamObj,
 	VideoStream,
@@ -25,6 +26,8 @@ import { sha1 } from "./Sha";
 import axiosInstance from "./axiosInstance";
 import { FocusDetails, setFocus } from "@/spatial-nav";
 import { Setter } from "solid-js";
+import { AxiosError } from "axios";
+import { useSettings } from "@/SettingsContext";
 // import Player from "video.js/dist/types/player";
 
 export function parseXml(data: string, param: string) {
@@ -170,7 +173,7 @@ export async function getFilePasswordSalt(ident: string): Promise<string> {
 	}
 }
 
-export async function getUsername(token: string): Promise<string> {
+export async function getUsername(token: string): Promise<string | AxiosError> {
 	try {
 		const response = await axiosInstance.post(
 			AUTH_ENDPOINT + PATH_USER_DATA,
@@ -180,7 +183,7 @@ export async function getUsername(token: string): Promise<string> {
 		return parseXml(response.data, "username");
 	} catch (error) {
 		console.log("An error occured while getting username: ", error);
-		throw error; // Return an empty string or handle the error appropriately
+		return error as AxiosError; // Return an empty string or handle the error appropriately
 	}
 }
 
@@ -280,14 +283,16 @@ export function formatStringAsId(input: string) {
 }
 
 export async function checkWebshareStatus(token: string) {
-	let success = true;
-	try {
-		const username = await getUsername(token);
-		if (!username.length) {
-			success = false;
-		}
-	} catch (error) {
+	let success: boolean | "network_error" = true;
+	const username = await getUsername(token);
+	if (typeof username === "string" && !username.length) {
 		success = false;
+	} else if (
+		typeof username === "object" &&
+		username.code &&
+		username.code === "ERR_NETWORK"
+	) {
+		success = "network_error";
 	}
 	return success;
 }
@@ -418,73 +423,29 @@ export function controlShowEffect(
 	}
 }
 
-// export function fullscreenShortcut(lastEnterTimestamp: number, player: Player) {
-//     const currentTimestamp = Date.now();
-//     const timeSinceLastEnter = currentTimestamp - lastEnterTimestamp;
-
-//     if (timeSinceLastEnter < 1000) {
-//     // The user pressed Enter twice within 1 second (adjust the time threshold as needed).
-//         if (document.fullscreenEnabled) {
-//             // Request full-screen mode
-//             try {
-//                 if (player.isFullscreen()) {
-//                     player.exitFullscreen();
-//                 } else {
-//                     player.requestFullscreen();
-//                 }
-//             } catch(error) {
-//                 console.log(error)
-//             }
-//         }
-
-//     // Reset the timestamp to avoid multiple triggers for the same double Enter key press.
-//     lastEnterTimestamp = 0;
-
-//     } else {
-//         // Set the timestamp of the first Enter key press.
-//         lastEnterTimestamp = currentTimestamp;
-//     }
-
-//     return lastEnterTimestamp
-// }
-
 export interface KeyTimeStamp {
 	arrowUpTimestamp: number;
 }
 
-// export function handlePlayerShortcuts(event: KeyboardEvent, player: Player, keyTimestamps: KeyTimeStamp) {
-//     const skipTime = 10
-//     // console.log(player, Boolean(player))
-
-//     if (player.player_) {
-//         console.log("Called shortcut handler")
-//         // Move the fullscreen code directly to the eventhandler to prevent permission errors
-//         // if (event.key === 'ArrowUp') {
-//         //     keyTimestamps.arrowUpTimestamp = fullscreenShortcut(keyTimestamps.arrowUpTimestamp, player);
-//         // }
-
-//         // `enter or space` key = pause
-//         if (event.keyCode === 32 || event.keyCode === 13) {
-//             if (player?.paused()) {
-//                 player.play()
-//             } else {
-//                 player.pause();
-//             }
-//         }
-//         // `right` key to forward by skiptime, `left` key to rewind by skip time
-//         if (event.keyCode === 37) {
-//             const currentTime = player.currentTime()
-//             // console.log(currentTime, skipTime)
-//             const newTime = currentTime && currentTime > skipTime ? currentTime - skipTime : 0
-//             player.currentTime(newTime)
-//         }
-
-//         if (event.keyCode === 39) {
-//             const currentTime = player.currentTime()
-//             // console.log(currentTime, skipTime)
-//             const newTime = currentTime ? currentTime + skipTime : 0
-//             player.currentTime(newTime)
-//         }
-//     }
-
-// }
+export function checkExplicitContent(mediaSource?: MediaSource) {
+	const { getSetting } = useSettings();
+	if (mediaSource && getSetting("restrict_content")) {
+		const contentFilter = ["porno", "pornographic", "nudity", "erotic"];
+		const hasContent = Array(
+			...mediaSource.tags,
+			...mediaSource.info_labels.genre,
+		).map((desc) => {
+			if (contentFilter.includes(desc.toLowerCase())) {
+				return true;
+			}
+			return false;
+		});
+		return hasContent.includes(true);
+	} else {
+		console.log(
+			"Couldn't check: ",
+			mediaSource,
+			getSetting("restrict_content"),
+		);
+	}
+}

@@ -1,3 +1,4 @@
+import { RawAxiosRequestHeaders } from "axios";
 import { ApiMapper } from "./MediaTypes";
 
 export const MEDIA_ENDPOINT = "https://plugin.sc2.zone";
@@ -42,7 +43,12 @@ export const PATH_FILE_PASSWORD_SALT = "/api/file_password_salt/";
 export const PATH_FILE_PROTECTED = "/api/file_protected/";
 export const PATH_SEARCH = "/api/search/";
 export const PATH_FILE_INFO = "/api/file_info/";
-export const authAxiosConfig = {
+
+type authConfig = {
+	headers: RawAxiosRequestHeaders;
+	cache: false;
+};
+export const authAxiosConfig: authConfig = {
 	headers: { "Content-Type": "application/x-www-form-urlencoded" },
 	cache: false,
 };

@@ -1,4 +1,4 @@
-import { createSignal, createEffect } from "solid-js";
+import { createSignal, createEffect, onCleanup } from "solid-js";
 import {
 	AUTH_ENDPOINT,
 	PATH_LOGIN,
@@ -21,21 +21,21 @@ interface LoginProps {
 	onClose: () => void;
 }
 
-const Login = function Login(props: LoginProps) {
+export default function Login(props: LoginProps) {
 	// console.log("Login is Re-rendering")
 
-	createEffect(() => {
-		function handleLoginEscape(event: KeyboardEvent) {
-			if (event.code === "Escape" || event.keyCode === 27) {
-				props.onClose();
-			}
+	function handleLoginEscape(event: KeyboardEvent) {
+		if (event.code === "Escape" || event.keyCode === 27) {
+			props.onClose();
 		}
+	}
 
+	createEffect(() => {
 		document.addEventListener("keydown", handleLoginEscape);
+	});
 
-		return () => {
-			document.removeEventListener("keydown", handleLoginEscape);
-		};
+	onCleanup(() => {
+		document.removeEventListener("keydown", handleLoginEscape);
 	});
 
 	const [username, setUsername] = createSignal("");
@@ -134,15 +134,17 @@ const Login = function Login(props: LoginProps) {
 	return (
 		<FocusContext.Provider value={focusKey()}>
 			<div
-				class={`login-modal invisible fixed bottom-0 top-0 z-0 flex h-full w-full items-center justify-center opacity-0 backdrop-blur-lg duration-300 ease-linear ${
-					props.show ? "!visible !z-[110] !opacity-100" : ""
-				}`}
+				class="login-modal invisible fixed bottom-0 top-0 z-0 flex h-full w-full items-center justify-center opacity-0 duration-300 ease-linear"
+				classList={{
+					"!visible !z-[110] !opacity-100": props.show,
+				}}
 				ref={setRef}
 			>
 				<div
-					class={`invisible w-[450px] translate-y-10 rounded-2xl bg-[#191919] px-8 pb-10 pt-7 text-white opacity-0 duration-[400ms] ease-in-out ${
-						props.show ? "!visible !translate-y-0 !opacity-100" : ""
-					}`}
+					class="invisible z-20 w-[450px] max-w-full translate-y-10 rounded-2xl bg-[#191919] px-8 pb-10 pt-7 text-white opacity-0 duration-[400ms] ease-in-out"
+					classList={{
+						"!visible !translate-y-0 !opacity-100": props.show,
+					}}
 				>
 					<div class="mb-10 flex justify-end">
 						<FocusLeaf
@@ -243,9 +245,8 @@ const Login = function Login(props: LoginProps) {
 						</div>
 					</div>
 				</div>
+				<div class="absolute inset-0 z-10 h-full w-full bg-black bg-opacity-80"></div>
 			</div>
 		</FocusContext.Provider>
 	);
-};
-
-export default Login;
+}

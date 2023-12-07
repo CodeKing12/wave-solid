@@ -8,6 +8,7 @@ import "@/css/layout.css";
 interface NavProps {
 	onSearch: (searchTerm: string) => void;
 	showFavorites: () => void;
+	handleNav: (name: string) => void;
 }
 
 const Navbar = function Navbar(props: NavProps) {
@@ -34,8 +35,8 @@ const Navbar = function Navbar(props: NavProps) {
 				}`}
 				ref={setRef}
 			>
-				<div class="flex flex-col items-center justify-between space-y-5 lg:flex-row lg:space-y-0">
-					<div class="flex items-center space-x-12 text-lg font-medium text-white text-opacity-80">
+				<div class="flex flex-col items-center justify-between space-y-5 xl:flex-row xl:space-y-0">
+					<div class="flex flex-wrap items-center space-x-12 text-lg font-medium text-white text-opacity-80 sm:flex-nowrap">
 						<FocusLeaf
 							focusedStyles="after:block animateUnderline"
 							customFocusKey="Nav-Favorites"
@@ -50,11 +51,22 @@ const Navbar = function Navbar(props: NavProps) {
 						<FocusLeaf focusedStyles="after:block animateUnderline">
 							<a class="cursor-pointer">Watched</a>
 						</FocusLeaf>
+						<FocusLeaf
+							focusedStyles="after:block animateUnderline"
+							onEnterPress={() => props.handleNav("settings")}
+						>
+							<a
+								class="cursor-pointer"
+								onclick={() => props.handleNav("settings")}
+							>
+								Settings
+							</a>
+						</FocusLeaf>
 					</div>
 
 					<FocusLeaf
 						isForm
-						class="w-full text-[#AEAFB2] lg:w-fit"
+						class="w-full text-[#AEAFB2] xl:w-fit"
 						focusedStyles="searchFocus"
 						onEnterPress={() => handleSearch(undefined)}
 					>
@@ -63,7 +75,7 @@ const Navbar = function Navbar(props: NavProps) {
 							onSubmit={handleSearch}
 						>
 							<input
-								class="h-14 w-full rounded-xl border border-[rgba(249,249,249,0.10)] px-14 py-3 text-base text-white outline-none placeholder:text-base placeholder:text-gray-300 lg:w-[350px]"
+								class="h-14 w-full rounded-xl border border-[rgba(249,249,249,0.10)] px-14 py-3 text-base text-white outline-none placeholder:text-base placeholder:text-gray-300 xl:w-[350px]"
 								placeholder="Search Movies or TV Shows"
 								onInput={(e) => setSearchTerm(e.target.value)}
 							/>
@@ -72,10 +84,13 @@ const Navbar = function Navbar(props: NavProps) {
 								class="icon absolute left-4 top-1/2 duration-300 ease-in-out"
 								// -translate-y-1/2 will be applied in css file for backwards compatibility for chrome 47
 							/>
+							<input class="hidden" type="submit" />
 							<button
-								class={`-group-hover:visible -group-hover:opacity-100 invisible absolute right-4 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-yellow-300 text-black-1 opacity-0 ease-in-out ${
-									searchTerm() ? "!visible !opacity-100" : ""
-								}`}
+								class="-group-hover:visible -group-hover:opacity-100 invisible absolute right-4 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-yellow-300 text-black-1 opacity-0 ease-in-out"
+								classList={{
+									"!visible !opacity-100":
+										searchTerm().length > 0,
+								}}
 								onClick={handleSearch}
 							>
 								<IconZoomFilled size={16} />

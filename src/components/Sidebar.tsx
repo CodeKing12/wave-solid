@@ -51,9 +51,14 @@ interface SidebarProps {
 
 const NavItem = function NavItem(props: SidebarItemProps) {
 	// console.log("Nav Item is re-rendering")
-	const { setRef, focused } = useFocusable({
+	const { setRef, focused, focusSelf } = useFocusable({
 		onEnterPress: () => props.onItemClick(props.page),
 	});
+
+	function handleItemClick() {
+		focusSelf();
+		props.onItemClick(props.page);
+	}
 
 	return (
 		<a
@@ -67,7 +72,7 @@ const NavItem = function NavItem(props: SidebarItemProps) {
 					? "!border-x-4 !border-yellow-300 !opacity-100 [&>svg]:!text-yellow-300"
 					: ""
 			}`}
-			onClick={() => props.onItemClick(props.page)}
+			onClick={handleItemClick}
 		>
 			{props.icon}
 			<span>{props.text}</span>

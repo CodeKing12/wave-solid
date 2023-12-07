@@ -7,6 +7,7 @@ import {
 	proxyUrl,
 } from "./constants";
 import {
+	checkExplicitContent,
 	getMediaStreams,
 	getStreamUrl,
 	resolveArtItem,
@@ -94,12 +95,16 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 		}
 	});
 
+	const isExplicitContent = createMemo(() =>
+		checkExplicitContent(props.media?._source),
+	);
+
 	const displayDetails = () => {
 		if (props.media) {
 			return getDisplayDetails(props.media._source.i18n_info_labels);
 		}
 	};
-	const images = () => {
+	const images = createMemo(() => {
 		if (props.media && props.show) {
 			return {
 				poster: resolveArtItem(
@@ -114,10 +119,6 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 		} else {
 			return {};
 		}
-	};
-
-	createEffect(() => {
-		console.log(props.show, images());
 	});
 
 	const movieDetails = () => {
@@ -404,7 +405,8 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 								width={1000}
 								height={600}
 								src={images()?.poster}
-								class="h-full w-full rounded-[30px] object-cover"
+								class="h-full w-full rounded-[30px] object-cover duration-200 ease-in-out"
+								classList={{ "!blur-2xl": isExplicitContent() }}
 								alt={movieTitle()}
 							/>
 						</Show>
@@ -561,13 +563,14 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 									ref={tvMediaRef}
 								>
 									<div
-										class={`absolute top-0 flex w-full max-w-full flex-wrap space-x-8 duration-300 ease-in-out ${
-											selectedSeason() &&
-											seasons()[props.media?._id ?? ""]
-												?.length
-												? "invisible -translate-y-16 opacity-0"
-												: ""
-										}`}
+										class="absolute top-0 grid w-full max-w-full grid-cols-5 flex-wrap gap-x-5 gap-y-8 duration-300 ease-in-out xl:gap-x-0"
+										classList={{
+											"invisible -translate-y-16 opacity-0":
+												Boolean(selectedSeason()) &&
+												seasons()[
+													props.media?._id ?? ""
+												]?.length > 0,
+										}}
 									>
 										<Show
 											when={

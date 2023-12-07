@@ -32,7 +32,7 @@
 	}
 }
 
-@media only screen and (min-width: 1075px) {
+@media only screen and (min-width: 992px) {
 	.media-card {
 		width: calc(100% / 5.3);
 		/* height: calc(100% / 5 * 0.5625); */
@@ -99,4 +99,8 @@
 	.media-card {
 		height: 300px;
 	}
+}
+
+.media-modal .content span {
+	line-height: 2 !important;
 }

@@ -26,6 +26,7 @@ import { IconArrowLeft, IconArrowRight } from "@tabler/icons-solidjs";
 import Sidebar, { PageType } from "./components/Sidebar";
 import { FocusContext, useFocusable } from "./spatial-nav";
 import FocusLeaf from "./components/Utilities/FocusLeaf";
+import Settings from "./components/Settings";
 
 type PaginationType = {
 	[page in PageType]: number;
@@ -54,8 +55,10 @@ export default function Home() {
 		forceFocus: true,
 	});
 
+	const [hasNetwork, setHasNetwork] = createSignal(true);
 	const [isAuthenticated, setIsAuthenticated] = createSignal(false);
 	const [openLogin, setOpenLogin] = createSignal(false);
+	const [openSettings, setOpenSettings] = createSignal(false);
 	const [authToken, setAuthToken] = createSignal("");
 
 	const [page, setPage] = createSignal<PageType>("movies");
@@ -76,8 +79,8 @@ export default function Home() {
 	const [modalPlaceholder, setModalPlaceholder] = createSignal("");
 
 	createEffect(() => {
-		if (!openLogin() && !openModal()) {
-			console.log("Focused self after login modal close");
+		if (!openLogin() && !openModal() && !openSettings()) {
+			console.log("Focused self after login/settings modal close");
 			focusSelf();
 		}
 		if (isAuthenticated() && !openModal()) {
@@ -96,13 +99,22 @@ export default function Home() {
 			const isValid = await checkWebshareStatus(storedToken.value);
 
 			if (
-				isValid &&
+				isValid === true &&
 				storedToken.expiration &&
 				currentTime < storedToken.expiration
 			) {
 				setAuthToken(storedToken.value);
 				setIsAuthenticated(true);
+			} else if (isValid === "network_error") {
+				setHasNetwork(false);
 			} else {
+				let prevStoredAuth = localStorage.getItem("previous-authToken");
+				if (prevStoredAuth === "null") {
+					localStorage.setItem(
+						"previous-authToken",
+						JSON.stringify(storedAuth),
+					);
+				}
 				localStorage.removeItem("authToken");
 			}
 		}
@@ -226,8 +238,10 @@ export default function Home() {
 	const hideSidebarHandler = (isHidden: boolean) => setHideSidebar(isHidden);
 	const openLoginHandler = () => setOpenLogin(true);
 	const closeLoginHandler = () => {
-		console.log("Done");
 		setOpenLogin(false);
+	};
+	const closeSettingsHandler = () => {
+		setOpenSettings(false);
 	};
 	const sbLogoutHandler = () => logoutWebshare();
 
@@ -240,6 +254,12 @@ export default function Home() {
 	const getPaginationData = createMemo(() => {
 		return Math.ceil((pageMedia()?.totals ?? 0) / mediaPerPage);
 	});
+
+	function navigateItem(item: string) {
+		if (item === "settings") {
+			setOpenSettings(true);
+		}
+	}
 
 	return (
 		<main class="bg-[#191919]">
@@ -267,6 +287,7 @@ export default function Home() {
 					<Navbar
 						onSearch={searchMedia}
 						showFavorites={navShowFavorites}
+						handleNav={navigateItem}
 					/>
 
 					<div class={`relative mt-6 flex-1`} ref={setRef}>
@@ -279,7 +300,7 @@ export default function Home() {
 						/>
 					</div>
 					<div
-						class={`mt-12 flex flex-col items-center space-x-7 sm:flex-row sm:justify-between sm:space-x-0 ${
+						class={`mt-12 flex flex-col items-center space-y-7 sm:flex-row sm:justify-between sm:space-y-0 ${
 							pageMedia.loading
 								? "pointer-events-none opacity-40"
 								: "pointer-events-auto opacity-100"
@@ -296,7 +317,7 @@ export default function Home() {
 							onEnterPress={() => updatePagination(page(), -1)}
 						>
 							<button
-								class={`flex items-center space-x-4 rounded-xl border-2 border-transparent bg-yellow-300 px-9 py-3 text-lg font-semibold text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 ${
+								class={`flex items-center space-x-3 rounded-xl border-2 border-transparent bg-yellow-300 px-9 py-3 text-lg font-semibold text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 ${
 									pagination()[page()] === 0
 										? "pointer-events-none opacity-40"
 										: ""
@@ -305,7 +326,7 @@ export default function Home() {
 							>
 								{/* <ArrowLeft size={32} variant='Bold' /> */}
 								<IconArrowLeft size={32} />
-								Previous
+								<span>Previous</span>
 							</button>
 						</FocusLeaf>
 
@@ -334,7 +355,7 @@ export default function Home() {
 							onEnterPress={() => updatePagination(page(), +1)}
 						>
 							<button
-								class={`space-x4 flex items-center rounded-xl border-2 border-transparent bg-yellow-300 px-9 py-3 text-lg font-semibold text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 ${
+								class={`flex items-center space-x-3 rounded-xl border-2 border-transparent bg-yellow-300 px-9 py-3 text-lg font-semibold text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 ${
 									pagination()[page()] + 1 ===
 									getPaginationData()
 										? "pointer-events-none opacity-40"
@@ -342,7 +363,7 @@ export default function Home() {
 								}`}
 								onClick={() => updatePagination(page(), +1)}
 							>
-								Next
+								<span>Next</span>
 								{/* <ArrowRight size={32} variant='Bold' /> */}
 								<IconArrowRight size={32} />
 							</button>
@@ -356,6 +377,10 @@ export default function Home() {
 				onLogin={onLogin}
 				onClose={closeLoginHandler}
 			/>
+
+			<Settings show={openSettings()} onClose={closeSettingsHandler} />
+
+			{/* Add a modal to display when there is no network */}
 
 			{/* <Transition> */}
 			{

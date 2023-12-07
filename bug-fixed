@@ -1,11 +1,13 @@
-Made the Login modal auto-focus the Quit button
-Fixed the bug where the media titles in some cards are not being displayed
-Fixed the bug where rating does not show on the MediaModal
-Centred the MediaCards
-Made some text bigger and bolder in the Sidebar, Navbar and Media Modal
-Changed the icons for the Media Streams
-Made the Media Modal image wider
-Fixed the bug where duplicate languages are shown in the Subtitles and Audio info in Media Stream
-Implemented automatic shortening of media cast names, with a link (or press enter when the element is focused) to view the full cast names or shorten them again
-Re-instated the Vidstack player for browser clients
-Added FocusBoundary and FocusBoundaryDirection implementations in FocusLeaf
+Made some clickable elements to auto-focus themselves when clicked
+Fixed type errors for AxiosCache
+Re-instated the Media formats for Episode Streams
+Added the Copy button to Media Streams, functionality coming later
+Removed Play button on Episode element when there are streams shown
+Added the settings modal
+Created global settings, with persistent storage
+Added the setting to blur explicit content
+Changed the backdrop blur to an opaque background to support older chrome versions
+Fixed a margin issue in the Seasons grid in the MediaModal
+Made the first media card to auto-focus when the list of media loads so that experience is better when you click the "Next" button
+Fixed the bug where the MediaCard requires 2 clicks to open the MediaModal on mobile devices
+Added a localStorage item to store previous-tokens when there is a network error, and a signal to register the absence of network (To be used in a future update)

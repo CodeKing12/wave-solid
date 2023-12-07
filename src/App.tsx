@@ -5,6 +5,7 @@ import { AlertProvider } from "./AlertContext";
 import Alerts from "./components/Utilities/Alerts";
 import { init } from "./spatial-nav";
 import scrollPolyfill from "scroll-polyfill";
+import SettingsProvider from "./SettingsContext";
 
 export default function App() {
 	scrollPolyfill();
@@ -16,11 +17,13 @@ export default function App() {
 	});
 
 	return (
-		<AlertProvider>
-			<MediaProvider>
-				<Home />
-			</MediaProvider>
-			<Alerts />
-		</AlertProvider>
+		<SettingsProvider>
+			<AlertProvider>
+				<MediaProvider>
+					<Home />
+				</MediaProvider>
+				<Alerts />
+			</AlertProvider>
+		</SettingsProvider>
 	);
 }
