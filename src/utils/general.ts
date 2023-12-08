@@ -480,3 +480,12 @@ export class Timer {
 		this.timerId = setTimeout(this.callback, this.remaining);
 	}
 }
+
+export function normalizeHDR(source?: string | boolean) {
+	if (!source) return;
+	if (source === true) return "HDR";
+	const isDolbyVision = source.includes("Dolby Vision");
+	const isSMPTE = source.includes("SMPTE");
+	if (isDolbyVision && isSMPTE) return "HDR+DV";
+	return isDolbyVision ? "DV" : "HDR";
+}

@@ -1,5 +1,5 @@
-import { bytesToSize, secondsToHMS } from "@/utils/general";
-import { Match, Show, Switch } from "solid-js";
+import { bytesToSize, normalizeHDR, secondsToHMS } from "@/utils/general";
+import { Match, Show, Switch, createMemo } from "solid-js";
 import { AudioStream, StreamObj, Subtitle } from "./MediaTypes";
 import { FocusDetails, useFocusable } from "@/spatial-nav";
 
@@ -23,6 +23,11 @@ export default function MediaStreamOption(props: MediaStreamOptionProps) {
 			return props.stream._id;
 		},
 	});
+
+	const isHdr = createMemo(() => normalizeHDR(props.stream.video[0].hdr));
+	const is3d = createMemo(
+		() => !!props.stream.video.find((item) => item["3d"]),
+	);
 
 	function displayLang(languages: AudioStream[] | Subtitle[]) {
 		let uniqueArray: string[] = [];
@@ -148,11 +153,9 @@ export default function MediaStreamOption(props: MediaStreamOptionProps) {
 							></path>
 						</svg>
 						<p>
-							{props.stream.video
-								.map(
-									(video) => video.width + "×" + video.height,
-								)
-								.join(",")}
+							{props.stream.video[0].width +
+								"×" +
+								props.stream.video[0].height}
 						</p>
 					</div>
 				</Show>
@@ -182,6 +185,23 @@ export default function MediaStreamOption(props: MediaStreamOptionProps) {
 						</p>
 					</div>
 				</Show>
+				<div
+					class="flex flex-col justify-center space-y-1 duration-300 ease-in-out"
+					classList={{
+						"opacity-50": !focused(),
+					}}
+				>
+					<Show when={isHdr()}>
+						<p class="border-2 border-yellow-300 px-2 py-1 font-semibold text-yellow-300">
+							{isHdr()}
+						</p>
+					</Show>
+					<Show when={is3d()}>
+						<p class="border-2 border-yellow-300 px-2 py-1 font-semibold text-yellow-300">
+							{is3d() ? "3D" : ""}
+						</p>
+					</Show>
+				</div>
 			</div>
 
 			<div class="flex gap-4">

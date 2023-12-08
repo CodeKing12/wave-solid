@@ -1,5 +1,2 @@
-Fixed the bug with the duration of the subtitles
-Fixed the bug with the spatial-nav of the Login modal
-Fixed some UI bugs in the player
-Remvoed the copy button for Streams on Samsung TVs
-Created separate build command for legacy and modern TVs (because the legacy polyfills keep causing bugs in the modern builds)
+Fixed the issue with multiple resolutions on some streams (e.g. the Avatar stream)
+Added a badge for HDR/DV streams & 3D streams
