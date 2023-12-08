@@ -73,7 +73,7 @@ function AvailableSubtitles(props: AvailableSubtitlesProps) {
 								"bg-current": !props.current,
 							}}
 						></span>
-						off
+						<span>off</span>
 					</button>
 				</FocusLeaf>
 				<For each={props.subtitles}>
@@ -98,7 +98,7 @@ function AvailableSubtitles(props: AvailableSubtitlesProps) {
 											props.current?.index,
 									}}
 								></span>
-								{subtitle.language}
+								<span>{subtitle.language}</span>
 							</button>
 						</FocusLeaf>
 					)}

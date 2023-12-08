@@ -79,7 +79,7 @@ function AvailableAudioTracks(props: AvailableAudioProps) {
 											props.current?.index,
 									}}
 								></span>
-								{audio.language}
+								<span>{audio.language}</span>
 							</button>
 						</FocusLeaf>
 					)}

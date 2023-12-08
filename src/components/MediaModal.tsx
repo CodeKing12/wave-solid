@@ -764,14 +764,14 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 							/>
 						</Match>
 						<Match when={!(isTizenTv && hasWebApi)}>
-							<PlayMedia
+							{/* <PlayMedia
 								show={showPlayer()}
 								url={mediaUrl()}
 								mediaFormat="mp4"
 								mediaType="video/mp4"
 								mediaDetails={displayDetails()}
 								onExit={onPlayerExit}
-							/>
+							/> */}
 						</Match>
 					</Switch>
 				</div>

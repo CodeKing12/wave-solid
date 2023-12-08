@@ -1,5 +1,4 @@
-import { createEffect, createSignal, onCleanup } from "solid-js";
-import { useAlert } from "@/AlertContext";
+import { createEffect, onCleanup } from "solid-js";
 import { IconX } from "@tabler/icons-solidjs";
 import { FocusContext, useFocusable } from "@/spatial-nav";
 import FocusLeaf from "./Utilities/FocusLeaf";
@@ -60,9 +59,8 @@ export default function Settings(props: SettingsProps) {
 		get isFocusBoundary() {
 			return props.show;
 		},
-		preferredChildFocusKey: "LOGIN_QUIT_BUTTON",
+		preferredChildFocusKey: "SETTINGS_QUIT_BUTTON",
 	});
-	const { addAlert } = useAlert();
 
 	createEffect(() => {
 		if (props.show) {
@@ -92,7 +90,7 @@ export default function Settings(props: SettingsProps) {
 						<FocusLeaf
 							focusedStyles="on-svg-focus"
 							onEnterPress={props.onClose}
-							customFocusKey="LOGIN_QUIT_BUTTON"
+							customFocusKey="SETTINGS_QUIT_BUTTON"
 						>
 							<button
 								class="cursor-pointer text-white hover:text-yellow-300"

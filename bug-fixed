@@ -1,13 +1,5 @@
-Made some clickable elements to auto-focus themselves when clicked
-Fixed type errors for AxiosCache
-Re-instated the Media formats for Episode Streams
-Added the Copy button to Media Streams, functionality coming later
-Removed Play button on Episode element when there are streams shown
-Added the settings modal
-Created global settings, with persistent storage
-Added the setting to blur explicit content
-Changed the backdrop blur to an opaque background to support older chrome versions
-Fixed a margin issue in the Seasons grid in the MediaModal
-Made the first media card to auto-focus when the list of media loads so that experience is better when you click the "Next" button
-Fixed the bug where the MediaCard requires 2 clicks to open the MediaModal on mobile devices
-Added a localStorage item to store previous-tokens when there is a network error, and a signal to register the absence of network (To be used in a future update)
+Fixed the bug with the duration of the subtitles
+Fixed the bug with the spatial-nav of the Login modal
+Fixed some UI bugs in the player
+Remvoed the copy button for Streams on Samsung TVs
+Created separate build command for legacy and modern TVs (because the legacy polyfills keep causing bugs in the modern builds)

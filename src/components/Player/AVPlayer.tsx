@@ -38,6 +38,12 @@ interface AudioSliderProps {
 	updateVolume: (newVolume: number) => void;
 }
 
+interface SubtitleObj {
+	duration: number;
+	text: string;
+	now: number;
+}
+
 export function AudioSlider(props: AudioSliderProps) {
 	const { setRef, focused } = useFocusable({});
 
@@ -144,6 +150,7 @@ function TimeSlider(props: TimeSliderProps) {
 
 export default function AVPlayer(props: AVPlayerProps) {
 	let timeoutId: number;
+	let subtitleTimeout: any;
 	// const controlsId = "player-controls"
 	// const [controlsEl, setControlsEl] = createSignal<HTMLElement | undefined>();
 	const [mediaDuration, setMediaDuration] = createSignal(0);
@@ -168,7 +175,13 @@ export default function AVPlayer(props: AVPlayerProps) {
 		any | false
 	>();
 	const [currentAudioTrack, setCurrentAudioTrack] = createSignal<any>();
-	const [currentSubtitle, setCurrentSubtitle] = createSignal("");
+	const defaultSubtitle: SubtitleObj = {
+		duration: 0,
+		text: "",
+		now: 0,
+	};
+	const [currentSubtitle, setCurrentSubtitle] =
+		createSignal<SubtitleObj>(defaultSubtitle);
 	const [audioMenuOpen, setAudioMenuOpen] = createSignal(false);
 	const [subtitleMenuOpen, setSubtitleMenuOpen] = createSignal(false);
 	const [speedMenuOpen, setSpeedMenuOpen] = createSignal(false);
@@ -273,10 +286,14 @@ export default function AVPlayer(props: AVPlayerProps) {
 			!isPending()
 		) {
 			webapis.avplay.play();
+			refreshSubtitle();
 			setPaused(false);
 			console.log("Resumed Video");
 		} else if (currentState === "PLAYING" && !isPending()) {
 			webapis.avplay.pause();
+			if (subtitleTimeout) {
+				clearTimeout(subtitleTimeout);
+			}
 			setPaused(true);
 			console.log("Paused Video");
 		}
@@ -485,6 +502,38 @@ export default function AVPlayer(props: AVPlayerProps) {
 		resetTimeout();
 	});
 
+	function refreshSubtitle() {
+		if (currentSubtitle() && currentSubtitle().duration) {
+			var lastSubDurationDiff =
+				currentSubtitle().duration -
+				(elapsedTime() - currentSubtitle().now);
+			if (lastSubDurationDiff > 0)
+				renderSubtitle(lastSubDurationDiff, currentSubtitle().text);
+		}
+	}
+
+	function renderSubtitle(duration: number, text: string) {
+		if (subtitleTimeout) {
+			clearTimeout(subtitleTimeout);
+			subtitleTimeout = false;
+		}
+
+		console.log("subtitleDuration: " + duration);
+		console.log("subtitleText: " + text);
+		setCurrentSubtitle({
+			duration,
+			text,
+			now: webapis.avplay.getCurrentTime(),
+		});
+
+		if (duration) {
+			subtitleTimeout = setTimeout(function () {
+				console.log("Clearing Subtitle");
+				setCurrentSubtitle(defaultSubtitle);
+			}, duration);
+		}
+	}
+
 	let listener: AVPlayPlaybackCallback = {
 		onbufferingstart: function () {
 			console.log("Buffering start.");
@@ -518,10 +567,8 @@ export default function AVPlayer(props: AVPlayerProps) {
 			console.log("event type: " + eventType + ", data: " + eventData);
 		},
 
-		onsubtitlechange: function (duration, text, data3, data4) {
-			console.log(duration, data4, data3);
-			console.log("subtitleText: " + text);
-			setCurrentSubtitle(text);
+		onsubtitlechange: function (duration, text) {
+			renderSubtitle(parseInt(duration), text);
 		},
 		// ondrmevent: function(drmEvent, drmData) {
 		//     console.log("DRM callback: " + drmEvent + ", data: " + drmData);
@@ -679,7 +726,7 @@ export default function AVPlayer(props: AVPlayerProps) {
 								showControls(),
 							"!opacity-0 !invisible": !showSubtitles(),
 						}}
-						innerHTML={currentSubtitle()}
+						innerHTML={currentSubtitle().text}
 					></p>
 				</div>
 				<div

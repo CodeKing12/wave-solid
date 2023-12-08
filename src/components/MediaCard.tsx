@@ -195,7 +195,7 @@ const MediaCard = function MediaCard(props: MediaCardProps) {
 				ref={setRef}
 				onClick={handleCardClick}
 			>
-				<div class="media-poster relative h-full min-h-full">
+				<div class="media-poster relative h-full min-h-full overflow-hidden">
 					{poster() ? (
 						// <Image width={300} height={400} class="w-full h-full max-h-full object-cover rounded-xl opacity-75" src={smallPoster(poster) || ""} alt={displayDetails?.plot} />
 						<img

@@ -12,7 +12,7 @@ import axiosInstance from "@/utils/axiosInstance";
 import { useAlert } from "@/AlertContext";
 import { Spinner, SpinnerType } from "solid-spinner";
 import { IconKey, IconX } from "@tabler/icons-solidjs";
-import { FocusContext, useFocusable } from "@/spatial-nav";
+import { FocusContext, setFocus, useFocusable } from "@/spatial-nav";
 import FocusLeaf from "./Utilities/FocusLeaf";
 
 interface LoginProps {
@@ -41,7 +41,7 @@ export default function Login(props: LoginProps) {
 	const [username, setUsername] = createSignal("");
 	const [password, setPassword] = createSignal("");
 	const [isAuthenticating, setIsAuthenticating] = createSignal(false);
-	const { setRef, focusSelf, focusKey } = useFocusable({
+	const { setRef, focusKey } = useFocusable({
 		get focusable() {
 			return props.show;
 		},
@@ -56,7 +56,8 @@ export default function Login(props: LoginProps) {
 
 	createEffect(() => {
 		if (props.show) {
-			focusSelf();
+			setFocus("LOGIN_QUIT_BUTTON");
+			console.log("Focused Me");
 		}
 	});
 

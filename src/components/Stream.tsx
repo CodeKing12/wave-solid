@@ -1,5 +1,5 @@
 import { bytesToSize, secondsToHMS } from "@/utils/general";
-import { Match, Show, Switch, createEffect } from "solid-js";
+import { Match, Show, Switch } from "solid-js";
 import { AudioStream, StreamObj, Subtitle } from "./MediaTypes";
 import { FocusDetails, useFocusable } from "@/spatial-nav";
 
@@ -12,6 +12,7 @@ interface MediaStreamOptionProps {
 }
 
 export default function MediaStreamOption(props: MediaStreamOptionProps) {
+	const isTizenTv = "tizen" in window;
 	const { setRef, focused } = useFocusable({
 		onEnterPress: () => props.onStreamClick(true),
 		onFocus: props.onFocus,
@@ -186,26 +187,28 @@ export default function MediaStreamOption(props: MediaStreamOptionProps) {
 			<div class="flex gap-4">
 				<Switch>
 					<Match when={props.isEpisode && props.authToken}>
-						<button onClick={copyUrlToClipboard}>
-							<svg
-								class="text-yellow-300 duration-300 ease-in-out"
-								classList={{ "!text-white": focused() }}
-								xmlns="http://www.w3.org/2000/svg"
-								width="30"
-								height="30"
-								viewBox="0 0 24 24"
-								fill="none"
-							>
-								<path
-									d="M14.35 2h-4.7c-1.04 0-1.89.84-1.89 1.88v.94c0 1.04.84 1.88 1.88 1.88h4.71c1.04 0 1.88-.84 1.88-1.88v-.94C16.24 2.84 15.39 2 14.35 2Z"
-									fill="currentColor"
-								></path>
-								<path
-									d="M17.24 4.82c0 1.59-1.3 2.89-2.89 2.89h-4.7c-1.59 0-2.89-1.3-2.89-2.89 0-.56-.6-.91-1.1-.65a4.472 4.472 0 0 0-2.37 3.95v9.41C3.29 19.99 5.3 22 7.76 22h8.48c2.46 0 4.47-2.01 4.47-4.47V8.12c0-1.71-.96-3.2-2.37-3.95-.5-.26-1.1.09-1.1.65Zm-4.86 12.13H8c-.41 0-.75-.34-.75-.75s.34-.75.75-.75h4.38c.41 0 .75.34.75.75s-.34.75-.75.75Zm2.62-4H8c-.41 0-.75-.34-.75-.75s.34-.75.75-.75h7c.41 0 .75.34.75.75s-.34.75-.75.75Z"
-									fill="currentColor"
-								></path>
-							</svg>
-						</button>
+						<Show when={!isTizenTv}>
+							<button onClick={copyUrlToClipboard}>
+								<svg
+									class="text-yellow-300 duration-300 ease-in-out"
+									classList={{ "!text-white": focused() }}
+									xmlns="http://www.w3.org/2000/svg"
+									width="30"
+									height="30"
+									viewBox="0 0 24 24"
+									fill="none"
+								>
+									<path
+										d="M14.35 2h-4.7c-1.04 0-1.89.84-1.89 1.88v.94c0 1.04.84 1.88 1.88 1.88h4.71c1.04 0 1.88-.84 1.88-1.88v-.94C16.24 2.84 15.39 2 14.35 2Z"
+										fill="currentColor"
+									></path>
+									<path
+										d="M17.24 4.82c0 1.59-1.3 2.89-2.89 2.89h-4.7c-1.59 0-2.89-1.3-2.89-2.89 0-.56-.6-.91-1.1-.65a4.472 4.472 0 0 0-2.37 3.95v9.41C3.29 19.99 5.3 22 7.76 22h8.48c2.46 0 4.47-2.01 4.47-4.47V8.12c0-1.71-.96-3.2-2.37-3.95-.5-.26-1.1.09-1.1.65Zm-4.86 12.13H8c-.41 0-.75-.34-.75-.75s.34-.75.75-.75h4.38c.41 0 .75.34.75.75s-.34.75-.75.75Zm2.62-4H8c-.41 0-.75-.34-.75-.75s.34-.75.75-.75h7c.41 0 .75.34.75.75s-.34.75-.75.75Z"
+										fill="currentColor"
+									></path>
+								</svg>
+							</button>
+						</Show>
 
 						<button
 							onClick={() => {
@@ -230,26 +233,28 @@ export default function MediaStreamOption(props: MediaStreamOptionProps) {
 					</Match>
 
 					<Match when={!props.isEpisode && props.authToken}>
-						<button onClick={copyUrlToClipboard}>
-							<svg
-								class="text-yellow-300 duration-300 ease-in-out"
-								classList={{ "!text-white": focused() }}
-								xmlns="http://www.w3.org/2000/svg"
-								width="34"
-								height="34"
-								viewBox="0 0 24 24"
-								fill="none"
-							>
-								<path
-									d="M14.35 2h-4.7c-1.04 0-1.89.84-1.89 1.88v.94c0 1.04.84 1.88 1.88 1.88h4.71c1.04 0 1.88-.84 1.88-1.88v-.94C16.24 2.84 15.39 2 14.35 2Z"
-									fill="currentColor"
-								></path>
-								<path
-									d="M17.24 4.82c0 1.59-1.3 2.89-2.89 2.89h-4.7c-1.59 0-2.89-1.3-2.89-2.89 0-.56-.6-.91-1.1-.65a4.472 4.472 0 0 0-2.37 3.95v9.41C3.29 19.99 5.3 22 7.76 22h8.48c2.46 0 4.47-2.01 4.47-4.47V8.12c0-1.71-.96-3.2-2.37-3.95-.5-.26-1.1.09-1.1.65Zm-4.86 12.13H8c-.41 0-.75-.34-.75-.75s.34-.75.75-.75h4.38c.41 0 .75.34.75.75s-.34.75-.75.75Zm2.62-4H8c-.41 0-.75-.34-.75-.75s.34-.75.75-.75h7c.41 0 .75.34.75.75s-.34.75-.75.75Z"
-									fill="currentColor"
-								></path>
-							</svg>
-						</button>
+						<Show when={!isTizenTv}>
+							<button onClick={copyUrlToClipboard}>
+								<svg
+									class="text-yellow-300 duration-300 ease-in-out"
+									classList={{ "!text-white": focused() }}
+									xmlns="http://www.w3.org/2000/svg"
+									width="34"
+									height="34"
+									viewBox="0 0 24 24"
+									fill="none"
+								>
+									<path
+										d="M14.35 2h-4.7c-1.04 0-1.89.84-1.89 1.88v.94c0 1.04.84 1.88 1.88 1.88h4.71c1.04 0 1.88-.84 1.88-1.88v-.94C16.24 2.84 15.39 2 14.35 2Z"
+										fill="currentColor"
+									></path>
+									<path
+										d="M17.24 4.82c0 1.59-1.3 2.89-2.89 2.89h-4.7c-1.59 0-2.89-1.3-2.89-2.89 0-.56-.6-.91-1.1-.65a4.472 4.472 0 0 0-2.37 3.95v9.41C3.29 19.99 5.3 22 7.76 22h8.48c2.46 0 4.47-2.01 4.47-4.47V8.12c0-1.71-.96-3.2-2.37-3.95-.5-.26-1.1.09-1.1.65Zm-4.86 12.13H8c-.41 0-.75-.34-.75-.75s.34-.75.75-.75h4.38c.41 0 .75.34.75.75s-.34.75-.75.75Zm2.62-4H8c-.41 0-.75-.34-.75-.75s.34-.75.75-.75h7c.41 0 .75.34.75.75s-.34.75-.75.75Z"
+										fill="currentColor"
+									></path>
+								</svg>
+							</button>
+						</Show>
 
 						<button
 							class="flex items-center justify-center space-x-4 rounded-md border-2 border-transparent bg-yellow-300 px-5 py-3 text-sm font-bold tracking-wide text-black-1 opacity-40 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 xl:h-16 xl:w-12 xl:!p-0"
