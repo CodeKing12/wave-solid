@@ -83,7 +83,7 @@ export default function Home() {
 			console.log("Focused self after login/settings modal close");
 			focusSelf();
 		}
-		if (isAuthenticated() && !openModal()) {
+		if (isAuthenticated() && !openModal() && !openSettings()) {
 			console.log("Quit media modal");
 			focusSelf();
 		}

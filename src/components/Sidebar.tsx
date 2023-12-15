@@ -14,7 +14,7 @@ import {
 	IconMovie,
 	IconStereoGlasses,
 } from "@tabler/icons-solidjs";
-import { JSXElement, createEffect } from "solid-js";
+import { JSXElement, Match, Switch, createEffect } from "solid-js";
 import FocusLeaf from "./Utilities/FocusLeaf";
 
 export type PageType =
@@ -98,13 +98,16 @@ const Sidebar = function Sidebar(props: SidebarProps) {
 		get focusable() {
 			return !props.isHidden;
 		},
-		autoRestoreFocus: true,
+		autoRestoreFocus: false,
+		saveLastFocusedChild: false,
 		onArrowPress: () => true,
 	});
 
 	createEffect(() => {
 		focusSelf();
 	});
+
+	function loginTrakt() {}
 
 	return (
 		<aside
@@ -144,7 +147,7 @@ const Sidebar = function Sidebar(props: SidebarProps) {
 					<div
 						class="flex flex-col space-y-5 fill-white text-white"
 						classList={{
-							"!border-yellow-300 !border-2": focused(),
+							// "!border-yellow-300 !border-2": focused(),
 							hasFocusedChildren: hasFocusedChild(),
 						}}
 						ref={setRef}
@@ -208,35 +211,53 @@ const Sidebar = function Sidebar(props: SidebarProps) {
 					</div>
 				</FocusContext.Provider>
 			</div>
-			{props.isLoggedIn ? (
+			<div class="absolute bottom-2 flex flex-col gap-2">
+				<Switch>
+					<Match when={props.isLoggedIn}>
+						<FocusLeaf
+							class="logout-btn"
+							focusedStyles="logout-btn-onfocus"
+							onEnterPress={props.onLogout}
+						>
+							<button
+								class="group mt-auto flex items-center space-x-3 px-8 py-2 text-[17px] font-medium text-white text-opacity-70 duration-500 ease-in-out hover:text-yellow-300"
+								onClick={props.onLogout}
+							>
+								<span>Logout Webshare</span>
+								<IconLogout2 class="text-yellow-300 duration-500 ease-in-out group-hover:text-white" />
+							</button>
+						</FocusLeaf>
+					</Match>
+					<Match when={!props.isLoggedIn}>
+						<FocusLeaf
+							class="login-btn"
+							focusedStyles="login-btn-onfocus"
+							onEnterPress={props.onLoginClick}
+						>
+							<button
+								class="group mt-auto flex items-center space-x-3 border-2 border-l-0 border-yellow-300 bg-yellow-300 bg-opacity-90 px-8 py-2.5 font-semibold text-black-1 duration-500 ease-in-out hover:bg-transparent hover:text-yellow-300"
+								onClick={props.onLoginClick}
+							>
+								<span>Webshare</span>
+								<IconLogout class="text-black duration-500 ease-in-out group-hover:text-yellow-300" />
+							</button>
+						</FocusLeaf>
+					</Match>
+				</Switch>
 				<FocusLeaf
-					class="logout-btn absolute bottom-[18px]"
-					focusedStyles="logout-btn-onfocus"
-					onEnterPress={props.onLogout}
-				>
-					<button
-						class="group mt-auto flex items-center space-x-3 px-8 py-2 text-[17px] font-medium text-white text-opacity-70 duration-500 ease-in-out hover:text-yellow-300"
-						onClick={props.onLogout}
-					>
-						<span>Logout</span>
-						<IconLogout2 class="text-yellow-300 duration-500 ease-in-out group-hover:text-white" />
-					</button>
-				</FocusLeaf>
-			) : (
-				<FocusLeaf
-					class="login-btn absolute bottom-[18px]"
+					class="login-btn"
 					focusedStyles="login-btn-onfocus"
-					onEnterPress={props.onLoginClick}
+					onEnterPress={loginTrakt}
 				>
 					<button
 						class="group mt-auto flex items-center space-x-3 border-2 border-l-0 border-yellow-300 bg-yellow-300 bg-opacity-90 px-8 py-2.5 font-semibold text-black-1 duration-500 ease-in-out hover:bg-transparent hover:text-yellow-300"
-						onClick={props.onLoginClick}
+						onClick={loginTrakt}
 					>
-						<span>Login</span>
+						<span>Trakt.TV</span>
 						<IconLogout class="text-black duration-500 ease-in-out group-hover:text-yellow-300" />
 					</button>
 				</FocusLeaf>
-			)}
+			</div>
 		</aside>
 	);
 };
