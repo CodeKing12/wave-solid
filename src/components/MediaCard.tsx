@@ -10,8 +10,9 @@ import {
 	IconPhoto,
 	IconStar,
 	IconStarFilled,
+	IconExplicit,
 } from "@tabler/icons-solidjs";
-import { createEffect, createMemo } from "solid-js";
+import { Match, Switch, createEffect, createMemo } from "solid-js";
 import { FocusableComponentLayout } from "@/spatial-nav";
 import "@/css/media.css";
 
@@ -196,29 +197,42 @@ const MediaCard = function MediaCard(props: MediaCardProps) {
 				onClick={handleCardClick}
 			>
 				<div class="media-poster relative h-full min-h-full overflow-hidden">
-					{poster() ? (
-						// <Image width={300} height={400} class="w-full h-full max-h-full object-cover rounded-xl opacity-75" src={smallPoster(poster) || ""} alt={displayDetails?.plot} />
-						<img
-							id={`${props.media._id}-poster`}
-							width={300}
-							height={400}
-							class="h-full max-h-full w-full rounded-xl object-cover opacity-80 duration-200 ease-in-out"
-							classList={{ "!blur-3xl": isExplicitContent() }}
-							src={posterLink() || ""}
-							alt={displayDetails()?.title}
-							onError={onImgError}
-						/>
-					) : (
-						<IconPhoto
-							size={85}
-							class="group-hover:-fill-yellow-300 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 fill-transparent text-yellow-300 transition-all duration-500 ease-linear"
-						/>
-					)}
+					<Switch>
+						<Match when={poster() && !isExplicitContent()}>
+							<img
+								id={`${props.media._id}-poster`}
+								width={300}
+								height={400}
+								class="h-full max-h-full w-full rounded-xl object-cover opacity-80 duration-200 ease-in-out"
+								classList={{ "!blur-3xl": isExplicitContent() }}
+								src={posterLink() || ""}
+								alt={displayDetails()?.title}
+								onError={onImgError}
+							/>
+						</Match>
+						<Match when={!poster()}>
+							<IconPhoto
+								size={85}
+								class="group-hover:-fill-yellow-300 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 fill-transparent text-yellow-300 transition-all duration-500 ease-linear"
+							/>
+						</Match>
+						<Match when={isExplicitContent()}>
+							{
+								<IconExplicit
+									size={85}
+									class="group-hover:-fill-yellow-300 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 fill-transparent text-yellow-300 transition-all duration-500 ease-linear"
+								/>
+							}
+						</Match>
+					</Switch>
 				</div>
 				<div
-					class="details-overlay invisible absolute bottom-0 h-full w-full rounded-[11px] px-3 py-5 text-gray-100 opacity-0 duration-[400ms] ease-in-out group-hover:visible group-hover:opacity-100"
+					class="details-overlay invisible absolute bottom-0 h-full w-full rounded-[11px] px-3 py-5 text-gray-100 opacity-0 duration-[400ms] ease-in-out"
 					classList={{
-						"!duration-300 !visible !opacity-100": focused(),
+						"group-hover:visible group-hover:opacity-100":
+							!isExplicitContent(),
+						"!duration-300 !visible !opacity-100":
+							focused() && !isExplicitContent(),
 					}}
 				>
 					<div class="flex h-full flex-col justify-between">
