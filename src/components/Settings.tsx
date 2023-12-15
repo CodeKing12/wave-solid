@@ -18,14 +18,24 @@ interface SwitchSettingProps {
 function SwitchSetting(props: SwitchSettingProps) {
 	const { getSetting, updateSetting } = useSettings();
 	const currentValue = () => getSetting(props.id);
+	const { setRef, focused } = useFocusable({
+		onEnterPress: changeSetting,
+	});
 
 	function changeSetting() {
 		updateSetting(props.id, !currentValue());
 	}
 
 	return (
-		<div class="flex items-center space-x-32">
-			<h4 class="text-lg">{props.title}</h4>
+		<div class="flex items-center space-x-32" ref={setRef}>
+			<h4
+				class="decoration-clone text-lg decoration-white decoration-4 underline-offset-8 duration-300 ease-in-out"
+				classList={{
+					"underline text-yellow-300 font-semibold": focused(),
+				}}
+			>
+				{props.title}
+			</h4>
 			<h4>
 				<FormSwitch value={currentValue()} onSwitch={changeSetting} />
 			</h4>

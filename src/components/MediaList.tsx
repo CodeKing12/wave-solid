@@ -37,7 +37,7 @@ const MediaList = function MediaList(props: MediaListProps) {
 			<div>
 				<div
 					id="media-list"
-					class="-mx-1 -mt-4 flex flex-wrap justify-center [&>div]:mx-1 [&>div]:mt-4"
+					class="-mx-1 -mt-4 flex flex-wrap justify-center xl:justify-start [&>div]:mx-1 [&>div]:mt-4"
 					classList={{
 						sidebarVisible: !props.isSidebarOpen,
 						"!overflow-hidden": props.isModalOpen,
