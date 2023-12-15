@@ -28,6 +28,12 @@ import { FocusDetails, setFocus } from "@/spatial-nav";
 import { Setter } from "solid-js";
 import { AxiosError } from "axios";
 import { useSettings } from "@/SettingsContext";
+import {
+	GET_DEVICE_CODE,
+	TRAKT_API,
+	traktAuthConfig,
+	traktClientId,
+} from "@/components/trakt-constants";
 // import Player from "video.js/dist/types/player";
 
 export function parseXml(data: string, param: string) {
@@ -488,4 +494,19 @@ export function normalizeHDR(source?: string | boolean) {
 	const isSMPTE = source.includes("SMPTE");
 	if (isDolbyVision && isSMPTE) return "HDR+DV";
 	return isDolbyVision ? "DV" : "HDR";
+}
+
+export async function getUserCode() {
+	try {
+		const response = axiosInstance.post(
+			TRAKT_API + GET_DEVICE_CODE,
+			{ client_id: traktClientId },
+			traktAuthConfig,
+		);
+
+		return response;
+	} catch (error) {
+		console.log(error);
+		return "An error occurred";
+	}
 }

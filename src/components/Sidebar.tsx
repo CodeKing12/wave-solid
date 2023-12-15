@@ -14,8 +14,16 @@ import {
 	IconMovie,
 	IconStereoGlasses,
 } from "@tabler/icons-solidjs";
-import { JSXElement, Match, Switch, createEffect } from "solid-js";
+import {
+	JSXElement,
+	Match,
+	Switch,
+	createEffect,
+	createSignal,
+} from "solid-js";
 import FocusLeaf from "./Utilities/FocusLeaf";
+import { getUserCode } from "@/utils/general";
+import { VerifyDeviceData } from "./TraktTypes";
 
 export type PageType =
 	| ""
@@ -86,7 +94,6 @@ const Sidebar = function Sidebar(props: SidebarProps) {
 		setRef,
 		focusSelf,
 		hasFocusedChild,
-		focused,
 		focusKey,
 		// setFocus, -- to set focus manually to some focusKey
 		// navigateByDirection, -- to manually navigate by direction
@@ -102,12 +109,21 @@ const Sidebar = function Sidebar(props: SidebarProps) {
 		saveLastFocusedChild: false,
 		onArrowPress: () => true,
 	});
+	const [authData, setAuthData] = createSignal<
+		VerifyDeviceData | "failed" | undefined
+	>();
 
 	createEffect(() => {
 		focusSelf();
 	});
 
-	function loginTrakt() {}
+	async function loginTrakt() {
+		const authInfo = await getUserCode();
+		console.log(authInfo);
+		if (typeof authInfo === "string") {
+			setAuthData("failed");
+		}
+	}
 
 	return (
 		<aside
@@ -245,12 +261,12 @@ const Sidebar = function Sidebar(props: SidebarProps) {
 					</Match>
 				</Switch>
 				<FocusLeaf
-					class="login-btn"
+					class="login-btn w-full"
 					focusedStyles="login-btn-onfocus"
 					onEnterPress={loginTrakt}
 				>
 					<button
-						class="group mt-auto flex items-center space-x-3 border-2 border-l-0 border-yellow-300 bg-yellow-300 bg-opacity-90 px-8 py-2.5 font-semibold text-black-1 duration-500 ease-in-out hover:bg-transparent hover:text-yellow-300"
+						class="group mt-auto flex w-full items-center space-x-3 border-2 border-l-0 border-yellow-300 bg-yellow-300 bg-opacity-90 px-8 py-2.5 font-semibold text-black-1 duration-500 ease-in-out hover:bg-transparent hover:text-yellow-300"
 						onClick={loginTrakt}
 					>
 						<span>Trakt.TV</span>

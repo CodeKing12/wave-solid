@@ -44,8 +44,8 @@ export const PATH_FILE_PROTECTED = "/api/file_protected/";
 export const PATH_SEARCH = "/api/search/";
 export const PATH_FILE_INFO = "/api/file_info/";
 
-type authConfig = {
-	headers: RawAxiosRequestHeaders;
+export type authConfig = {
+	headers?: RawAxiosRequestHeaders;
 	cache: false;
 };
 export const authAxiosConfig: authConfig = {
