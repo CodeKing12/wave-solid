@@ -1,7 +1,8 @@
 import { RawAxiosRequestHeaders } from "axios";
-import { ApiMapper } from "./MediaTypes";
+import { ApiMapper, TYPE_MEDIA } from "./MediaTypes";
 
 export const MEDIA_ENDPOINT = "https://plugin.sc2.zone";
+export const MEDIA_PROXY = "http://localhost:9000/sc2";
 export const PATH_SEARCH_MEDIA =
 	"/api/media/filter/v2/search?order=desc&sort=score&type=*";
 export const DEFAULT_ITEM_COUNT = 100;
@@ -30,6 +31,23 @@ export const PATH_MOVIES_ADDED =
 export const PATH_SERIES_ADDED =
 	"/api/media/filter/v2/all?type=tvshow&sort=dateAdded&order=desc";
 
+export const PATH_GET_MULTIPLE_MEDIA = "/api/media/filter/v2/ids";
+export const CONSTRUCT_PATH_GET_SERVICE_DATA = (
+	service_name: string,
+	service_ids: string | Array<string>,
+	media_type: TYPE_MEDIA,
+) => {
+	let service_values;
+
+	if (typeof service_ids === "string") {
+		service_values = "value=" + service_ids;
+	} else if (Array.isArray(service_ids)) {
+		service_values = service_ids.map((id) => "value=" + id).join("&");
+	}
+
+	return `/api/media/filter/v2/service?service=${service_name}&${service_values}&type=${media_type}`;
+};
+
 export const TOKEN_PARAM_NAME = "access_token";
 // export const TOKEN_PARAM_VALUE = "th2tdy0no8v1zoh1fs59";  // This is the former token, gotten from the ymovie app.
 export const TOKEN_PARAM_VALUE = "F4fdEDXKgsw7z3TxzSjaDpp3O";
@@ -44,16 +62,14 @@ export const PATH_FILE_PROTECTED = "/api/file_protected/";
 export const PATH_SEARCH = "/api/search/";
 export const PATH_FILE_INFO = "/api/file_info/";
 
-export type authConfig = {
+export type APIAuthConfig = {
 	headers?: RawAxiosRequestHeaders;
 	cache: false;
 };
-export const authAxiosConfig: authConfig = {
+export const authAxiosConfig: APIAuthConfig = {
 	headers: { "Content-Type": "application/x-www-form-urlencoded" },
 	cache: false,
 };
-
-export const proxyUrl = "http://localhost:5000/video";
 
 export const mediaPerPage = 100;
 

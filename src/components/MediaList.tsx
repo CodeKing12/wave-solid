@@ -1,9 +1,11 @@
-import { Index, Show, createEffect } from "solid-js";
+import { Index, Show } from "solid-js";
 import MediaCard from "./MediaCard";
 import { MediaObj } from "./MediaTypes";
 import { Spinner, SpinnerType } from "solid-spinner";
-import { FocusableComponentLayout, setFocus } from "@/spatial-nav";
+import { FocusableComponentLayout } from "@/spatial-nav";
 import "@/css/media.css";
+import "@/css/transitions.css";
+import { TransitionGroup } from "solid-transition-group";
 
 export interface MediaListProps {
 	media?: MediaObj[];
@@ -58,17 +60,19 @@ const MediaList = function MediaList(props: MediaListProps) {
 							/>
 						}
 					>
-						<Index each={props.media}>
-							{(show, index) => (
-								<MediaCard
-									index={index}
-									media={show()}
-									showMediaInfo={onCardSelect}
-									onFocus={props.onCardFocus}
-									onEnterPress={onCardPress}
-								/>
-							)}
-						</Index>
+						<TransitionGroup name="slide" appear={true}>
+							<Index each={props.media}>
+								{(show, index) => (
+									<MediaCard
+										index={index}
+										media={show()}
+										showMediaInfo={onCardSelect}
+										onFocus={props.onCardFocus}
+										onEnterPress={onCardPress}
+									/>
+								)}
+							</Index>
+						</TransitionGroup>
 					</Show>
 				</div>
 			</div>

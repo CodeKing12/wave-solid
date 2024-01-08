@@ -4,10 +4,11 @@ import { IconSearch, IconZoomFilled } from "@tabler/icons-solidjs";
 import FocusLeaf from "./Utilities/FocusLeaf";
 import { createEffect, createSignal } from "solid-js";
 import "@/css/layout.css";
+import { SyncType } from "./TraktTypes";
 
 interface NavProps {
 	onSearch: (searchTerm: string) => void;
-	showFavorites: () => void;
+	showSynced: (type: SyncType) => void;
 	handleNav: (name: string) => void;
 }
 
@@ -39,20 +40,38 @@ const Navbar = function Navbar(props: NavProps) {
 					<div class="flex flex-wrap items-center space-x-12 text-lg font-medium text-white text-opacity-80 sm:flex-nowrap">
 						<FocusLeaf
 							focusedStyles="after:block animateUnderline"
+							class="hover:text-yellow-300"
 							customFocusKey="Nav-Favorites"
+							onEnterPress={() => props.showSynced("favorites")}
 						>
 							<a
 								class="cursor-pointer"
-								onClick={props.showFavorites}
+								onClick={() => props.showSynced("favorites")}
 							>
 								Favorites
 							</a>
 						</FocusLeaf>
-						<FocusLeaf focusedStyles="after:block animateUnderline">
-							<a class="cursor-pointer">Watched</a>
+						<FocusLeaf
+							focusedStyles="after:block animateUnderline"
+							class="hover:text-yellow-300"
+							onEnterPress={() => props.showSynced("watchlist")}
+						>
+							<a
+								onclick={() => props.showSynced("watchlist")}
+								class="cursor-pointer"
+							>
+								Watchlist
+							</a>
 						</FocusLeaf>
 						<FocusLeaf
 							focusedStyles="after:block animateUnderline"
+							class="hover:text-yellow-300"
+						>
+							<a class="cursor-pointer">History</a>
+						</FocusLeaf>
+						<FocusLeaf
+							focusedStyles="after:block animateUnderline"
+							class="hover:text-yellow-300"
 							onEnterPress={() => props.handleNav("settings")}
 						>
 							<a

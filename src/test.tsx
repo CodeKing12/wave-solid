@@ -44,4 +44,4 @@ const authAxiosConfig = {
 	headers: { "Content-Type": "application/x-www-form-urlencoded" },
 };
 
-const proxyUrl = "http://localhost:5000/video";
+const proxyUrl = "http://localhost:8080";

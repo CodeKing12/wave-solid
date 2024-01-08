@@ -17,13 +17,17 @@ import {
 import {
 	JSXElement,
 	Match,
+	Show,
 	Switch,
 	createEffect,
 	createSignal,
+	onMount,
 } from "solid-js";
 import FocusLeaf from "./Utilities/FocusLeaf";
-import { getUserCode } from "@/utils/general";
+import { checkTraktToken, getUserCode } from "@/utils/general";
 import { VerifyDeviceData } from "./TraktTypes";
+import { useAlert } from "@/AlertContext";
+import { useLoader } from "@/LoaderContext";
 
 export type PageType =
 	| ""
@@ -49,8 +53,10 @@ interface SidebarItemProps {
 interface SidebarProps {
 	current: PageType;
 	isHidden: boolean;
+	traktToken: string;
 	isLoggedIn: boolean;
 	finishedLoading: boolean;
+	onDeviceCode: (traktAuthData: VerifyDeviceData) => void;
 	onHide: (isHidden: boolean) => void;
 	onChange: (newVal: PageType) => void;
 	onLoginClick: () => void;
@@ -89,7 +95,9 @@ const NavItem = function NavItem(props: SidebarItemProps) {
 };
 
 const Sidebar = function Sidebar(props: SidebarProps) {
-	// console.log("Sidebar is re-rendering")
+	const { addAlert } = useAlert();
+	const { setShowLoader } = useLoader();
+
 	const {
 		setRef,
 		focusSelf,
@@ -109,19 +117,54 @@ const Sidebar = function Sidebar(props: SidebarProps) {
 		saveLastFocusedChild: false,
 		onArrowPress: () => true,
 	});
-	const [authData, setAuthData] = createSignal<
+	const [pollData, setPollData] = createSignal<
 		VerifyDeviceData | "failed" | undefined
 	>();
+	const [traktToken, setTraktToken] = createSignal<string | undefined>();
+
+	// onMount(() => {
+	// 	const { isValid, access_token } = checkTraktToken();
+
+	// 	if (isValid) {
+	// 		setTraktToken(access_token);
+	// 	} else {
+	// 		localStorage.removeItem("trakt-auth");
+	// 	}
+	// });
 
 	createEffect(() => {
 		focusSelf();
 	});
 
+	createEffect(() => {
+		if (props.traktToken && props.traktToken.length > 0) {
+			setTraktToken(props.traktToken);
+		}
+	});
+
 	async function loginTrakt() {
+		setShowLoader(true);
 		const authInfo = await getUserCode();
-		console.log(authInfo);
-		if (typeof authInfo === "string") {
-			setAuthData("failed");
+		setShowLoader(false);
+
+		if (authInfo.status === "error") {
+			setPollData("failed");
+			addAlert({
+				title:
+					`<em>${authInfo.error?.message} </em> while trying to acquire Trakt User Code` ||
+					"Failed to acquire Trakt User Code",
+				type: "error",
+			});
+		} else {
+			// authInfo.result follows the VerifyDeviceData type interface
+			setPollData(authInfo.result);
+			props.onDeviceCode({
+				user_code: authInfo.result.user_code,
+				verification_url: authInfo.result.verification_url,
+				expires_in: authInfo.result.expires_in,
+				device_code: authInfo.result.device_code,
+				interval: authInfo.result.interval,
+			});
 		}
 	}
 
@@ -260,19 +303,22 @@ const Sidebar = function Sidebar(props: SidebarProps) {
 						</FocusLeaf>
 					</Match>
 				</Switch>
-				<FocusLeaf
-					class="login-btn w-full"
-					focusedStyles="login-btn-onfocus"
-					onEnterPress={loginTrakt}
-				>
-					<button
-						class="group mt-auto flex w-full items-center space-x-3 border-2 border-l-0 border-yellow-300 bg-yellow-300 bg-opacity-90 px-8 py-2.5 font-semibold text-black-1 duration-500 ease-in-out hover:bg-transparent hover:text-yellow-300"
-						onClick={loginTrakt}
+				<Show when={!traktToken() || !Boolean(traktToken()?.length)}>
+					<FocusLeaf
+						class="login-btn w-full"
+						focusedStyles="login-btn-onfocus"
+						onEnterPress={loginTrakt}
 					>
-						<span>Trakt.TV</span>
-						<IconLogout class="text-black duration-500 ease-in-out group-hover:text-yellow-300" />
-					</button>
-				</FocusLeaf>
+						<button
+							class="group mt-auto flex w-full items-center space-x-3 border-2 border-l-0 border-yellow-300 bg-yellow-300 bg-opacity-90 px-8 py-2.5 font-semibold text-black-1 duration-500 ease-in-out hover:bg-transparent hover:text-yellow-300"
+							onClick={loginTrakt}
+						>
+							<span>Trakt.TV</span>
+							<IconLogout class="text-black duration-500 ease-in-out group-hover:text-yellow-300" />
+						</button>
+					</FocusLeaf>
+				</Show>
+				{/* {"Trakt Token: " + traktToken() + " " + Boolean(traktToken())} */}
 			</div>
 		</aside>
 	);

@@ -19,6 +19,7 @@ const config: Config = {
 			colors: {
 				"black-1": "#21201E",
 				"brand-orange": "#FF8A65",
+				"alert-blue": "#1E90FF",
 			},
 			screens: {
 				xs: "330px",

@@ -245,3 +245,29 @@ video-js.video-js {
 .media-stream span {
 	@apply transition-all duration-300 ease-in-out;
 }
+
+.indicator .moving-bar {
+	animation: hitZak 1.5s linear infinite alternate;
+}
+
+.pauseAnimation {
+	animation-play-state: paused !important;
+}
+
+.resumeAnimation {
+	animation-play-state: running !important;
+}
+
+@keyframes hitZak {
+	0% {
+		left: 0;
+		transform: translateX(-1%);
+	}
+	50% {
+		transform: translateX(-49%) scaleX(1.4);
+	}
+	100% {
+		left: 100%;
+		transform: translateX(-99%);
+	}
+}

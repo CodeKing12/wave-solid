@@ -15,11 +15,13 @@ const defaultContextValue: SettingsProviderObj = {
 export interface AppSettings {
 	restrict_content: boolean | "thorough";
 	store_credentials: boolean;
+	trakt_token: string;
 }
 
 const defaultSettings: AppSettings = {
 	restrict_content: true,
 	store_credentials: true,
+	trakt_token: "",
 };
 
 type IsKeyOf<T, K extends keyof T> = K;
@@ -58,7 +60,7 @@ export default function SettingsProvider(props: any) {
 				return settings();
 			}
 			if (settings().hasOwnProperty(property)) {
-				console.log(property, settings()[property]);
+				// console.log(property, settings()[property]);
 				return settings()[property];
 			} else {
 				throw Error("This setting does not exist");

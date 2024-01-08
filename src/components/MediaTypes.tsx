@@ -1,3 +1,15 @@
+export interface MediaServices {
+	[name: string]: string;
+}
+
+export type TYPE_MEDIA =
+	| "movie"
+	| "tvshow"
+	| "concert"
+	| "anime"
+	| "season"
+	| "episode";
+
 export interface MediaType {
 	[page: string]: MediaObj[][];
 }
@@ -98,7 +110,7 @@ export interface BaseInfoLabels {
 	writer: string[];
 	premiered: string;
 	dateadded: string;
-	mediatype: string;
+	mediatype: TYPE_MEDIA;
 	country: (string | null)[];
 	duration: number;
 }
@@ -153,14 +165,15 @@ export interface Person {
 export interface MediaSource {
 	original_language: string;
 	languages: string[];
-	networks: string[];
-	collections: any[]; // Update with the correct type if needed
+	networks?: string[];
+	collections?: any[]; // Update with the correct type if needed
 	ratings: RatingObj;
 	// ... other properties
 	cast: Person[];
 	i18n_info_labels: I18nInfoLabel[];
 	info_labels: MediaInfoLabels;
 	available_streams: AvailableStreams;
+	services: MediaServices;
 	tags: string[];
 }
 
@@ -195,9 +208,7 @@ export interface SeasonSource {
 	premieres: any[];
 	ratings: RatingObj;
 	root_parent: string;
-	services: {
-		[name: string]: string;
-	};
+	services: MediaServices;
 	stream_info: {
 		audio: AudioStream[];
 		video: VideoStream[];

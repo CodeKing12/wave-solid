@@ -7,12 +7,18 @@ import {
 	mediaPerPage,
 } from "@/components/constants";
 import MediaList from "@/components/MediaList";
-import { MediaObj, MediaType } from "@/components/MediaTypes";
+import { MediaObj } from "@/components/MediaTypes";
 import Login from "@/components/Login";
 import MediaModal from "@/components/MediaModal";
 import { useAlert } from "@/AlertContext";
 import axiosInstance from "@/utils/axiosInstance";
-import { checkWebshareStatus } from "@/utils/general";
+import {
+	checkTraktToken,
+	checkWebshareStatus,
+	convertTraktType,
+	filterByTraktID,
+	getDefaultlist,
+} from "@/utils/general";
 import Navbar from "@/components/Navbar";
 import {
 	onMount,
@@ -27,6 +33,14 @@ import Sidebar, { PageType } from "./components/Sidebar";
 import { FocusContext, useFocusable } from "./spatial-nav";
 import FocusLeaf from "./components/Utilities/FocusLeaf";
 import Settings from "./components/Settings";
+import {
+	SyncType,
+	TraktDefaultListItem,
+	VerifyDeviceData,
+} from "./components/TraktTypes";
+import AuthenticateTrakt from "./components/AuthenticateTrakt";
+import { useSettings } from "./SettingsContext";
+import { useLoader } from "./LoaderContext";
 
 type PaginationType = {
 	[page in PageType]: number;
@@ -50,15 +64,29 @@ interface PageMediaObj {
 	media: MediaObj[];
 }
 
+type SyncDataObj = {
+	[sync in SyncType]?: {
+		movies: MediaObj[];
+		tvshows: MediaObj[];
+	};
+};
+
 export default function Home() {
 	const { setRef, focusKey, focusSelf } = useFocusable({
 		forceFocus: true,
 	});
+	const { updateSetting } = useSettings();
+	const { setShowLoader } = useLoader();
 
+	const [display, setDisplay] = createSignal<
+		"media" | "favorites" | "watchlist" | "history"
+	>("media");
+	const [syncData, setSyncData] = createSignal<SyncDataObj>();
 	const [hasNetwork, setHasNetwork] = createSignal(true);
 	const [isAuthenticated, setIsAuthenticated] = createSignal(false);
 	const [openLogin, setOpenLogin] = createSignal(false);
 	const [openSettings, setOpenSettings] = createSignal(false);
+	const [openTraktAuth, setOpenTraktAuth] = createSignal(false);
 	const [authToken, setAuthToken] = createSignal("");
 
 	const [page, setPage] = createSignal<PageType>("movies");
@@ -76,7 +104,13 @@ export default function Home() {
 	>();
 	const [openModal, setOpenModal] = createSignal(false);
 	const [finishedLoading, setFinishedLoading] = createSignal(false);
+	const [traktData, setTraktData] = createSignal<VerifyDeviceData>();
 	const [modalPlaceholder, setModalPlaceholder] = createSignal("");
+	const [traktToken, setTraktToken] = createSignal("");
+
+	const displayReadableName = createMemo(
+		() => display().charAt(0).toUpperCase() + display().slice(1),
+	);
 
 	createEffect(() => {
 		if (!openLogin() && !openModal() && !openSettings()) {
@@ -92,7 +126,7 @@ export default function Home() {
 	const { addAlert } = useAlert();
 
 	onMount(() => {
-		async function retrieveToken() {
+		async function retrieveWebshareToken() {
 			let storedAuth = localStorage.getItem("authToken");
 			const storedToken: TokenObj = JSON.parse(storedAuth || "{}");
 			const currentTime = new Date().getTime();
@@ -118,7 +152,20 @@ export default function Home() {
 				localStorage.removeItem("authToken");
 			}
 		}
-		retrieveToken();
+
+		function retrieveTraktToken() {
+			const { isValid, access_token } = checkTraktToken();
+
+			if (isValid) {
+				updateSetting("trakt_token", access_token);
+				setTraktToken(access_token);
+			} else {
+				localStorage.removeItem("trakt-auth");
+			}
+		}
+
+		retrieveWebshareToken();
+		retrieveTraktToken();
 
 		if (window.screen.width < 1200) {
 			setHideSidebar(true);
@@ -234,7 +281,75 @@ export default function Home() {
 		setModalPlaceholder(placeholderUrl || "");
 	};
 
-	const navShowFavorites = () => console.log("Clicked Favorites");
+	async function showSynced(type: SyncType) {
+		if (display() === type) {
+			setDisplay("media");
+			return;
+		}
+		const displayName = type.charAt(0).toUpperCase() + type.slice(1);
+		const traktMediaType = "movies";
+
+		setShowLoader(true);
+		const traktSynced = await getDefaultlist(
+			type,
+			traktMediaType,
+			"added",
+			traktToken(),
+		);
+
+		if (traktSynced.status === "error") {
+			setShowLoader(false);
+			addAlert({
+				title:
+					traktSynced.error?.message ||
+					`Failed to fetch your ${displayName}`,
+				type: "error",
+			});
+		} else {
+			const ids: string[] = traktSynced.result.map(
+				(item: TraktDefaultListItem) => item.movie.ids.trakt.toString(),
+			);
+
+			if (ids.length > 0) {
+				const syncInfo = await filterByTraktID(
+					ids,
+					convertTraktType(traktMediaType),
+				);
+				setShowLoader(false);
+
+				if (syncInfo.status === "error") {
+					addAlert({
+						title:
+							syncInfo.error?.message ||
+							`Failed to fetch synced media information`,
+						message: "No response from Database",
+						type: "error",
+					});
+				} else {
+					setSyncData((prev) => {
+						console.log("PREV", prev);
+						console.log({
+							...prev,
+							[type]: {
+								...prev?.[type],
+								[traktMediaType]: syncInfo.result.hits.hits,
+							},
+						});
+
+						return {
+							...prev,
+							[type]: {
+								...prev?.[type],
+								[traktMediaType]: syncInfo.result.hits.hits,
+							},
+						};
+					});
+				}
+
+				setDisplay(type);
+			}
+		}
+	}
 	const hideSidebarHandler = (isHidden: boolean) => setHideSidebar(isHidden);
 	const openLoginHandler = () => setOpenLogin(true);
 	const closeLoginHandler = () => {
@@ -246,8 +361,6 @@ export default function Home() {
 	const sbLogoutHandler = () => logoutWebshare();
 
 	const pageChangeHandler = (newPage: PageType) => {
-		console.log("Clicked Sidebar");
-		console.log(pageMedia());
 		setPage(newPage);
 	};
 
@@ -261,14 +374,42 @@ export default function Home() {
 		}
 	}
 
+	function displayDeviceCode(traktAuthData: VerifyDeviceData) {
+		setTraktData(traktAuthData);
+		setOpenTraktAuth(true);
+	}
+
+	function determineMedia() {
+		// @ts-ignore
+		const dataToDisplay = syncData()?.[display()]?.["movies"];
+
+		if (display() === "media" || !dataToDisplay?.length) {
+			return pageMedia()?.media;
+		}
+
+		if (display() !== "media") {
+			if (dataToDisplay?.length) {
+				return dataToDisplay;
+			} else {
+				addAlert({
+					type: "info",
+					title: `You don't have any ${displayReadableName()}`,
+					message: `Add some media to your ${display()}`,
+				});
+			}
+		}
+	}
+
 	return (
 		<main class="bg-[#191919]">
 			{/* <div class="fixed top-1 left-1/2 z-[10000] text-white">Keys: { keyInput.map((val, index) => (<span class='text-yellow-300 mr-2' key={index}>{ val }</span>)) }</div> */}
 			<Sidebar
 				current={page()}
+				traktToken={traktToken()}
 				onChange={pageChangeHandler}
 				isHidden={hideSidebar()}
 				isLoggedIn={isAuthenticated()}
+				onDeviceCode={displayDeviceCode}
 				onHide={hideSidebarHandler}
 				onLogout={sbLogoutHandler}
 				finishedLoading={finishedLoading()}
@@ -286,89 +427,100 @@ export default function Home() {
 				>
 					<Navbar
 						onSearch={searchMedia}
-						showFavorites={navShowFavorites}
+						showSynced={showSynced}
 						handleNav={navigateItem}
 					/>
 
-					<div class={`relative mt-6 flex-1`} ref={setRef}>
+					<div class="relative mt-6 flex-1" ref={setRef}>
 						<MediaList
-							media={pageMedia()?.media}
+							// media={pageMedia()?.media}
+							media={determineMedia()}
 							isLoading={pageMedia.loading}
 							onMediaModalOpen={onMediaCardClick}
 							onCardFocus={onCardFocus}
 							isSidebarOpen={hideSidebar()}
 						/>
 					</div>
-					<div
-						class={`mt-12 flex flex-col items-center space-y-7 sm:flex-row sm:justify-between sm:space-y-0 ${
-							pageMedia.loading
-								? "pointer-events-none opacity-40"
-								: "pointer-events-auto opacity-100"
-						}`}
-					>
-						<FocusLeaf
-							class={
-								pagination()[page()] === 0
-									? "cursor-not-allowed"
-									: ""
-							}
-							focusedStyles="[&>button]:!bg-black-1 [&>button]:!border-yellow-300 [&>button]:!text-yellow-300"
-							isFocusable={pagination()[page()] !== 0}
-							onEnterPress={() => updatePagination(page(), -1)}
+					<Show when={display() === "media"}>
+						<div
+							class={`mt-12 flex flex-col items-center space-y-7 sm:flex-row sm:justify-between sm:space-y-0 ${
+								pageMedia.loading
+									? "pointer-events-none opacity-40"
+									: "pointer-events-auto opacity-100"
+							}`}
 						>
-							<button
-								class={`flex items-center space-x-3 rounded-xl border-2 border-transparent bg-yellow-300 px-9 py-3 text-lg font-semibold text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 ${
+							<FocusLeaf
+								class={
 									pagination()[page()] === 0
-										? "pointer-events-none opacity-40"
+										? "cursor-not-allowed"
 										: ""
-								}`}
-								onClick={() => updatePagination(page(), -1)}
+								}
+								focusedStyles="[&>button]:!bg-black-1 [&>button]:!border-yellow-300 [&>button]:!text-yellow-300"
+								isFocusable={pagination()[page()] !== 0}
+								onEnterPress={() =>
+									updatePagination(page(), -1)
+								}
 							>
-								{/* <ArrowLeft size={32} variant='Bold' /> */}
-								<IconArrowLeft size={32} />
-								<span>Previous</span>
-							</button>
-						</FocusLeaf>
+								<button
+									class={`flex items-center space-x-3 rounded-xl border-2 border-transparent bg-yellow-300 px-9 py-3 text-lg font-semibold text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 ${
+										pagination()[page()] === 0
+											? "pointer-events-none opacity-40"
+											: ""
+									}`}
+									onClick={() => updatePagination(page(), -1)}
+								>
+									{/* <ArrowLeft size={32} variant='Bold' /> */}
+									<IconArrowLeft size={32} />
+									<span>Previous</span>
+								</button>
+							</FocusLeaf>
 
-						{/* {typeof pagination()[page()] == "number" &&
-						pagination()[page()] >= 0 ? ( */}
-						<Show when={!pageMedia.loading && getPaginationData()}>
-							<p class="text-lg font-semibold text-gray-300">
-								Page:{" "}
-								<span class="ml-2 text-yellow-300">
-									{pagination()[page()] + 1}
-								</span>{" "}
-								/ {getPaginationData()}
-							</p>
-						</Show>
+							{/* {typeof pagination()[page()] == "number" &&
+							pagination()[page()] >= 0 ? ( */}
+							<Show
+								when={!pageMedia.loading && getPaginationData()}
+							>
+								<p class="text-lg font-semibold text-gray-300">
+									Page:{" "}
+									<span class="ml-2 text-yellow-300">
+										{pagination()[page()] + 1}
+									</span>{" "}
+									/ {getPaginationData()}
+								</p>
+							</Show>
 
-						<FocusLeaf
-							class={
-								pagination()[page()] + 1 === getPaginationData()
-									? "cursor-not-allowed"
-									: ""
-							}
-							focusedStyles="[&>button]:!bg-black-1 [&>button]:!border-yellow-300 [&>button]:!text-yellow-300"
-							isFocusable={
-								pagination()[page()] + 1 !== getPaginationData()
-							}
-							onEnterPress={() => updatePagination(page(), +1)}
-						>
-							<button
-								class={`flex items-center space-x-3 rounded-xl border-2 border-transparent bg-yellow-300 px-9 py-3 text-lg font-semibold text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 ${
+							<FocusLeaf
+								class={
 									pagination()[page()] + 1 ===
 									getPaginationData()
-										? "pointer-events-none opacity-40"
+										? "cursor-not-allowed"
 										: ""
-								}`}
-								onClick={() => updatePagination(page(), +1)}
+								}
+								focusedStyles="[&>button]:!bg-black-1 [&>button]:!border-yellow-300 [&>button]:!text-yellow-300"
+								isFocusable={
+									pagination()[page()] + 1 !==
+									getPaginationData()
+								}
+								onEnterPress={() =>
+									updatePagination(page(), +1)
+								}
 							>
-								<span>Next</span>
-								{/* <ArrowRight size={32} variant='Bold' /> */}
-								<IconArrowRight size={32} />
-							</button>
-						</FocusLeaf>
-					</div>
+								<button
+									class={`flex items-center space-x-3 rounded-xl border-2 border-transparent bg-yellow-300 px-9 py-3 text-lg font-semibold text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 ${
+										pagination()[page()] + 1 ===
+										getPaginationData()
+											? "pointer-events-none opacity-40"
+											: ""
+									}`}
+									onClick={() => updatePagination(page(), +1)}
+								>
+									<span>Next</span>
+									{/* <ArrowRight size={32} variant='Bold' /> */}
+									<IconArrowRight size={32} />
+								</button>
+							</FocusLeaf>
+						</div>
+					</Show>
 				</section>
 			</FocusContext.Provider>
 
@@ -376,6 +528,17 @@ export default function Home() {
 				show={openLogin() && !isAuthenticated()}
 				onLogin={onLogin}
 				onClose={closeLoginHandler}
+			/>
+
+			<AuthenticateTrakt
+				show={openTraktAuth()}
+				traktAuth={traktData()}
+				quitModal={(traktToken) => {
+					setOpenTraktAuth(false);
+					if (traktToken && traktToken.length > 0) {
+						setTraktToken(traktToken);
+					}
+				}}
 			/>
 
 			<Settings show={openSettings()} onClose={closeSettingsHandler} />

@@ -4,7 +4,6 @@ import {
 	MEDIA_ENDPOINT,
 	TOKEN_PARAM_NAME,
 	TOKEN_PARAM_VALUE,
-	proxyUrl,
 } from "./constants";
 import {
 	checkExplicitContent,
@@ -172,14 +171,6 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 		}
 		// console.log("Focused MediaModal")
 	};
-
-	function transformMediaUrl(originalUrl: string) {
-		const modifiedUrl = originalUrl.replace(
-			/https:\/\/\d+\.dl\.wsfiles\.cz/,
-			proxyUrl,
-		);
-		return modifiedUrl;
-	}
 
 	async function getEpisodes(season: SeriesObj) {
 		try {
@@ -762,16 +753,6 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 								onQuit={onPlayerExit}
 								canPlayonTizen={isTizenTv && hasWebApi}
 							/>
-						</Match>
-						<Match when={!(isTizenTv && hasWebApi)}>
-							{/* <PlayMedia
-								show={showPlayer()}
-								url={mediaUrl()}
-								mediaFormat="mp4"
-								mediaType="video/mp4"
-								mediaDetails={displayDetails()}
-								onExit={onPlayerExit}
-							/> */}
 						</Match>
 					</Switch>
 				</div>

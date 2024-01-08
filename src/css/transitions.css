@@ -1,0 +1,50 @@
+.fade-fromTop-enter-to {
+	opacity: 1;
+	transform: translateY(0);
+	visibility: visible;
+}
+
+.fade-fromTop-enter,
+.fade-fromTop-exit-to {
+	opacity: 0;
+	transform: translateY(calc((100% + 12px) * -1));
+	visibility: hidden;
+}
+
+.slideFade-up {
+	transition: all 5s ease-in-out;
+}
+
+.slideFade-up-enter-to {
+	opacity: 1;
+	transform: translateY(calc(20px * -1));
+}
+
+.slideFade-up-enter,
+.slideFade-up-exit-to {
+	opacity: 0;
+	transform: translateY(0);
+}
+
+/* 
+
+
+MediaCard animation
+*/
+.slide-move {
+	transition: transform 0.3s ease;
+}
+.slide-enter-active,
+.slide-exit-active {
+	transition: all 0.3s ease;
+}
+.slide-enter,
+.slide-exit-to {
+	transform: translateY(12px);
+	opacity: 0;
+}
+.slide-enter-to,
+.slide-exit {
+	transform: translateY(0);
+	opacity: 1;
+}

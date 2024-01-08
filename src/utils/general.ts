@@ -4,17 +4,22 @@ import {
 	Info2,
 	LeanMediaStream,
 	MediaObj,
+	MediaServices,
 	MediaSource,
 	SeriesObj,
 	StreamObj,
+	TYPE_MEDIA,
 	VideoStream,
 } from "@/components/MediaTypes";
 import {
 	AUTH_ENDPOINT,
+	CONSTRUCT_PATH_GET_SERVICE_DATA,
 	MEDIA_ENDPOINT,
+	MEDIA_PROXY,
 	PATH_FILE_LINK,
 	PATH_FILE_PASSWORD_SALT,
 	PATH_FILE_PROTECTED,
+	PATH_GET_MULTIPLE_MEDIA,
 	PATH_USER_DATA,
 	TOKEN_PARAM_NAME,
 	TOKEN_PARAM_VALUE,
@@ -29,12 +34,27 @@ import { Setter } from "solid-js";
 import { AxiosError } from "axios";
 import { useSettings } from "@/SettingsContext";
 import {
+	FAVORITES_ENDPOINT,
 	GET_DEVICE_CODE,
+	GET_FAVORITES,
+	GET_WATCHLIST,
+	POLL_ACCESS_TOKEN,
 	TRAKT_API,
+	WATCHLIST_ENDPOINT,
 	traktAuthConfig,
 	traktClientId,
+	traktClientSecret,
+	traktProxy,
 } from "@/components/trakt-constants";
-// import Player from "video.js/dist/types/player";
+import {
+	APIAuthResponse,
+	StoredTraktAuth,
+	SyncType,
+	TRAKT_MEDIA_SORT,
+	TRAKT_MEDIA_TYPE,
+	TraktSyncIDs,
+	TraktTokenRetriever,
+} from "@/components/TraktTypes";
 
 export function parseXml(data: string, param: string) {
 	const xml = new DOMParser().parseFromString(data, "application/xml");
@@ -154,14 +174,14 @@ export function formatDate(dateString?: string) {
 	return "";
 }
 
-export function secondsToHMS(seconds: number) {
+export function secondsToHMS(seconds: number, noHours = false) {
 	const hours = Math.floor(seconds / 3600);
 	const minutes = Math.floor((seconds % 3600) / 60);
 	const remainingSeconds = Math.floor(seconds % 60);
 
-	const formattedTime = `${hours}:${minutes < 10 ? "0" : ""}${minutes}:${
-		remainingSeconds < 10 ? "0" : ""
-	}${remainingSeconds}`;
+	const formattedTime = `${noHours ? "" : `${hours}:`}${
+		minutes < 10 ? "0" : ""
+	}${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
 	return formattedTime;
 }
 
@@ -447,12 +467,6 @@ export function checkExplicitContent(mediaSource?: MediaSource) {
 			return false;
 		});
 		return hasContent.includes(true);
-	} else {
-		console.log(
-			"Couldn't check: ",
-			mediaSource,
-			getSetting("restrict_content"),
-		);
 	}
 }
 
@@ -496,17 +510,293 @@ export function normalizeHDR(source?: string | boolean) {
 	return isDolbyVision ? "DV" : "HDR";
 }
 
+export function proxify(url: string) {
+	return `${traktProxy}/${encodeURIComponent(url)}`;
+}
+
 export async function getUserCode() {
 	try {
-		const response = axiosInstance.post(
-			TRAKT_API + GET_DEVICE_CODE,
-			{ client_id: traktClientId },
+		const response = await axiosInstance.post(
+			traktProxy + GET_DEVICE_CODE,
+			{
+				client_id: traktClientId,
+			},
 			traktAuthConfig,
 		);
 
-		return response;
+		return {
+			status: "success",
+			result: response.data,
+			error: null,
+		};
 	} catch (error) {
-		console.log(error);
-		return "An error occurred";
+		return {
+			status: "error",
+			result: null,
+			error: error as AxiosError,
+		};
 	}
+}
+
+export async function pollAPI(device_code: string) {
+	try {
+		const response = await axiosInstance.post(
+			traktProxy + POLL_ACCESS_TOKEN,
+			{
+				code: device_code,
+				client_id: traktClientId,
+				client_sectret: traktClientSecret,
+			},
+			traktAuthConfig,
+		);
+
+		return response.data;
+	} catch (error: any) {
+		let title;
+		let message;
+		let stop: number | true = true;
+
+		switch (error.response.status) {
+			case 400:
+				title = "Pending authorization";
+				message = "";
+				stop = 400;
+				break;
+			case 404:
+				title = "Invalid Device Code";
+				message =
+					"Please click the Trakt Login button to restart the process.";
+				break;
+			case 409:
+				title = "Code Previously Approved";
+				message = "You can continue syncing your media";
+				break;
+			case 410:
+				title = "Expired Tokens";
+				message =
+					"Kindly restart the process by clicking the Trakt Login button in the Sidebar";
+				break;
+			case 418:
+				title = "Access Denied";
+				message =
+					"You've denied access. Your privacy is important to us.";
+				break;
+			case 429:
+				title = "Polling Too Quickly";
+				message = "";
+				stop = 429;
+				break;
+			default:
+				title = "Oops! An error occurred";
+				message = "Please try again.";
+				break;
+		}
+
+		return {
+			title,
+			message,
+			stop,
+		};
+	}
+}
+
+export async function getDefaultlist(
+	type: SyncType,
+	mediaType: TRAKT_MEDIA_TYPE,
+	sort: TRAKT_MEDIA_SORT,
+	traktToken: string,
+) {
+	if (traktToken.length === 0) {
+		throw Error("You have not authenticated with Trakt");
+	}
+
+	const LIST_ENDPOINT = type === "watchlist" ? GET_WATCHLIST : GET_FAVORITES;
+
+	try {
+		const response = await axiosInstance.get(
+			traktProxy + LIST_ENDPOINT + `/${mediaType}/${sort}`,
+			{
+				headers: {
+					Authorization: `Bearer ${traktToken}`,
+					...traktAuthConfig.headers,
+				},
+			},
+		);
+
+		return {
+			status: "success",
+			result: response.data,
+			error: null,
+		};
+	} catch (error) {
+		return {
+			status: "error",
+			result: null,
+			error: error as AxiosError,
+		};
+	}
+}
+
+export async function addToDefaultList(
+	syncType: "favorites" | "watchlist",
+	sc2Id: string,
+	type: TRAKT_MEDIA_TYPE,
+	title: string,
+	year: number,
+	ids: TraktSyncIDs,
+	traktToken: string,
+) {
+	try {
+		if (traktToken.length === 0) {
+			throw Error("You have not authenticated with Trakt");
+		}
+
+		const SYNC_ENDPOINT =
+			syncType === "watchlist" ? WATCHLIST_ENDPOINT : FAVORITES_ENDPOINT;
+
+		const response = await axiosInstance.post(
+			traktProxy + SYNC_ENDPOINT,
+			{
+				[type]: [
+					{
+						title,
+						year,
+						ids,
+						notes: sc2Id,
+					},
+				],
+			},
+			{
+				headers: {
+					Authorization: `Bearer ${traktToken}`,
+					...traktAuthConfig.headers,
+				},
+				cache: false,
+			},
+		);
+
+		return {
+			status: "success",
+			result: response.data,
+			error: null,
+		};
+	} catch (error) {
+		return { status: "error", error: error as AxiosError, result: null };
+	}
+}
+
+export function normalizeMediatype(mediatype: string): TRAKT_MEDIA_TYPE {
+	const normal: TRAKT_MEDIA_TYPE = "movies";
+
+	switch (mediatype) {
+		case "tvshow":
+			mediatype = "shows";
+	}
+
+	return normal;
+}
+
+export function normalizeServices(services: MediaServices) {
+	const syncIDs: any = {};
+
+	["trakt", "imdb", "tmdb", "slug"].map((id) => {
+		if (services.hasOwnProperty(id)) {
+			syncIDs[id] = services[id];
+		}
+	});
+
+	return syncIDs;
+}
+
+export function checkTraktToken(): TraktTokenRetriever {
+	let storageTraktToken = localStorage.getItem("trakt-auth");
+	const parsedStorageToken = JSON.parse(storageTraktToken || "{}");
+	const currentTime = new Date().getTime();
+	const isValid = currentTime < parsedStorageToken.expiration;
+
+	return {
+		isValid,
+		...parsedStorageToken,
+	};
+}
+
+export function preserveTraktAuth(authDetails: APIAuthResponse) {
+	const expirationDate = new Date(authDetails.created_at * 1000);
+	// Set the token to expire after 3 days
+	const expirationTime =
+		(Math.floor(expirationDate.getTime() / 1000) + authDetails.expires_in) *
+		1000;
+
+	const traktTokens: StoredTraktAuth = {
+		access_token: authDetails.access_token,
+		refresh_token: authDetails.refresh_token,
+		expiration: expirationTime,
+		// expiration: new Date().getTime() + 3 * 60 * 1000 // This sets it to expire after 3 mins (for testing purposes)
+	};
+	localStorage.setItem("trakt-auth", JSON.stringify(traktTokens));
+}
+
+export async function getMultipleSC2Media(ids: string[]) {
+	try {
+		const query = ids
+			.reduce((a, c) => (c ? a + "&id=" + encodeURIComponent(c) : a), "")
+			.slice(1);
+		// Slicing removes the `&` at the beginning of the derived query to prevent the request from failing
+
+		const response = await axiosInstance.get(
+			MEDIA_PROXY +
+				PATH_GET_MULTIPLE_MEDIA +
+				"?" +
+				query +
+				`&${TOKEN_PARAM_NAME}=${TOKEN_PARAM_VALUE}`,
+		);
+
+		return {
+			status: "success",
+			result: response.data,
+			error: null,
+		};
+	} catch (error) {
+		return {
+			status: "error",
+			result: null,
+			error: error as AxiosError,
+		};
+	}
+}
+
+export async function filterByTraktID(ids: string[], media_type: TYPE_MEDIA) {
+	try {
+		const response = await axiosInstance.get(
+			MEDIA_PROXY +
+				CONSTRUCT_PATH_GET_SERVICE_DATA("trakt", ids, media_type) +
+				`&${TOKEN_PARAM_NAME}=${TOKEN_PARAM_VALUE}`,
+		);
+
+		return {
+			status: "success",
+			result: response.data,
+			error: null,
+		};
+	} catch (error) {
+		return {
+			status: "error",
+			result: null,
+			error: error as AxiosError,
+		};
+	}
+}
+
+export function convertTraktType(type: TRAKT_MEDIA_TYPE) {
+	let normal = "";
+
+	switch (type) {
+		case "shows":
+			normal = "tvshow";
+			break;
+		default:
+			normal = type.slice(0, type.length - 1);
+	}
+
+	return normal as TYPE_MEDIA;
 }

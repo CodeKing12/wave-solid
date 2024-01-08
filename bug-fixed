@@ -1,2 +1,9 @@
-Fixed the issue with multiple resolutions on some streams (e.g. the Avatar stream)
-Added a badge for HDR/DV streams & 3D streams
+Added descriptive error messages for failed Axios Requests
+Made the animations for Alerts to be much smoother
+Added an indicator for clicked buttons/loading APIs
+Implemented Trakt.TV authentication and persistent token storage, with UI and error/warning/message displays
+Implemented Add to Favorites & Add to WatchList functionality
+Implemented functionality to retrieve synced media from Trakt and get their equivalent Stream Cinema Media
+Added a User Interface for viewing synced media
+Created a nodejs proxy for calling the SCC & Trakt APIs on my local device (because these APIs have limitations in browsers)
+Added smooth transitions for the MediaCards
