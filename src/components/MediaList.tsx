@@ -7,6 +7,8 @@ import "@/css/media.css";
 import "@/css/transitions.css";
 import { TransitionGroup } from "solid-transition-group";
 import { SyncType } from "./TraktTypes";
+import { IconArrowBackUpDouble } from "@tabler/icons-solidjs";
+import FocusLeaf from "./Utilities/FocusLeaf";
 
 export interface MediaListProps {
 	media?: MediaObj[];
@@ -16,6 +18,7 @@ export interface MediaListProps {
 	isSidebarOpen: boolean;
 	onCardFocus: (focusDetails: FocusableComponentLayout) => void;
 	onMediaModalOpen: (mediaInfo: MediaObj) => void;
+	handleBackPress: () => void;
 }
 
 const MediaList = function MediaList(props: MediaListProps) {
@@ -63,6 +66,23 @@ const MediaList = function MediaList(props: MediaListProps) {
 						}
 					>
 						<TransitionGroup name="slide" appear={true}>
+							<Show when={props.display !== "media"}>
+								<FocusLeaf
+									class="media-card !mr-4 rounded-xl border-4 border-transparent bg-yellow-300 bg-opacity-70 text-black-1 duration-300 ease-in-out"
+									focusedStyles="!bg-transparent border-yellow-300 text-yellow-300"
+									onEnterPress={props.handleBackPress}
+								>
+									<button
+										class="flex h-full w-full items-center justify-center"
+										onclick={props.handleBackPress}
+									>
+										<IconArrowBackUpDouble
+											size={60}
+											stroke-width={2}
+										/>
+									</button>
+								</FocusLeaf>
+							</Show>
 							<Index each={props.media}>
 								{(show, index) => (
 									<MediaCard

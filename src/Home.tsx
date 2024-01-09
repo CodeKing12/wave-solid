@@ -318,7 +318,6 @@ export default function Home() {
 
 			if (ids.length > 0) {
 				const syncInfo = await filterByTraktID(ids);
-				setShowLoader(false);
 
 				if (syncInfo.status === "error") {
 					addAlert({
@@ -341,7 +340,14 @@ export default function Home() {
 				}
 
 				setDisplay(type);
+			} else {
+				addAlert({
+					type: "info",
+					title: `Empty ${displayName}`,
+					message: `You haven't added any media to your ${displayName}`,
+				});
 			}
+			setShowLoader(false);
 		}
 	}
 	const hideSidebarHandler = (isHidden: boolean) => setHideSidebar(isHidden);
@@ -394,6 +400,10 @@ export default function Home() {
 		}
 	}
 
+	function handleSyncDisplayBackPress() {
+		setDisplay("media");
+	}
+
 	return (
 		<main class="bg-[#191919]">
 			{/* <div class="fixed top-1 left-1/2 z-[10000] text-white">Keys: { keyInput.map((val, index) => (<span class='text-yellow-300 mr-2' key={index}>{ val }</span>)) }</div> */}
@@ -435,6 +445,7 @@ export default function Home() {
 							onMediaModalOpen={onMediaCardClick}
 							onCardFocus={onCardFocus}
 							isSidebarOpen={hideSidebar()}
+							handleBackPress={handleSyncDisplayBackPress}
 						/>
 					</div>
 					<Show when={display() === "media"}>
