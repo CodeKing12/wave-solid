@@ -216,6 +216,11 @@ export default function Home() {
 			return newState;
 		} catch (error) {
 			console.log(error);
+			addAlert({
+				type: "error",
+				title: "Failed to fetch page media",
+				message: error?.message,
+			});
 		}
 	}
 

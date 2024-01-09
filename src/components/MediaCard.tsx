@@ -1,9 +1,8 @@
 import { useFocusable } from "@/spatial-nav/useFocusable";
 import { I18nInfoLabel, MediaObj, RatingObj } from "./MediaTypes";
 import {
-	addToDefaultList,
 	checkExplicitContent,
-	normalizeMediatype,
+	handleSync,
 	normalizeServices,
 	resolveArtItem,
 	smallPoster,
@@ -148,7 +147,7 @@ function MediaCard(props: MediaCardProps) {
 	};
 	const posterLink = createMemo(() => (poster ? smallPoster(poster()) : ""));
 
-	function onImgError(event: any) {
+	function onImgError() {
 		console.log("Image Error");
 		// setPosterLink(smallPoster(poster(), true) || "")
 	}
@@ -156,11 +155,10 @@ function MediaCard(props: MediaCardProps) {
 	const renderStars = createMemo(() => {
 		const filledIcons = Array(Math.round(reviews().rating))
 			.fill("")
-			.map((value, index) => {
+			.map(() => {
 				return (
 					<IconStarFilled
 						class="fill-yellow-300 text-yellow-300"
-						key={index}
 						size={18}
 					/>
 				);
@@ -168,11 +166,10 @@ function MediaCard(props: MediaCardProps) {
 
 		const emptyIcons = Array(5 - Math.round(reviews().rating))
 			.fill("")
-			.map((value, index) => {
+			.map(() => {
 				return (
 					<IconStar
 						class="fill-gray-300 text-gray-300 opacity-90"
-						key={index + 5}
 						size={18}
 					/>
 				);
@@ -204,79 +201,18 @@ function MediaCard(props: MediaCardProps) {
 		}
 	}
 
-	async function handleSync(syncType: "favorites" | "watchlist", e: Event) {
+	async function handleSyncPress(syncType: SyncType, e: Event) {
 		e.stopPropagation();
-		if (traktToken().length === 0) {
-			addAlert({
-				type: "error",
-				title: "Trakt.TV Authentication Required",
-				message: "Click the Login button in the Sidebar to continue.",
-			});
-			return;
-		}
-		setShowLoader(true);
-
-		const traktMediaType = normalizeMediatype(
-			props.media._source.info_labels.mediatype,
-		);
-
-		const displayName =
-			syncType.charAt(0).toUpperCase() + syncType.slice(1);
-
-		const response = await addToDefaultList(
+		await handleSync(
 			syncType,
-			traktMediaType,
+			props.media._source.info_labels.mediatype,
 			displayDetails()?.title,
 			mediaSource().info_labels.year,
-			normalizeServices(mediaSource().services),
+			mediaSource().services,
 			traktToken(),
+			addAlert,
+			setShowLoader,
 		);
-		setShowLoader(false);
-
-		if (response.status === "error") {
-			if (response.error?.response?.status === 420) {
-				addAlert({
-					title: `${displayName} limit exceeded`,
-					message: `Remove some items from your ${syncType} or upgrade your Trakt account`,
-					type: "error",
-				});
-			} else {
-				addAlert({
-					title:
-						response.error?.message ||
-						`Failed to add item to Your ${displayName}`,
-					type: "error",
-				});
-			}
-		} else if (response.status === "success") {
-			if (response?.result?.added[traktMediaType] === 1) {
-				addAlert({
-					title: `<em>${
-						displayDetails().title
-					}</em>&nbsp; added to ${displayName}`,
-					type: "success",
-				});
-			} else if (
-				response?.result?.not_found[traktMediaType][0]?.title ===
-				displayDetails()?.title
-			) {
-				addAlert({
-					title: `${
-						props.media._source.info_labels.mediatype === "movie"
-							? "Movie"
-							: "TVShow"
-					} not found`,
-					message: "Trakt.TV does not recognize this item.",
-					type: "info",
-				});
-			} else if (response?.result?.existing[traktMediaType] === 1) {
-				addAlert({
-					title: `Item is already in ${displayName}`,
-					message: "No need to add it again.",
-					type: "info",
-				});
-			}
-		}
 	}
 
 	return (
@@ -355,7 +291,9 @@ function MediaCard(props: MediaCardProps) {
 							<div class="flex items-center justify-between">
 								<button
 									class="group flex h-[50px] w-[50px] items-center justify-center space-x-4 rounded-2xl border-none bg-[rgba(249,249,249,0.20)] text-lg font-bold tracking-wide text-[#F9F9F9] !outline-none backdrop-blur-[5px] hover:bg-[#F9F9F9] hover:text-black-1"
-									onclick={(e) => handleSync("favorites", e)}
+									onclick={(e) =>
+										handleSyncPress("favorites", e)
+									}
 								>
 									<IconHeart
 										width={22}
@@ -365,7 +303,9 @@ function MediaCard(props: MediaCardProps) {
 
 								<button
 									class="group flex h-[50px] w-[50px] items-center justify-center space-x-4 rounded-2xl border-none bg-[rgba(249,249,249,0.20)] text-lg font-bold tracking-wide text-[#F9F9F9] !outline-none backdrop-blur-[5px] hover:bg-[#F9F9F9] hover:text-black-1"
-									onclick={(e) => handleSync("watchlist", e)}
+									onclick={(e) =>
+										handleSyncPress("watchlist", e)
+									}
 								>
 									<IconBookmark
 										width={22}

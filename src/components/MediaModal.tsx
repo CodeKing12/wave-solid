@@ -1,5 +1,5 @@
 import { getDisplayDetails, getRatingAggr } from "./MediaCard";
-import { MediaObj, SeriesObj, StreamObj } from "./MediaTypes";
+import { I18nInfoLabel, MediaObj, SeriesObj, StreamObj } from "./MediaTypes";
 import {
 	MEDIA_ENDPOINT,
 	TOKEN_PARAM_NAME,
@@ -9,6 +9,7 @@ import {
 	checkExplicitContent,
 	getMediaStreams,
 	getStreamUrl,
+	handleSync,
 	resolveArtItem,
 	setWidths,
 } from "@/utils/general";
@@ -19,7 +20,12 @@ import Season from "./Season";
 import axiosInstance from "@/utils/axiosInstance";
 import EpisodeList from "./EpisodeList";
 import PlayMedia from "./PlayMedia";
-import { IconArrowBackUp, IconHeartPlus, IconX } from "@tabler/icons-solidjs";
+import {
+	IconArrowBackUp,
+	IconBookmark,
+	IconHeartPlus,
+	IconX,
+} from "@tabler/icons-solidjs";
 import {
 	For,
 	Match,
@@ -40,6 +46,10 @@ import {
 import FocusLeaf from "./Utilities/FocusLeaf";
 import AVPlayer from "./Player/AVPlayer";
 import { Switch } from "solid-js";
+import { SyncType } from "./TraktTypes";
+import { useAlert } from "@/AlertContext";
+import { useLoader } from "@/LoaderContext";
+import { useSettings } from "@/SettingsContext";
 
 interface MediaModalProps {
 	show: boolean;
@@ -78,6 +88,11 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 
 	let modalContent: HTMLElement | null;
 
+	const { addAlert } = useAlert();
+	const { setShowLoader } = useLoader();
+	const { getSetting } = useSettings();
+	const traktToken = () => (getSetting("trakt_token") as string) ?? "";
+
 	onMount(() => {
 		modalContent = document.querySelector(".modal-content");
 	});
@@ -99,10 +114,21 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 	);
 
 	const displayDetails = () => {
-		if (props.media) {
-			return getDisplayDetails(props.media._source.i18n_info_labels);
+		let details: I18nInfoLabel;
+
+		if (props.media?._source?.i18n_info_labels) {
+			details = getDisplayDetails(props.media?._source.i18n_info_labels);
+		} else {
+			details = {} as I18nInfoLabel;
 		}
+		if (!details?.title || details?.title.length === 0) {
+			details.title =
+				props.media?._source?.info_labels?.originaltitle ?? "";
+		}
+
+		return details;
 	};
+
 	const images = createMemo(() => {
 		if (props.media && props.show) {
 			return {
@@ -366,6 +392,22 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 		}
 	};
 
+	async function handleSyncPress(syncType: SyncType, e?: Event) {
+		e?.stopPropagation();
+		if (props.media) {
+			await handleSync(
+				syncType,
+				props.media?._source.info_labels.mediatype,
+				displayDetails()?.title,
+				props.media?._source.info_labels.year,
+				props.media?._source.services,
+				traktToken(),
+				addAlert,
+				setShowLoader,
+			);
+		}
+	}
+
 	// rating = ; // To get the rating as a fraction of 10. (Multiplying by 2 undoes the dividing by 2 in the getRatingAggr function)
 
 	return (
@@ -488,10 +530,39 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 								onFocus={(focusDetails: FocusDetails) =>
 									onEpisodeFocus(focusDetails, true)
 								}
+								onEnterPress={() =>
+									handleSyncPress("favorites")
+								}
 							>
-								<button class="flex items-center space-x-4 rounded-xl border-4 border-transparent bg-white px-10 py-3 text-[15px] font-bold tracking-wide text-black-1 hover:border-white hover:bg-opacity-5 hover:text-white">
+								<button
+									class="flex items-center space-x-4 rounded-xl border-4 border-transparent bg-white px-10 py-3 text-[15px] font-bold tracking-wide text-black-1 hover:border-white hover:bg-opacity-5 hover:text-white"
+									onclick={(e) =>
+										handleSyncPress("favorites", e)
+									}
+								>
 									<IconHeartPlus size={32} />
 									<span>Add to Favorites</span>
+								</button>
+							</FocusLeaf>
+
+							<FocusLeaf
+								focusedStyles="[&>button]:!bg-opacity-5 [&>button]:!border-yellow-300 [&>button]:!text-yellow-300"
+								customFocusKey="WTCHLST-BTN"
+								onFocus={(focusDetails: FocusDetails) =>
+									onEpisodeFocus(focusDetails, true)
+								}
+								onEnterPress={() =>
+									handleSyncPress("watchlist")
+								}
+							>
+								<button
+									class="flex items-center space-x-4 rounded-xl border-4 border-transparent bg-yellow-300 px-10 py-3 text-[15px] font-bold tracking-wide text-black-1 hover:border-yellow-300 hover:bg-opacity-5 hover:text-yellow-300"
+									onclick={(e) =>
+										handleSyncPress("watchlist", e)
+									}
+								>
+									<IconBookmark size={32} />
+									<span>Add to Watchlist</span>
 								</button>
 							</FocusLeaf>
 

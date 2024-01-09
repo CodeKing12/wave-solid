@@ -52,6 +52,7 @@ import {
 	TraktSyncIDs,
 	TraktTokenRetriever,
 } from "@/components/TraktTypes";
+import { AlertData } from "@/components/Utilities/Alert";
 
 export function parseXml(data: string, param: string) {
 	const xml = new DOMParser().parseFromString(data, "application/xml");
@@ -640,7 +641,7 @@ export async function getDefaultlist(
 }
 
 export async function addToDefaultList(
-	syncType: "favorites" | "watchlist",
+	syncType: SyncType,
 	type: TRAKT_MEDIA_TYPE,
 	title: string,
 	year: number,
@@ -795,4 +796,79 @@ export function convertTraktType(type: TRAKT_MEDIA_TYPE) {
 	}
 
 	return normal as TYPE_MEDIA;
+}
+
+export async function handleSync(
+	syncType: SyncType,
+	mediatype: TYPE_MEDIA,
+	mediaTitle: string,
+	releaseYear: number,
+	services: MediaServices,
+	traktToken: string,
+	addAlert: (alert: AlertData) => void,
+	setShowLoader: (newVal: boolean) => void,
+) {
+	if (traktToken.length === 0) {
+		addAlert({
+			type: "error",
+			title: "Trakt.TV Authentication Required",
+			message: "Click the Login button in the Sidebar to continue.",
+		});
+		return;
+	}
+	setShowLoader(true);
+
+	const traktMediaType = normalizeMediatype(mediatype);
+
+	const displayName = syncType.charAt(0).toUpperCase() + syncType.slice(1);
+
+	const response = await addToDefaultList(
+		syncType,
+		traktMediaType,
+		mediaTitle,
+		releaseYear,
+		normalizeServices(services),
+		traktToken,
+	);
+	setShowLoader(false);
+
+	if (response.status === "error") {
+		if (response.error?.response?.status === 420) {
+			addAlert({
+				title: `${displayName} limit exceeded`,
+				message: `Remove some items from your ${syncType} or upgrade your Trakt account`,
+				type: "error",
+			});
+		} else {
+			addAlert({
+				title:
+					response.error?.message ||
+					`Failed to add item to Your ${displayName}`,
+				type: "error",
+			});
+		}
+	} else if (response.status === "success") {
+		if (response?.result?.added[traktMediaType] === 1) {
+			addAlert({
+				title: `<em>${mediaTitle}</em>&nbsp; added to ${displayName}`,
+				type: "success",
+			});
+		} else if (
+			response?.result?.not_found[traktMediaType][0]?.title === mediaTitle
+		) {
+			addAlert({
+				title: `${
+					mediatype === "movie" ? "Movie" : "TVShow"
+				} not found`,
+				message: "Trakt.TV does not recognize this item.",
+				type: "info",
+			});
+		} else if (response?.result?.existing[traktMediaType] === 1) {
+			addAlert({
+				title: `Item is already in ${displayName}`,
+				message: "No need to add it again.",
+				type: "info",
+			});
+		}
+	}
 }
