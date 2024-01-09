@@ -8,7 +8,8 @@ export type TYPE_MEDIA =
 	| "concert"
 	| "anime"
 	| "season"
-	| "episode";
+	| "episode"
+	| "*";
 
 export interface MediaType {
 	[page: string]: MediaObj[][];

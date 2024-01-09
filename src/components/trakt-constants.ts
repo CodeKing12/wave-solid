@@ -6,18 +6,18 @@ export const TRAKT_API = import.meta.env.PROD
 
 export const GET_DEVICE_CODE = "/oauth/device/code";
 export const POLL_ACCESS_TOKEN = "/oauth/device/token";
-export const GET_WATCHLIST = "/sync/watchlist";
-export const GET_FAVORITES = "/sync/favorites";
+export const FAVORITES_ENDPOINT = "/sync/favorites";
+export const WATCHLIST_ENDPOINT = "/sync/watchlist";
 
 export const traktClientId = import.meta.env.PROD
 	? import.meta.env.VITE_CLIENT_ID
-	: import.meta.env.VITE_STAGING_CLIENT_ID;
-// : import.meta.env.VITE_CLIENT_ID;
+	: import.meta.env.VITE_CLIENT_ID;
+// : import.meta.env.VITE_STAGING_CLIENT_ID;
 
 export const traktClientSecret = import.meta.env.PROD
 	? import.meta.env.VITE_CLIENT_SECRET
-	: import.meta.env.VITE_STAGING_CLIENT_SECRET;
-// : import.meta.env.VITE_CLIENT_SECRET;
+	: import.meta.env.VITE_CLIENT_SECRET;
+// : import.meta.env.VITE_STAGING_CLIENT_SECRET;
 
 export const traktAuthConfig: APIAuthConfig = {
 	headers: {
@@ -30,8 +30,5 @@ export const traktAuthConfig: APIAuthConfig = {
 
 export const traktProxy = import.meta.env.PROD
 	? "http://localhost:9000/trakt"
-	: "http://localhost:9000/trakt-staging";
-// : "http://localhost:9000/trakt";
-
-export const FAVORITES_ENDPOINT = "/sync/favorites";
-export const WATCHLIST_ENDPOINT = "/sync/watchlist";
+	: "http://localhost:9000/trakt";
+// : "http://localhost:9000/trakt-staging";

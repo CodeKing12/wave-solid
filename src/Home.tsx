@@ -15,7 +15,6 @@ import axiosInstance from "@/utils/axiosInstance";
 import {
 	checkTraktToken,
 	checkWebshareStatus,
-	convertTraktType,
 	filterByTraktID,
 	getDefaultlist,
 } from "@/utils/general";
@@ -290,12 +289,7 @@ export default function Home() {
 		const traktMediaType = "movies";
 
 		setShowLoader(true);
-		const traktSynced = await getDefaultlist(
-			type,
-			traktMediaType,
-			"added",
-			traktToken(),
-		);
+		const traktSynced = await getDefaultlist(type, traktToken());
 
 		if (traktSynced.status === "error") {
 			setShowLoader(false);
@@ -307,14 +301,12 @@ export default function Home() {
 			});
 		} else {
 			const ids: string[] = traktSynced.result.map(
-				(item: TraktDefaultListItem) => item.movie.ids.trakt.toString(),
+				(item: TraktDefaultListItem) =>
+					item[item.type]?.ids.trakt.toString(),
 			);
 
 			if (ids.length > 0) {
-				const syncInfo = await filterByTraktID(
-					ids,
-					convertTraktType(traktMediaType),
-				);
+				const syncInfo = await filterByTraktID(ids);
 				setShowLoader(false);
 
 				if (syncInfo.status === "error") {

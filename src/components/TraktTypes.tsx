@@ -27,6 +27,7 @@ export type APIAuthResponse = {
 };
 
 export type TRAKT_MEDIA_TYPE = "movies" | "shows" | "seasons" | "episodes";
+export type TRAKT_MEDIA_TYPE_SINGULAR = "movie" | "show" | "season" | "episode";
 export type TRAKT_MEDIA_SORT = "rank" | "added" | "released" | "title";
 
 export type TraktSyncIDs = {
@@ -81,6 +82,9 @@ export interface TraktDefaultListItem {
 	id: number;
 	listed_at: string;
 	notes: string | null;
-	type: TRAKT_MEDIA_TYPE;
-	movie: TraktMediaSyncData;
+	type: TRAKT_MEDIA_TYPE_SINGULAR;
+	movie?: TraktMediaSyncData;
+	show?: TraktMediaSyncData;
+	season?: TraktMediaSyncData;
+	episode?: TraktMediaSyncData;
 }

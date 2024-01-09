@@ -15,7 +15,6 @@ import {
 	AUTH_ENDPOINT,
 	CONSTRUCT_PATH_GET_SERVICE_DATA,
 	MEDIA_ENDPOINT,
-	MEDIA_PROXY,
 	PATH_FILE_LINK,
 	PATH_FILE_PASSWORD_SALT,
 	PATH_FILE_PROTECTED,
@@ -36,8 +35,6 @@ import { useSettings } from "@/SettingsContext";
 import {
 	FAVORITES_ENDPOINT,
 	GET_DEVICE_CODE,
-	GET_FAVORITES,
-	GET_WATCHLIST,
 	POLL_ACCESS_TOKEN,
 	TRAKT_API,
 	WATCHLIST_ENDPOINT,
@@ -602,19 +599,28 @@ export async function pollAPI(device_code: string) {
 
 export async function getDefaultlist(
 	type: SyncType,
-	mediaType: TRAKT_MEDIA_TYPE,
-	sort: TRAKT_MEDIA_SORT,
 	traktToken: string,
+	mediaType?: TRAKT_MEDIA_TYPE,
+	sort?: TRAKT_MEDIA_SORT,
 ) {
 	if (traktToken.length === 0) {
 		throw Error("You have not authenticated with Trakt");
 	}
 
-	const LIST_ENDPOINT = type === "watchlist" ? GET_WATCHLIST : GET_FAVORITES;
+	let query = "";
+	if (mediaType) {
+		query += "/" + mediaType;
+	}
+	if (sort) {
+		query += "/" + sort;
+	}
+
+	const LIST_ENDPOINT =
+		type === "watchlist" ? WATCHLIST_ENDPOINT : FAVORITES_ENDPOINT;
 
 	try {
 		const response = await axiosInstance.get(
-			traktProxy + LIST_ENDPOINT + `/${mediaType}/${sort}`,
+			traktProxy + LIST_ENDPOINT + query,
 			{
 				headers: {
 					Authorization: `Bearer ${traktToken}`,
@@ -639,7 +645,6 @@ export async function getDefaultlist(
 
 export async function addToDefaultList(
 	syncType: "favorites" | "watchlist",
-	sc2Id: string,
 	type: TRAKT_MEDIA_TYPE,
 	title: string,
 	year: number,
@@ -662,7 +667,6 @@ export async function addToDefaultList(
 						title,
 						year,
 						ids,
-						notes: sc2Id,
 					},
 				],
 			},
@@ -686,11 +690,11 @@ export async function addToDefaultList(
 }
 
 export function normalizeMediatype(mediatype: string): TRAKT_MEDIA_TYPE {
-	const normal: TRAKT_MEDIA_TYPE = "movies";
+	let normal: TRAKT_MEDIA_TYPE = "movies";
 
 	switch (mediatype) {
 		case "tvshow":
-			mediatype = "shows";
+			normal = "shows";
 	}
 
 	return normal;
@@ -744,7 +748,7 @@ export async function getMultipleSC2Media(ids: string[]) {
 		// Slicing removes the `&` at the beginning of the derived query to prevent the request from failing
 
 		const response = await axiosInstance.get(
-			MEDIA_PROXY +
+			MEDIA_ENDPOINT +
 				PATH_GET_MULTIPLE_MEDIA +
 				"?" +
 				query +
@@ -765,11 +769,11 @@ export async function getMultipleSC2Media(ids: string[]) {
 	}
 }
 
-export async function filterByTraktID(ids: string[], media_type: TYPE_MEDIA) {
+export async function filterByTraktID(ids: string[]) {
 	try {
 		const response = await axiosInstance.get(
-			MEDIA_PROXY +
-				CONSTRUCT_PATH_GET_SERVICE_DATA("trakt", ids, media_type) +
+			MEDIA_ENDPOINT +
+				CONSTRUCT_PATH_GET_SERVICE_DATA("trakt", ids, "*") +
 				`&${TOKEN_PARAM_NAME}=${TOKEN_PARAM_VALUE}`,
 		);
 

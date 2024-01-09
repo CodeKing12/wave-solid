@@ -1,7 +1,9 @@
 import { RawAxiosRequestHeaders } from "axios";
 import { ApiMapper, TYPE_MEDIA } from "./MediaTypes";
 
-export const MEDIA_ENDPOINT = "https://plugin.sc2.zone";
+export const MEDIA_ENDPOINT = import.meta.env.PROD
+	? "https://plugin.sc2.zone"
+	: "http://localhost:9000/sc2";
 export const MEDIA_PROXY = "http://localhost:9000/sc2";
 export const PATH_SEARCH_MEDIA =
 	"/api/media/filter/v2/search?order=desc&sort=score&type=*";

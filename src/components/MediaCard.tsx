@@ -223,7 +223,6 @@ function MediaCard(props: MediaCardProps) {
 
 		const response = await addToDefaultList(
 			syncType,
-			props.media._id,
 			traktMediaType,
 			displayDetails()?.title,
 			mediaSource().info_labels.year,
