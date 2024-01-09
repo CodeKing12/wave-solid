@@ -1,15 +1,22 @@
 import { FocusContext, setFocus } from "@/spatial-nav";
 import { useFocusable } from "@/spatial-nav/useFocusable";
-import { IconSearch, IconZoomFilled } from "@tabler/icons-solidjs";
+import {
+	IconBookmarksFilled,
+	IconHeartFilled,
+	IconSearch,
+	IconZoomFilled,
+} from "@tabler/icons-solidjs";
 import FocusLeaf from "./Utilities/FocusLeaf";
-import { createEffect, createSignal } from "solid-js";
+import { Show, createEffect, createSignal } from "solid-js";
 import "@/css/layout.css";
 import { SyncType } from "./TraktTypes";
+import { Transition } from "solid-transition-group";
 
 interface NavProps {
 	onSearch: (searchTerm: string) => void;
 	showSynced: (type: SyncType) => void;
 	handleNav: (name: string) => void;
+	currentDisplay: SyncType | "media";
 }
 
 const Navbar = function Navbar(props: NavProps) {
@@ -37,7 +44,7 @@ const Navbar = function Navbar(props: NavProps) {
 				ref={setRef}
 			>
 				<div class="flex flex-col items-center justify-between space-y-5 xl:flex-row xl:space-y-0">
-					<div class="flex flex-wrap items-center space-x-12 text-lg font-medium text-white text-opacity-80 sm:flex-nowrap">
+					<div class="flex flex-wrap items-center space-x-11 text-lg font-medium text-white text-opacity-80 duration-300 ease-in-out sm:flex-nowrap">
 						<FocusLeaf
 							focusedStyles="after:block animateUnderline"
 							class="hover:text-yellow-300"
@@ -45,10 +52,22 @@ const Navbar = function Navbar(props: NavProps) {
 							onEnterPress={() => props.showSynced("favorites")}
 						>
 							<a
-								class="cursor-pointer"
+								class="flex cursor-pointer items-center gap-2"
 								onClick={() => props.showSynced("favorites")}
 							>
 								Favorites
+								<Transition name="slide">
+									<Show
+										when={
+											props.currentDisplay === "favorites"
+										}
+									>
+										<IconHeartFilled
+											class="text-yellow-300"
+											width={24}
+										/>
+									</Show>
+								</Transition>
 							</a>
 						</FocusLeaf>
 						<FocusLeaf
@@ -58,9 +77,21 @@ const Navbar = function Navbar(props: NavProps) {
 						>
 							<a
 								onclick={() => props.showSynced("watchlist")}
-								class="cursor-pointer"
+								class="flex cursor-pointer items-center gap-2"
 							>
 								Watchlist
+								<Transition name="slide">
+									<Show
+										when={
+											props.currentDisplay === "watchlist"
+										}
+									>
+										<IconBookmarksFilled
+											class="text-yellow-300"
+											width={24}
+										/>
+									</Show>
+								</Transition>
 							</a>
 						</FocusLeaf>
 						<FocusLeaf

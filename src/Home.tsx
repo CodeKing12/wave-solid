@@ -413,6 +413,7 @@ export default function Home() {
 						onSearch={searchMedia}
 						showSynced={showSynced}
 						handleNav={navigateItem}
+						currentDisplay={display()}
 					/>
 
 					<div class="relative mt-6 flex-1" ref={setRef}>

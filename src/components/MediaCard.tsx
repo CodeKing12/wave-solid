@@ -351,13 +351,7 @@ function MediaCard(props: MediaCardProps) {
 								</p>
 							</div>
 						</div>
-						<Show
-							when={
-								!["favorites", "watchlist"].includes(
-									props.currentDisplay,
-								)
-							}
-						>
+						<Show when={props.currentDisplay === "media"}>
 							<div class="flex items-center justify-between">
 								<button
 									class="group flex h-[50px] w-[50px] items-center justify-center space-x-4 rounded-2xl border-none bg-[rgba(249,249,249,0.20)] text-lg font-bold tracking-wide text-[#F9F9F9] !outline-none backdrop-blur-[5px] hover:bg-[#F9F9F9] hover:text-black-1"
