@@ -258,7 +258,10 @@ export default function Home() {
 
 	let mainRef: HTMLElement | undefined;
 
-	const onMediaModalClose = () => setOpenModal(false);
+	const onMediaModalClose = () => {
+		setOpenModal(false);
+		setSelectedMedia(undefined);
+	};
 
 	const onCardFocus = ({ y }: { y: number }) => {
 		if (mainRef) {
@@ -312,7 +315,7 @@ export default function Home() {
 						title:
 							syncInfo.error?.message ||
 							`Failed to fetch synced media information`,
-						message: "No response from Database",
+						message: "No response from SCC Database",
 						type: "error",
 					});
 				} else {
@@ -527,19 +530,18 @@ export default function Home() {
 
 			{/* Add a modal to display when there is no network */}
 
-			{/* <Transition> */}
-			{
-				// selectedMedia && openModal && <MediaModal show={openModal} media={selectedMedia || dummyMedia} placeholderImg={modalPlaceholder} authToken={authToken} onAuth={() => setOpenLogin(true)} onExit={onMediaModalClose} />
-				<MediaModal
-					show={openModal()}
-					media={selectedMedia()}
-					placeholderImg={modalPlaceholder()}
-					authToken={authToken()}
-					onAuth={openLoginHandler}
-					onExit={onMediaModalClose}
-				/>
-			}
-			{/* </Transition> */}
+			{/* <Transition name="slide">
+				<Show when={openModal() && selectedMedia()}> */}
+			<MediaModal
+				show={openModal()}
+				media={selectedMedia()}
+				placeholderImg={modalPlaceholder()}
+				authToken={authToken()}
+				onAuth={openLoginHandler}
+				onExit={onMediaModalClose}
+			/>
+			{/* </Show>
+			</Transition> */}
 		</main>
 	);
 }

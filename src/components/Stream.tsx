@@ -32,7 +32,7 @@ export default function MediaStreamOption(props: MediaStreamOptionProps) {
 	function displayLang(languages: AudioStream[] | Subtitle[]) {
 		let uniqueArray: string[] = [];
 		languages.map((value) => {
-			const uppercaseValue = value.language.toUpperCase();
+			const uppercaseValue = value?.language?.toUpperCase();
 			if (!uniqueArray.includes(uppercaseValue)) {
 				uniqueArray.push(uppercaseValue);
 			}
