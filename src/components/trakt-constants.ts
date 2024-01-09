@@ -29,6 +29,6 @@ export const traktAuthConfig: APIAuthConfig = {
 };
 
 export const traktProxy = import.meta.env.PROD
-	? "http://localhost:9000/trakt"
+	? "https://api.trakt.tv"
 	: "http://localhost:9000/trakt";
 // : "http://localhost:9000/trakt-staging";
