@@ -6,9 +6,11 @@ import { FocusableComponentLayout } from "@/spatial-nav";
 import "@/css/media.css";
 import "@/css/transitions.css";
 import { TransitionGroup } from "solid-transition-group";
+import { SyncType } from "./TraktTypes";
 
 export interface MediaListProps {
 	media?: MediaObj[];
+	display: SyncType | "media";
 	isLoading: boolean;
 	isModalOpen?: boolean;
 	isSidebarOpen: boolean;
@@ -69,6 +71,7 @@ const MediaList = function MediaList(props: MediaListProps) {
 										showMediaInfo={onCardSelect}
 										onFocus={props.onCardFocus}
 										onEnterPress={onCardPress}
+										currentDisplay={props.display}
 									/>
 								)}
 							</Index>

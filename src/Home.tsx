@@ -77,9 +77,7 @@ export default function Home() {
 	const { updateSetting } = useSettings();
 	const { setShowLoader } = useLoader();
 
-	const [display, setDisplay] = createSignal<
-		"media" | "favorites" | "watchlist" | "history"
-	>("media");
+	const [display, setDisplay] = createSignal<"media" | SyncType>("media");
 	const [syncData, setSyncData] = createSignal<SyncDataObj>();
 	const [hasNetwork, setHasNetwork] = createSignal(true);
 	const [isAuthenticated, setIsAuthenticated] = createSignal(false);
@@ -319,15 +317,6 @@ export default function Home() {
 					});
 				} else {
 					setSyncData((prev) => {
-						console.log("PREV", prev);
-						console.log({
-							...prev,
-							[type]: {
-								...prev?.[type],
-								[traktMediaType]: syncInfo.result.hits.hits,
-							},
-						});
-
 						return {
 							...prev,
 							[type]: {
@@ -427,6 +416,7 @@ export default function Home() {
 						<MediaList
 							// media={pageMedia()?.media}
 							media={determineMedia()}
+							display={display()}
 							isLoading={pageMedia.loading}
 							onMediaModalOpen={onMediaCardClick}
 							onCardFocus={onCardFocus}

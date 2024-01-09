@@ -16,16 +16,18 @@ import {
 	IconExplicit,
 	IconBookmark,
 } from "@tabler/icons-solidjs";
-import { Match, Switch, createEffect, createMemo } from "solid-js";
+import { Match, Show, Switch, createEffect, createMemo } from "solid-js";
 import { FocusableComponentLayout } from "@/spatial-nav";
 import "@/css/media.css";
 import { useSettings } from "@/SettingsContext";
 import { useAlert } from "@/AlertContext";
 import { useLoader } from "@/LoaderContext";
+import { SyncType } from "./TraktTypes";
 
 export interface MediaCardProps {
 	// currentPagination: number,
 	// currentPage: PageType,
+	currentDisplay: SyncType | "media";
 	index: number;
 	media: MediaObj;
 	showMediaInfo: (mediaInfo: MediaObj) => void;
@@ -349,31 +351,35 @@ function MediaCard(props: MediaCardProps) {
 								</p>
 							</div>
 						</div>
-						<div class="flex items-center justify-between">
-							<button
-								class="group flex h-[50px] w-[50px] items-center justify-center space-x-4 rounded-2xl border-none bg-[rgba(249,249,249,0.20)] text-lg font-bold tracking-wide text-[#F9F9F9] !outline-none backdrop-blur-[5px] hover:bg-[#F9F9F9] hover:text-black-1"
-								onclick={(e) => handleSync("favorites", e)}
-							>
-								<IconHeart
-									width={22}
-									class="group-hover:-fill-black-1"
-								/>
-							</button>
+						<Show
+							when={
+								!["favorites", "watchlist"].includes(
+									props.currentDisplay,
+								)
+							}
+						>
+							<div class="flex items-center justify-between">
+								<button
+									class="group flex h-[50px] w-[50px] items-center justify-center space-x-4 rounded-2xl border-none bg-[rgba(249,249,249,0.20)] text-lg font-bold tracking-wide text-[#F9F9F9] !outline-none backdrop-blur-[5px] hover:bg-[#F9F9F9] hover:text-black-1"
+									onclick={(e) => handleSync("favorites", e)}
+								>
+									<IconHeart
+										width={22}
+										class="group-hover:-fill-black-1"
+									/>
+								</button>
 
-							<button
-								class="group flex h-[50px] w-[50px] items-center justify-center space-x-4 rounded-2xl border-none bg-[rgba(249,249,249,0.20)] text-lg font-bold tracking-wide text-[#F9F9F9] !outline-none backdrop-blur-[5px] hover:bg-[#F9F9F9] hover:text-black-1"
-								onclick={(e) => handleSync("watchlist", e)}
-							>
-								<IconBookmark
-									width={22}
-									class="group-hover:-fill-black-1"
-								/>
-							</button>
-
-							{/* <button class="px-10 py-3 bg-yellow-300 text-black-1 rounded-xl text-sm tracking-wide font-semibold border-2 border-transparent hover:bg-black-1 hover:border-yellow-300 hover:text-yellow-300">
-									Watch
-								</button> */}
-						</div>
+								<button
+									class="group flex h-[50px] w-[50px] items-center justify-center space-x-4 rounded-2xl border-none bg-[rgba(249,249,249,0.20)] text-lg font-bold tracking-wide text-[#F9F9F9] !outline-none backdrop-blur-[5px] hover:bg-[#F9F9F9] hover:text-black-1"
+									onclick={(e) => handleSync("watchlist", e)}
+								>
+									<IconBookmark
+										width={22}
+										class="group-hover:-fill-black-1"
+									/>
+								</button>
+							</div>
+						</Show>
 					</div>
 				</div>
 			</div>
