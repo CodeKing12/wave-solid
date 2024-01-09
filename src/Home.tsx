@@ -343,8 +343,13 @@ export default function Home() {
 			} else {
 				addAlert({
 					type: "info",
-					title: `Empty ${displayName}`,
-					message: `You haven't added any media to your ${displayName}`,
+					title: `Your ${displayName} ${
+						type === "favorites" ? "are" : "is"
+					} empty`,
+					message:
+						type === "history"
+							? "You haven't watched anything"
+							: `You haven't added any media to your ${displayName}`,
 				});
 			}
 			setShowLoader(false);
