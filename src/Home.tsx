@@ -212,6 +212,7 @@ export default function Home() {
 				media: response.data.hits.hits,
 			};
 
+			setDisplay("media");
 			return newState;
 		} catch (error) {
 			console.log(error);
@@ -288,6 +289,15 @@ export default function Home() {
 		}
 		const displayName = type.charAt(0).toUpperCase() + type.slice(1);
 		const traktMediaType = "movies";
+
+		if (traktToken().length === 0) {
+			addAlert({
+				type: "error",
+				title: "Trakt.TV Authentication Required",
+				message: "Click the Login button in the Sidebar to continue.",
+			});
+			return;
+		}
 
 		setShowLoader(true);
 		const traktSynced = await getDefaultlist(type, traktToken());

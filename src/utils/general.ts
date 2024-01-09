@@ -603,10 +603,6 @@ export async function getDefaultlist(
 	mediaType?: TRAKT_MEDIA_TYPE,
 	sort?: TRAKT_MEDIA_SORT,
 ) {
-	if (traktToken.length === 0) {
-		throw Error("You have not authenticated with Trakt");
-	}
-
 	let query = "";
 	if (mediaType) {
 		query += "/" + mediaType;
@@ -652,10 +648,6 @@ export async function addToDefaultList(
 	traktToken: string,
 ) {
 	try {
-		if (traktToken.length === 0) {
-			throw Error("You have not authenticated with Trakt");
-		}
-
 		const SYNC_ENDPOINT =
 			syncType === "watchlist" ? WATCHLIST_ENDPOINT : FAVORITES_ENDPOINT;
 
