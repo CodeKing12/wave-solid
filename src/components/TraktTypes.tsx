@@ -88,3 +88,7 @@ export interface TraktDefaultListItem {
 	season?: TraktMediaSyncData;
 	episode?: TraktMediaSyncData;
 }
+
+export type SyncDataLength = {
+	[type in SyncType]?: number;
+};

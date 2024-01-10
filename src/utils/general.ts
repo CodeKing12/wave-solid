@@ -895,6 +895,7 @@ export async function handleSync(
 				title: `<em>${mediaTitle}</em>&nbsp; added to ${displayName}`,
 				type: "success",
 			});
+			return "success";
 		} else if (
 			response?.result?.not_found[traktMediaType][0]?.title === mediaTitle
 		) {

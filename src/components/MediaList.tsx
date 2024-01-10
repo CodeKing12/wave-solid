@@ -6,7 +6,7 @@ import { FocusableComponentLayout } from "@/spatial-nav";
 import "@/css/media.css";
 import "@/css/transitions.css";
 import { TransitionGroup } from "solid-transition-group";
-import { SyncType } from "./TraktTypes";
+import { SyncDataLength, SyncType } from "./TraktTypes";
 import { IconArrowBackUpDouble } from "@tabler/icons-solidjs";
 import FocusLeaf from "./Utilities/FocusLeaf";
 import { SyncDataObj } from "@/Home";
@@ -21,6 +21,7 @@ export interface MediaListProps {
 	onMediaModalOpen: (mediaInfo: MediaObj) => void;
 	handleBackPress: () => void;
 	onRemoveMedia: (media: MediaObj) => void;
+	syncLength: SyncDataLength;
 	setSyncData: Setter<SyncDataObj | undefined>;
 }
 
@@ -71,7 +72,7 @@ const MediaList = function MediaList(props: MediaListProps) {
 						<TransitionGroup name="slide" appear={true}>
 							<Show when={props.display !== "media"}>
 								<FocusLeaf
-									class="media-card !mr-4 rounded-xl border-4 border-transparent bg-yellow-300 bg-opacity-70 text-black-1 duration-300 ease-in-out"
+									class="media-card !mr-4 rounded-xl border-4 border-transparent bg-yellow-300 bg-opacity-70 text-black-1 duration-300 ease-in-out hover:!border-yellow-300 hover:!bg-transparent hover:!text-yellow-300"
 									focusedStyles="!bg-transparent border-yellow-300 text-yellow-300"
 									onEnterPress={props.handleBackPress}
 								>
@@ -98,6 +99,7 @@ const MediaList = function MediaList(props: MediaListProps) {
 										onRemove={() =>
 											props.onRemoveMedia(show())
 										}
+										syncLength={props.syncLength}
 										setSyncData={props.setSyncData}
 									/>
 								)}

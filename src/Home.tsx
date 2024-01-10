@@ -17,7 +17,6 @@ import {
 	checkWebshareStatus,
 	filterByTraktID,
 	getDefaultlist,
-	normalizeMediatype,
 } from "@/utils/general";
 import Navbar from "@/components/Navbar";
 import {
@@ -34,6 +33,7 @@ import { FocusContext, useFocusable } from "./spatial-nav";
 import FocusLeaf from "./components/Utilities/FocusLeaf";
 import Settings from "./components/Settings";
 import {
+	SyncDataLength,
 	SyncType,
 	TraktDefaultListItem,
 	VerifyDeviceData,
@@ -66,12 +66,13 @@ interface PageMediaObj {
 }
 
 export type SyncDataObj = {
-	[sync in SyncType]?: {
-		movies: MediaObj[];
-		shows: MediaObj[];
-		seasons?: MediaObj[];
-		episodes?: MediaObj[];
-	};
+	[sync in SyncType]?: MediaObj[];
+	// [sync in SyncType]?: {
+	// 	movies: MediaObj[];
+	// 	shows: MediaObj[];
+	// 	seasons?: MediaObj[];
+	// 	episodes?: MediaObj[];
+	// };
 };
 
 export default function Home() {
@@ -298,8 +299,11 @@ export default function Home() {
 			setDisplay("media");
 			return;
 		}
+		if ((syncData()?.[type]?.length ?? 0) > 0) {
+			setDisplay(type);
+			return;
+		}
 		const displayName = type.charAt(0).toUpperCase() + type.slice(1);
-		const traktMediaType = "movies";
 
 		if (traktToken().length === 0) {
 			addAlert({
@@ -346,10 +350,10 @@ export default function Home() {
 						);
 						return {
 							...prev,
-							[type]: {
-								...prev?.[type],
-								[traktMediaType]: syncInfo.result.hits.hits,
-							},
+							[type]: [
+								...(prev?.[type] ?? []),
+								...syncInfo.result.hits.hits,
+							],
 						};
 					});
 					setDisplay(type);
@@ -400,7 +404,7 @@ export default function Home() {
 
 	function determineMedia() {
 		// @ts-ignore
-		const dataToDisplay = syncData()?.[display()]?.["movies"];
+		const dataToDisplay = syncData()?.[display()];
 		console.log(dataToDisplay);
 
 		if (display() === "media" || !dataToDisplay?.length) {
@@ -437,32 +441,28 @@ export default function Home() {
 			);
 		} else {
 			setSyncData((prev) => {
-				const mediaList =
-					prev?.[currentDisplay]?.[
-						normalizeMediatype(media._source.info_labels.mediatype)
-					];
+				const mediaList = prev?.[currentDisplay];
 
 				console.log({
 					...prev,
-					[display()]: {
-						...prev?.[currentDisplay],
-						[normalizeMediatype(
-							media._source.info_labels.mediatype,
-						)]: mediaList?.filter((item) => item !== media),
-					},
+					[display()]: mediaList?.filter((item) => item !== media),
 				});
 
 				return {
 					...prev,
-					[display()]: {
-						...prev?.[currentDisplay],
-						[normalizeMediatype(
-							media._source.info_labels.mediatype,
-						)]: mediaList?.filter((item) => item !== media),
-					},
+					[display()]: mediaList?.filter((item) => item !== media),
 				};
 			});
 		}
+	}
+
+	function getSyncDataLength() {
+		const obj: SyncDataLength = {};
+		(Object.keys(syncData() ?? {}) as SyncType[]).forEach(
+			(key) => (obj[key] = syncData()?.[key]?.length ?? 0),
+		);
+		console.log("This is the length obj: ", obj);
+		return obj;
 	}
 
 	return (
@@ -508,6 +508,7 @@ export default function Home() {
 							isSidebarOpen={hideSidebar()}
 							handleBackPress={handleSyncDisplayBackPress}
 							onRemoveMedia={handleRemoveMedia}
+							syncLength={getSyncDataLength()}
 							setSyncData={setSyncData}
 						/>
 					</div>

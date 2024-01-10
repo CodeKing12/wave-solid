@@ -4,7 +4,6 @@ import {
 	checkExplicitContent,
 	handleSync,
 	handleSyncDelete,
-	normalizeMediatype,
 	resolveArtItem,
 	smallPoster,
 } from "@/utils/general";
@@ -23,7 +22,7 @@ import "@/css/media.css";
 import { useSettings } from "@/SettingsContext";
 import { useAlert } from "@/AlertContext";
 import { useLoader } from "@/LoaderContext";
-import { SyncType } from "./TraktTypes";
+import { SyncDataLength, SyncType } from "./TraktTypes";
 import { SyncDataObj } from "@/Home";
 
 export interface MediaCardProps {
@@ -33,6 +32,7 @@ export interface MediaCardProps {
 	index: number;
 	media: MediaObj;
 	showMediaInfo: (mediaInfo: MediaObj) => void;
+	syncLength: SyncDataLength;
 	setSyncData: Setter<SyncDataObj | undefined>;
 	onRemove: () => void;
 	onEnterPress: (mediaInfo: MediaObj) => void;
@@ -208,7 +208,7 @@ function MediaCard(props: MediaCardProps) {
 
 	async function handleSyncPress(syncType: SyncType, e: Event) {
 		e.stopPropagation();
-		await handleSync(
+		const syncItem = await handleSync(
 			syncType,
 			props.media._source.info_labels.mediatype,
 			displayDetails()?.title,
@@ -218,37 +218,24 @@ function MediaCard(props: MediaCardProps) {
 			addAlert,
 			setShowLoader,
 		);
-		props.setSyncData((prev) => {
-			const mediaList =
-				prev?.[syncType]?.[
-					normalizeMediatype(
-						props.media._source.info_labels.mediatype,
-					)
-				] ?? [];
+		if (syncItem === "success") {
+			if ((props.syncLength?.[syncType] ?? 0) > 0) {
+				props.setSyncData((prev) => {
+					console.log(prev?.[syncType] ?? []);
 
-			console.log(mediaList);
+					console.log("Previous Sync Data: ", prev);
+					console.log("New Sync Data: ", {
+						...prev,
+						[syncType]: [...(prev?.[syncType] ?? []), props.media],
+					});
 
-			console.log("Previous Sync Data: ", prev);
-			console.log("New Sync Data: ", {
-				...prev,
-				[syncType]: {
-					...prev?.[syncType],
-					[normalizeMediatype(
-						props.media._source.info_labels.mediatype,
-					)]: [...mediaList, props.media],
-				},
-			});
-
-			return {
-				...prev,
-				[syncType]: {
-					...prev?.[syncType],
-					[normalizeMediatype(
-						props.media._source.info_labels.mediatype,
-					)]: [...mediaList, props.media],
-				},
-			};
-		});
+					return {
+						...prev,
+						[syncType]: [...(prev?.[syncType] ?? []), props.media],
+					};
+				});
+			}
+		}
 	}
 
 	async function handleSyncDeletePress(e: Event) {
