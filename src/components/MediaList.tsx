@@ -1,4 +1,4 @@
-import { Index, Show } from "solid-js";
+import { Index, Setter, Show } from "solid-js";
 import MediaCard from "./MediaCard";
 import { MediaObj } from "./MediaTypes";
 import { Spinner, SpinnerType } from "solid-spinner";
@@ -9,6 +9,7 @@ import { TransitionGroup } from "solid-transition-group";
 import { SyncType } from "./TraktTypes";
 import { IconArrowBackUpDouble } from "@tabler/icons-solidjs";
 import FocusLeaf from "./Utilities/FocusLeaf";
+import { SyncDataObj } from "@/Home";
 
 export interface MediaListProps {
 	media?: MediaObj[];
@@ -19,6 +20,8 @@ export interface MediaListProps {
 	onCardFocus: (focusDetails: FocusableComponentLayout) => void;
 	onMediaModalOpen: (mediaInfo: MediaObj) => void;
 	handleBackPress: () => void;
+	onRemoveMedia: (media: MediaObj) => void;
+	setSyncData: Setter<SyncDataObj | undefined>;
 }
 
 const MediaList = function MediaList(props: MediaListProps) {
@@ -92,6 +95,10 @@ const MediaList = function MediaList(props: MediaListProps) {
 										onFocus={props.onCardFocus}
 										onEnterPress={onCardPress}
 										currentDisplay={props.display}
+										onRemove={() =>
+											props.onRemoveMedia(show())
+										}
+										setSyncData={props.setSyncData}
 									/>
 								)}
 							</Index>

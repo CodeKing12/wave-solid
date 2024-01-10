@@ -3,7 +3,8 @@ import { I18nInfoLabel, MediaObj, RatingObj } from "./MediaTypes";
 import {
 	checkExplicitContent,
 	handleSync,
-	normalizeServices,
+	handleSyncDelete,
+	normalizeMediatype,
 	resolveArtItem,
 	smallPoster,
 } from "@/utils/general";
@@ -14,14 +15,16 @@ import {
 	IconStarFilled,
 	IconExplicit,
 	IconBookmark,
+	IconTrashX,
 } from "@tabler/icons-solidjs";
-import { Match, Show, Switch, createEffect, createMemo } from "solid-js";
+import { Match, Setter, Switch, createEffect, createMemo } from "solid-js";
 import { FocusableComponentLayout } from "@/spatial-nav";
 import "@/css/media.css";
 import { useSettings } from "@/SettingsContext";
 import { useAlert } from "@/AlertContext";
 import { useLoader } from "@/LoaderContext";
 import { SyncType } from "./TraktTypes";
+import { SyncDataObj } from "@/Home";
 
 export interface MediaCardProps {
 	// currentPagination: number,
@@ -30,6 +33,8 @@ export interface MediaCardProps {
 	index: number;
 	media: MediaObj;
 	showMediaInfo: (mediaInfo: MediaObj) => void;
+	setSyncData: Setter<SyncDataObj | undefined>;
+	onRemove: () => void;
 	onEnterPress: (mediaInfo: MediaObj) => void;
 	onFocus: (focusDetails: FocusableComponentLayout) => void;
 }
@@ -213,6 +218,55 @@ function MediaCard(props: MediaCardProps) {
 			addAlert,
 			setShowLoader,
 		);
+		props.setSyncData((prev) => {
+			const mediaList =
+				prev?.[syncType]?.[
+					normalizeMediatype(
+						props.media._source.info_labels.mediatype,
+					)
+				] ?? [];
+
+			console.log(mediaList);
+
+			console.log("Previous Sync Data: ", prev);
+			console.log("New Sync Data: ", {
+				...prev,
+				[syncType]: {
+					...prev?.[syncType],
+					[normalizeMediatype(
+						props.media._source.info_labels.mediatype,
+					)]: [...mediaList, props.media],
+				},
+			});
+
+			return {
+				...prev,
+				[syncType]: {
+					...prev?.[syncType],
+					[normalizeMediatype(
+						props.media._source.info_labels.mediatype,
+					)]: [...mediaList, props.media],
+				},
+			};
+		});
+	}
+
+	async function handleSyncDeletePress(e: Event) {
+		e.stopPropagation();
+		const removeMedia = await handleSyncDelete(
+			// @ts-ignore because the button that calls the handler won't be available if they are not on any of the sync pages
+			props.currentDisplay,
+			props.media._source.info_labels.mediatype,
+			displayDetails()?.title,
+			mediaSource().info_labels.year,
+			mediaSource().services,
+			traktToken(),
+			addAlert,
+			setShowLoader,
+		);
+		if (removeMedia === "success") {
+			props.onRemove();
+		}
 	}
 
 	return (
@@ -287,33 +341,51 @@ function MediaCard(props: MediaCardProps) {
 								</p>
 							</div>
 						</div>
-						<Show when={props.currentDisplay === "media"}>
-							<div class="flex items-center justify-between">
-								<button
-									class="group flex h-[50px] w-[50px] items-center justify-center space-x-4 rounded-2xl border-none bg-[rgba(249,249,249,0.20)] text-lg font-bold tracking-wide text-[#F9F9F9] !outline-none backdrop-blur-[5px] hover:bg-[#F9F9F9] hover:text-black-1"
-									onclick={(e) =>
-										handleSyncPress("favorites", e)
-									}
-								>
-									<IconHeart
-										width={22}
-										class="group-hover:-fill-black-1"
-									/>
-								</button>
+						<Switch>
+							<Match when={props.currentDisplay === "media"}>
+								<div class="flex items-center justify-between">
+									<button
+										class="group flex h-[50px] w-[50px] items-center justify-center space-x-4 rounded-2xl border-none bg-[rgba(249,249,249,0.20)] text-lg font-bold tracking-wide text-[#F9F9F9] !outline-none backdrop-blur-[5px] hover:bg-[#F9F9F9] hover:text-black-1"
+										onclick={(e) =>
+											handleSyncPress("favorites", e)
+										}
+									>
+										<IconHeart
+											width={22}
+											class="group-hover:-fill-black-1"
+										/>
+									</button>
 
-								<button
-									class="group flex h-[50px] w-[50px] items-center justify-center space-x-4 rounded-2xl border-none bg-[rgba(249,249,249,0.20)] text-lg font-bold tracking-wide text-[#F9F9F9] !outline-none backdrop-blur-[5px] hover:bg-[#F9F9F9] hover:text-black-1"
-									onclick={(e) =>
-										handleSyncPress("watchlist", e)
-									}
-								>
-									<IconBookmark
-										width={22}
-										class="group-hover:-fill-black-1"
-									/>
-								</button>
-							</div>
-						</Show>
+									<button
+										class="group flex h-[50px] w-[50px] items-center justify-center space-x-4 rounded-2xl border-none bg-[rgba(249,249,249,0.20)] text-lg font-bold tracking-wide text-[#F9F9F9] !outline-none backdrop-blur-[5px] hover:bg-[#F9F9F9] hover:text-black-1"
+										onclick={(e) =>
+											handleSyncPress("watchlist", e)
+										}
+									>
+										<IconBookmark
+											width={22}
+											class="group-hover:-fill-black-1"
+										/>
+									</button>
+								</div>
+							</Match>
+
+							<Match when={props.currentDisplay !== "media"}>
+								<div class="flex items-center justify-between">
+									<button
+										class="group flex h-[50px] w-[50px] items-center justify-center space-x-4 rounded-2xl border-none bg-red-700 text-lg font-bold tracking-wide text-[#F9F9F9] !outline-none backdrop-blur-[5px] hover:bg-yellow-300 hover:text-black-1"
+										onclick={(e) =>
+											handleSyncDeletePress(e)
+										}
+									>
+										<IconTrashX
+											width={22}
+											class="group-hover:-fill-black-1"
+										/>
+									</button>
+								</div>
+							</Match>
+						</Switch>
 					</div>
 				</div>
 			</div>

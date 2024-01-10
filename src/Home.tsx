@@ -17,6 +17,7 @@ import {
 	checkWebshareStatus,
 	filterByTraktID,
 	getDefaultlist,
+	normalizeMediatype,
 } from "@/utils/general";
 import Navbar from "@/components/Navbar";
 import {
@@ -40,6 +41,7 @@ import {
 import AuthenticateTrakt from "./components/AuthenticateTrakt";
 import { useSettings } from "./SettingsContext";
 import { useLoader } from "./LoaderContext";
+import { makePersisted } from "@solid-primitives/storage";
 
 type PaginationType = {
 	[page in PageType]: number;
@@ -63,10 +65,12 @@ interface PageMediaObj {
 	media: MediaObj[];
 }
 
-type SyncDataObj = {
+export type SyncDataObj = {
 	[sync in SyncType]?: {
 		movies: MediaObj[];
-		tvshows: MediaObj[];
+		shows: MediaObj[];
+		seasons?: MediaObj[];
+		episodes?: MediaObj[];
 	};
 };
 
@@ -78,7 +82,9 @@ export default function Home() {
 	const { setShowLoader } = useLoader();
 
 	const [display, setDisplay] = createSignal<"media" | SyncType>("media");
-	const [syncData, setSyncData] = createSignal<SyncDataObj>();
+	const [syncData, setSyncData] = makePersisted(createSignal<SyncDataObj>(), {
+		name: "trakt-sync",
+	});
 	const [hasNetwork, setHasNetwork] = createSignal(true);
 	const [isAuthenticated, setIsAuthenticated] = createSignal(false);
 	const [openLogin, setOpenLogin] = createSignal(false);
@@ -334,6 +340,10 @@ export default function Home() {
 					});
 				} else {
 					setSyncData((prev) => {
+						console.log(
+							"Setting sync data",
+							syncInfo.result.hits.hits,
+						);
 						return {
 							...prev,
 							[type]: {
@@ -342,9 +352,8 @@ export default function Home() {
 							},
 						};
 					});
+					setDisplay(type);
 				}
-
-				setDisplay(type);
 			} else {
 				addAlert({
 					type: "info",
@@ -392,8 +401,12 @@ export default function Home() {
 	function determineMedia() {
 		// @ts-ignore
 		const dataToDisplay = syncData()?.[display()]?.["movies"];
+		console.log(dataToDisplay);
 
 		if (display() === "media" || !dataToDisplay?.length) {
+			if (!dataToDisplay?.length) {
+				setDisplay("media");
+			}
 			return pageMedia()?.media;
 		}
 
@@ -406,12 +419,50 @@ export default function Home() {
 					title: `You don't have any ${displayReadableName()}`,
 					message: `Add some media to your ${display()}`,
 				});
+				setDisplay("media");
 			}
 		}
 	}
 
 	function handleSyncDisplayBackPress() {
 		setDisplay("media");
+	}
+
+	function handleRemoveMedia(media: MediaObj) {
+		const currentDisplay = display();
+
+		if (currentDisplay === "media") {
+			console.error(
+				"display() is not meant to be set to `media` at this stage.",
+			);
+		} else {
+			setSyncData((prev) => {
+				const mediaList =
+					prev?.[currentDisplay]?.[
+						normalizeMediatype(media._source.info_labels.mediatype)
+					];
+
+				console.log({
+					...prev,
+					[display()]: {
+						...prev?.[currentDisplay],
+						[normalizeMediatype(
+							media._source.info_labels.mediatype,
+						)]: mediaList?.filter((item) => item !== media),
+					},
+				});
+
+				return {
+					...prev,
+					[display()]: {
+						...prev?.[currentDisplay],
+						[normalizeMediatype(
+							media._source.info_labels.mediatype,
+						)]: mediaList?.filter((item) => item !== media),
+					},
+				};
+			});
+		}
 	}
 
 	return (
@@ -456,6 +507,8 @@ export default function Home() {
 							onCardFocus={onCardFocus}
 							isSidebarOpen={hideSidebar()}
 							handleBackPress={handleSyncDisplayBackPress}
+							onRemoveMedia={handleRemoveMedia}
+							setSyncData={setSyncData}
 						/>
 					</div>
 					<Show when={display() === "media"}>

@@ -682,6 +682,48 @@ export async function addToDefaultList(
 	}
 }
 
+export async function removeFromDefaultList(
+	syncType: SyncType,
+	type: TRAKT_MEDIA_TYPE,
+	title: string,
+	year: number,
+	ids: TraktSyncIDs,
+	traktToken: string,
+) {
+	try {
+		const SYNC_ENDPOINT =
+			syncType === "watchlist" ? WATCHLIST_ENDPOINT : FAVORITES_ENDPOINT;
+
+		const response = await axiosInstance.post(
+			traktProxy + SYNC_ENDPOINT + "/remove",
+			{
+				[type]: [
+					{
+						title,
+						year,
+						ids,
+					},
+				],
+			},
+			{
+				headers: {
+					Authorization: `Bearer ${traktToken}`,
+					...traktAuthConfig.headers,
+				},
+				cache: false,
+			},
+		);
+
+		return {
+			status: "success",
+			result: response.data,
+			error: null,
+		};
+	} catch (error) {
+		return { status: "error", error: error as AxiosError, result: null };
+	}
+}
+
 export function normalizeMediatype(mediatype: string): TRAKT_MEDIA_TYPE {
 	let normal: TRAKT_MEDIA_TYPE = "movies";
 
@@ -867,6 +909,68 @@ export async function handleSync(
 			addAlert({
 				title: `Item is already in ${displayName}`,
 				message: "No need to add it again.",
+				type: "info",
+			});
+		}
+	}
+}
+
+export async function handleSyncDelete(
+	syncType: SyncType,
+	mediatype: TYPE_MEDIA,
+	mediaTitle: string,
+	releaseYear: number,
+	services: MediaServices,
+	traktToken: string,
+	addAlert: (alert: AlertData) => void,
+	setShowLoader: (newVal: boolean) => void,
+) {
+	if (traktToken.length === 0) {
+		addAlert({
+			type: "error",
+			title: "Trakt.TV Authentication Required",
+			message: "Click the Login button in the Sidebar to continue.",
+		});
+		return;
+	}
+	setShowLoader(true);
+
+	const traktMediaType = normalizeMediatype(mediatype);
+
+	const displayName = syncType.charAt(0).toUpperCase() + syncType.slice(1);
+
+	const response = await removeFromDefaultList(
+		syncType,
+		traktMediaType,
+		mediaTitle,
+		releaseYear,
+		normalizeServices(services),
+		traktToken,
+	);
+	setShowLoader(false);
+
+	if (response.status === "error") {
+		addAlert({
+			title:
+				response.error?.message ||
+				`Failed to add item to Your ${displayName}`,
+			type: "error",
+		});
+	} else if (response.status === "success") {
+		if (response?.result?.deleted[traktMediaType] === 1) {
+			addAlert({
+				title: `<em>${mediaTitle}</em>&nbsp; removed from ${displayName}`,
+				type: "success",
+			});
+			return "success";
+		} else if (
+			response?.result?.not_found[traktMediaType][0]?.title === mediaTitle
+		) {
+			addAlert({
+				title: `${
+					mediatype === "movie" ? "Movie" : "TVShow"
+				} not found`,
+				message: "Trakt.TV does not recognize this item.",
 				type: "info",
 			});
 		}
