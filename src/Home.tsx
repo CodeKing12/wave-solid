@@ -625,6 +625,8 @@ export default function Home() {
 				authToken={authToken()}
 				onAuth={openLoginHandler}
 				onExit={onMediaModalClose}
+				syncLength={getSyncDataLength()}
+				setSyncData={setSyncData}
 			/>
 			{/* </Show>
 			</Transition> */}

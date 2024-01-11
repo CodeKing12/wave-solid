@@ -30,6 +30,8 @@ export type TRAKT_MEDIA_TYPE = "movies" | "shows" | "seasons" | "episodes";
 export type TRAKT_MEDIA_TYPE_SINGULAR = "movie" | "show" | "season" | "episode";
 export type TRAKT_MEDIA_SORT = "rank" | "added" | "released" | "title";
 
+export type TraktIDType = "trakt" | "tmdb" | "imdb" | "slug" | "tvdb" | "csfd";
+
 export type TraktSyncIDs = {
 	trakt: number;
 	tmdb: number;

@@ -35,8 +35,8 @@ import { useSettings } from "@/SettingsContext";
 import {
 	FAVORITES_ENDPOINT,
 	GET_DEVICE_CODE,
+	HISTORY_ENDPOINT,
 	POLL_ACCESS_TOKEN,
-	TRAKT_API,
 	WATCHLIST_ENDPOINT,
 	traktAuthConfig,
 	traktClientId,
@@ -49,6 +49,7 @@ import {
 	SyncType,
 	TRAKT_MEDIA_SORT,
 	TRAKT_MEDIA_TYPE,
+	TraktIDType,
 	TraktSyncIDs,
 	TraktTokenRetriever,
 } from "@/components/TraktTypes";
@@ -737,10 +738,15 @@ export function normalizeMediatype(mediatype: string): TRAKT_MEDIA_TYPE {
 
 export function normalizeServices(services: MediaServices) {
 	const syncIDs: any = {};
+	const traktServices: TraktIDType[] = ["trakt", "imdb", "tmdb", "slug"];
 
-	["trakt", "imdb", "tmdb", "slug"].map((id) => {
+	traktServices.map((id) => {
 		if (services.hasOwnProperty(id)) {
-			syncIDs[id] = services[id];
+			let value = services[id];
+			if (["trakt", "tmdb"].includes(id) && typeof value === "string") {
+				value = Number.parseInt(value);
+			}
+			syncIDs[id] = value;
 		}
 	});
 
@@ -975,5 +981,43 @@ export async function handleSyncDelete(
 				type: "info",
 			});
 		}
+	}
+}
+
+export async function addToTraktHistory(
+	type: TRAKT_MEDIA_TYPE,
+	title: string,
+	year: number,
+	ids: TraktSyncIDs,
+	traktToken: string,
+) {
+	try {
+		const response = await axiosInstance.post(
+			traktProxy + HISTORY_ENDPOINT,
+			{
+				[type]: [
+					{
+						title,
+						year,
+						ids,
+					},
+				],
+			},
+			{
+				headers: {
+					Authorization: `Bearer ${traktToken}`,
+					...traktAuthConfig.headers,
+				},
+				cache: false,
+			},
+		);
+
+		return {
+			status: "success",
+			result: response.data,
+			error: null,
+		};
+	} catch (error) {
+		return { status: "error", error: error as AxiosError, result: null };
 	}
 }

@@ -6,10 +6,13 @@ import {
 	TOKEN_PARAM_VALUE,
 } from "./constants";
 import {
+	addToTraktHistory,
 	checkExplicitContent,
 	getMediaStreams,
 	getStreamUrl,
 	handleSync,
+	normalizeMediatype,
+	normalizeServices,
 	resolveArtItem,
 	setWidths,
 } from "@/utils/general";
@@ -46,10 +49,12 @@ import {
 import FocusLeaf from "./Utilities/FocusLeaf";
 import AVPlayer from "./Player/AVPlayer";
 import { Switch } from "solid-js";
-import { SyncType } from "./TraktTypes";
+import { SyncDataLength, SyncType } from "./TraktTypes";
 import { useAlert } from "@/AlertContext";
 import { useLoader } from "@/LoaderContext";
 import { useSettings } from "@/SettingsContext";
+import { Setter } from "solid-js";
+import { SyncDataObj } from "@/Home";
 
 interface MediaModalProps {
 	show: boolean;
@@ -58,6 +63,8 @@ interface MediaModalProps {
 	placeholderImg: string;
 	onAuth: () => void;
 	onExit: () => void;
+	syncLength: SyncDataLength;
+	setSyncData: Setter<SyncDataObj | undefined>;
 }
 
 export interface SeriesData {
@@ -395,7 +402,7 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 	async function handleSyncPress(syncType: SyncType, e?: Event) {
 		e?.stopPropagation();
 		if (props.media) {
-			await handleSync(
+			const syncItem = await handleSync(
 				syncType,
 				props.media?._source.info_labels.mediatype,
 				displayDetails()?.title,
@@ -404,6 +411,43 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 				traktToken(),
 				addAlert,
 				setShowLoader,
+			);
+
+			if (syncItem === "success") {
+				if ((props.syncLength?.[syncType] ?? 0) > 0) {
+					props.setSyncData((prev) => {
+						console.log(prev?.[syncType] ?? []);
+
+						console.log("Previous Sync Data: ", prev);
+						console.log("New Sync Data: ", {
+							...prev,
+							[syncType]: [
+								...(prev?.[syncType] ?? []),
+								props.media,
+							],
+						});
+
+						return {
+							...prev,
+							[syncType]: [
+								...(prev?.[syncType] ?? []),
+								props.media,
+							],
+						};
+					});
+				}
+			}
+		}
+	}
+
+	async function handleHistory() {
+		if (props.media) {
+			await addToTraktHistory(
+				normalizeMediatype(props.media?._source.info_labels.mediatype),
+				displayDetails().title,
+				props.media?._source.info_labels.year,
+				normalizeServices(props.media?._source.services),
+				traktToken(),
 			);
 		}
 	}
@@ -822,6 +866,7 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 								url={mediaUrl()}
 								show={showPlayer()}
 								onQuit={onPlayerExit}
+								addToTraktHistory={handleHistory}
 								canPlayonTizen={isTizenTv && hasWebApi}
 							/>
 						</Match>

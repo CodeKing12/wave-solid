@@ -8,6 +8,7 @@ export const GET_DEVICE_CODE = "/oauth/device/code";
 export const POLL_ACCESS_TOKEN = "/oauth/device/token";
 export const FAVORITES_ENDPOINT = "/sync/favorites";
 export const WATCHLIST_ENDPOINT = "/sync/watchlist";
+export const HISTORY_ENDPOINT = "/sync/history";
 
 export const traktClientId = import.meta.env.PROD
 	? import.meta.env.VITE_CLIENT_ID

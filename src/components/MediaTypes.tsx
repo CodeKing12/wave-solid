@@ -1,6 +1,16 @@
-export interface MediaServices {
-	[name: string]: string;
-}
+export type MediaServiceType =
+	| "csfd"
+	| "trakt"
+	| "tmdb"
+	| "tvdb"
+	| "fanart"
+	| "imdb"
+	| "trakt_with_type"
+	| "slug";
+
+export type MediaServices = {
+	[name in MediaServiceType]: string;
+};
 
 export type TYPE_MEDIA =
 	| "movie"

@@ -1,9 +1,3 @@
-Added descriptive error messages for failed Axios Requests
-Made the animations for Alerts to be much smoother
-Added an indicator for clicked buttons/loading APIs
-Implemented Trakt.TV authentication and persistent token storage, with UI and error/warning/message displays
-Implemented Add to Favorites & Add to WatchList functionality
-Implemented functionality to retrieve synced media from Trakt and get their equivalent Stream Cinema Media
-Added a User Interface for viewing synced media
-Created a nodejs proxy for calling the SCC & Trakt APIs on my local device (because these APIs have limitations in browsers)
-Added smooth transitions for the MediaCards
+Made AVPlayer quit when the stream is completed
+AVPlayer automatically adds items to your watched history when you start watching them
+Fixed a bug in the adding of sync items through the MediaModal
