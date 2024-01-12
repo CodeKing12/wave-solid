@@ -204,6 +204,7 @@ export interface SeriesParentInfoLabel {
 }
 
 export interface SeasonSource {
+	original_language: string;
 	parent_id: string;
 	networks: string[];
 	cast: Cast[];
@@ -243,3 +244,9 @@ export type Info2 = {
 	title: string;
 	plot: string;
 };
+
+export type StreamClickType = (
+	stream: StreamObj,
+	media: MediaObj | SeriesObj,
+	isEnterpress?: boolean,
+) => void;

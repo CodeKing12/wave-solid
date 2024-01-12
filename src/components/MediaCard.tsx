@@ -47,7 +47,10 @@ export interface MediaCardProps {
 	onFocus: (focusDetails: FocusableComponentLayout) => void;
 }
 
-export function getDisplayDetails(mediaI18n: I18nInfoLabel[]) {
+export function getDisplayDetails(
+	mediaI18n: I18nInfoLabel[],
+	originalTitle: string,
+) {
 	let selectedDetails;
 
 	selectedDetails = mediaI18n?.find(
@@ -81,6 +84,10 @@ export function getDisplayDetails(mediaI18n: I18nInfoLabel[]) {
 		selectedDetails?.art?.poster.startsWith("//")
 	) {
 		selectedDetails.art.poster = "https:" + selectedDetails?.art?.poster;
+	}
+
+	if (!selectedDetails?.title || selectedDetails?.title.length === 0) {
+		selectedDetails.title = originalTitle;
 	}
 
 	return selectedDetails;
@@ -145,16 +152,10 @@ function MediaCard(props: MediaCardProps) {
 		}
 	});
 	const displayDetails = () => {
-		let details: I18nInfoLabel;
-
-		if (mediaSource()?.i18n_info_labels) {
-			details = getDisplayDetails(mediaSource().i18n_info_labels);
-		} else {
-			details = {} as I18nInfoLabel;
-		}
-		if (!details?.title || details?.title.length === 0) {
-			details.title = mediaSource()?.info_labels?.originaltitle;
-		}
+		let details = getDisplayDetails(
+			mediaSource().i18n_info_labels,
+			mediaSource().info_labels.originaltitle,
+		);
 
 		return details;
 	};

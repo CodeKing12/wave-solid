@@ -301,11 +301,13 @@ export default function Home() {
 		setModalPlaceholder(placeholderUrl || "");
 	};
 
-	async function showSynced(type: SyncType) {
+	async function showSynced(type: SyncType, page?: number) {
+		// If the display is "media" (the regular display), do nothing
 		if (display() === type) {
 			setDisplay("media");
 			return;
 		}
+		// If the data has already been fetched, don't fetch it again.
 		if (type !== "history" && (syncData()?.[type]?.length ?? 0) > 0) {
 			setDisplay(type);
 			return;
@@ -333,6 +335,7 @@ export default function Home() {
 				type: "error",
 			});
 		} else {
+			// Generate the trakt_with_type ids for filtering with SCC
 			const ids: string[] = traktSynced.result.map(
 				(item: TraktDefaultListItem) =>
 					`${normalizeTraktService(item.type)}:${item[item.type]?.ids

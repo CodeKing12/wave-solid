@@ -2,7 +2,7 @@
 import { FocusContext, FocusDetails, useFocusable } from "@/spatial-nav";
 import Episode from "./Episode";
 import { SeasonStreamObj, SeriesData } from "./MediaModal";
-import { SeriesObj, StreamObj } from "./MediaTypes";
+import { SeriesObj, StreamClickType } from "./MediaTypes";
 import { For } from "solid-js";
 
 interface EpisodeListProps {
@@ -12,7 +12,7 @@ interface EpisodeListProps {
 	isLoadingEpisodeStreams: string;
 	isFocusable: boolean;
 	episodeStreams: SeasonStreamObj;
-	onEpisodeStreamClick: (stream: StreamObj, isEnterpress?: boolean) => void;
+	onEpisodeStreamClick: StreamClickType;
 	onEpisodeClick: (episode: SeriesObj) => void;
 	onEpisodeFocus: (focusDetails: FocusDetails) => void;
 	onEpisodeStreamFocus?: (focusDetails: FocusDetails) => void;

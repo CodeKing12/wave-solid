@@ -733,12 +733,16 @@ export async function removeFromDefaultList(
 	}
 }
 
-export function normalizeMediatype(mediatype: string): TRAKT_MEDIA_TYPE {
-	let normal: TRAKT_MEDIA_TYPE = "movies";
+export function normalizeMediatype(mediatype: TYPE_MEDIA): TRAKT_MEDIA_TYPE {
+	let normal: TRAKT_MEDIA_TYPE;
 
 	switch (mediatype) {
 		case "tvshow":
 			normal = "shows";
+			break;
+		default:
+			normal = (mediatype + "s") as TRAKT_MEDIA_TYPE;
+			break;
 	}
 
 	return normal;

@@ -22,7 +22,6 @@ import Episode from "./Episode";
 import Season from "./Season";
 import axiosInstance from "@/utils/axiosInstance";
 import EpisodeList from "./EpisodeList";
-import PlayMedia from "./PlayMedia";
 import {
 	IconArrowBackUp,
 	IconBookmark,
@@ -124,13 +123,14 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 		let details: I18nInfoLabel;
 
 		if (props.media?._source?.i18n_info_labels) {
-			details = getDisplayDetails(props.media?._source.i18n_info_labels);
+			details = getDisplayDetails(
+				props.media?._source.i18n_info_labels,
+				props.media?._source.info_labels.originaltitle,
+			);
 		} else {
-			details = {} as I18nInfoLabel;
-		}
-		if (!details?.title || details?.title.length === 0) {
-			details.title =
-				props.media?._source?.info_labels?.originaltitle ?? "";
+			details = {
+				title: props.media?._source?.info_labels?.originaltitle ?? "",
+			} as I18nInfoLabel;
 		}
 
 		return details;
@@ -288,7 +288,11 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 		streamClasses.forEach((streamClass) => setWidths(streamClass));
 	});
 
-	async function handleStreamPlay(stream: StreamObj, isEnterpress?: boolean) {
+	async function handleStreamPlay(
+		stream: StreamObj,
+		media?: MediaObj | SeriesObj,
+		isEnterpress?: boolean,
+	) {
 		if (props.authToken.length) {
 			setIsLoadingUrl(true);
 			setSelectedStream(stream);
@@ -302,7 +306,7 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 				}
 				setMediaUrl(mediaLink);
 				setShowPlayer(true);
-				handleHistory();
+				handleHistory(media);
 				prevShowPlayer = true;
 			}
 			setIsLoadingUrl(false);
@@ -441,13 +445,16 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 		}
 	}
 
-	async function handleHistory() {
-		if (props.media) {
+	async function handleHistory(media?: MediaObj | SeriesObj) {
+		if (media) {
 			await addToTraktHistory(
-				normalizeMediatype(props.media?._source.info_labels.mediatype),
-				displayDetails().title,
-				props.media?._source.info_labels.year,
-				normalizeServices(props.media?._source.services),
+				normalizeMediatype(media._source.info_labels.mediatype),
+				getDisplayDetails(
+					media._source.i18n_info_labels,
+					media._source.info_labels.originaltitle,
+				).title,
+				media._source.info_labels.year,
+				normalizeServices(media._source.services),
 				traktToken(),
 			);
 		}
@@ -506,16 +513,18 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 							voteCount={reviews().voteCount}
 							onFocus={onDetailFocus}
 						/>
-						{props.authToken.length ? (
-							""
-						) : (
+						<Show when={!props.authToken.length}>
 							<p class="my-5 text-lg font-medium text-red-500">
 								Login to watch
 							</p>
-						)}
-						{movieDetails()?.info_labels.mediatype === "tvshow" ? (
-							""
-						) : (
+						</Show>
+						{/* Show the list of streams when the mediatype is not a tvshow. If it is a tvshow, the list of seasons or the list of episodes will be shown instead. */}
+						<Show
+							when={
+								movieDetails()?.info_labels.mediatype !==
+								"tvshow"
+							}
+						>
 							<div
 								class={`media-streams mb-6 mt-12 w-full opacity-100 duration-300 ease-in-out`}
 								classList={{
@@ -557,6 +566,7 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 													) =>
 														handleStreamPlay(
 															stream,
+															props?.media,
 															isEnterpress,
 														)
 													}
@@ -567,7 +577,8 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 									</Show>
 								</div>
 							</div>
-						)}
+						</Show>
+
 						<div class="mt-16 flex flex-col items-center justify-center xsm:flex-row xsm:items-start xsm:justify-start xl:mt-10 xl:space-x-12">
 							<FocusLeaf
 								focusedStyles="[&>button]:!bg-opacity-5 [&>button]:!border-white [&>button]:!text-white"
@@ -758,10 +769,12 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 																}
 																onEpisodeStreamClick={(
 																	stream,
+																	episode,
 																	isEnterpress,
 																) =>
 																	handleStreamPlay(
 																		stream,
+																		episode,
 																		isEnterpress,
 																	)
 																}
@@ -796,14 +809,8 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 												] || {}
 											}
 											onEpisodeClick={getEpisodeStreams}
-											onEpisodeStreamClick={(
-												stream,
-												isEnterpress,
-											) =>
-												handleStreamPlay(
-													stream,
-													isEnterpress,
-												)
+											onEpisodeStreamClick={
+												handleStreamPlay
 											}
 											isLoadingEpisodeStreams={isLoadingEpisodeStreams()}
 											onEpisodeFocus={onEpisodeFocus}

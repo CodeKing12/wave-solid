@@ -1,7 +1,7 @@
 import { createEffect, createResource } from "solid-js";
 import { getDisplayDetails, getRatingAggr } from "./MediaCard";
 import { convertSecondsToTime, getMediaStreams } from "@/utils/general";
-import { SeriesObj, StreamObj } from "./MediaTypes";
+import { SeriesObj, StreamClickType, StreamObj } from "./MediaTypes";
 import StreamEpisodes from "./StreamEpisodes";
 import { IconMovieOff, IconPlayerPlayFilled } from "@tabler/icons-solidjs";
 import { Spinner, SpinnerType } from "solid-spinner";
@@ -15,12 +15,13 @@ export interface EpisodeProps {
 	// isLoadingStreams: boolean;
 	onFocus: ({ y }: { y: number }) => void;
 	onEpisodeStreamFocus?: (focusDetails: FocusDetails) => void;
-	onEpisodeStreamClick: (stream: StreamObj, isEnterpress?: boolean) => void;
+	onEpisodeStreamClick: StreamClickType;
 }
 
 export default function Episode(props: EpisodeProps) {
 	const episodeDetails = getDisplayDetails(
 		props.episode._source.i18n_info_labels,
+		props.episode._source.info_labels.originaltitle,
 	);
 	const hasNoStreams = () =>
 		Array.isArray(episodeStreams()) && !episodeStreams()?.length;
@@ -183,7 +184,13 @@ export default function Episode(props: EpisodeProps) {
 			<StreamEpisodes
 				authToken={props.authToken}
 				episodeStreams={episodeStreams()}
-				onEpisodeStreamClick={props.onEpisodeStreamClick}
+				onEpisodeStreamClick={(stream, isEnterpress) =>
+					props.onEpisodeStreamClick(
+						stream,
+						props.episode,
+						isEnterpress,
+					)
+				}
 				onEpisodeStreamFocus={modifyStreamOffset}
 				customFocusKey={props.episode._id}
 			/>
