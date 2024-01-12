@@ -49,6 +49,7 @@ import {
 	SyncType,
 	TRAKT_MEDIA_SORT,
 	TRAKT_MEDIA_TYPE,
+	TRAKT_MEDIA_TYPE_SINGULAR,
 	TraktIDType,
 	TraktSyncIDs,
 	TraktTokenRetriever,
@@ -614,12 +615,19 @@ export async function getDefaultlist(
 	}
 
 	const LIST_ENDPOINT =
-		type === "watchlist" ? WATCHLIST_ENDPOINT : FAVORITES_ENDPOINT;
+		type === "watchlist"
+			? WATCHLIST_ENDPOINT
+			: type === "history"
+			  ? HISTORY_ENDPOINT
+			  : FAVORITES_ENDPOINT;
 
 	try {
 		const response = await axiosInstance.get(
 			traktProxy + LIST_ENDPOINT + query,
 			{
+				params: {
+					limit: type === "history" ? 50 : "",
+				},
 				headers: {
 					Authorization: `Bearer ${traktToken}`,
 					...traktAuthConfig.headers,
@@ -814,7 +822,7 @@ export async function filterByTraktID(ids: string[]) {
 	try {
 		const response = await axiosInstance.get(
 			MEDIA_ENDPOINT +
-				CONSTRUCT_PATH_GET_SERVICE_DATA("trakt", ids, "*") +
+				CONSTRUCT_PATH_GET_SERVICE_DATA("trakt_with_type", ids, "*") +
 				`&${TOKEN_PARAM_NAME}=${TOKEN_PARAM_VALUE}`,
 		);
 
@@ -1020,4 +1028,18 @@ export async function addToTraktHistory(
 	} catch (error) {
 		return { status: "error", error: error as AxiosError, result: null };
 	}
+}
+
+export function normalizeTraktService(type: TRAKT_MEDIA_TYPE_SINGULAR) {
+	let normal;
+
+	switch (type) {
+		case "show":
+			normal = "tvshow";
+			break;
+		default:
+			normal = type;
+	}
+
+	return normal;
 }

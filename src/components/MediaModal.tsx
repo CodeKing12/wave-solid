@@ -302,6 +302,7 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 				}
 				setMediaUrl(mediaLink);
 				setShowPlayer(true);
+				handleHistory();
 				prevShowPlayer = true;
 			}
 			setIsLoadingUrl(false);
@@ -866,7 +867,6 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 								url={mediaUrl()}
 								show={showPlayer()}
 								onQuit={onPlayerExit}
-								addToTraktHistory={handleHistory}
 								canPlayonTizen={isTizenTv && hasWebApi}
 							/>
 						</Match>

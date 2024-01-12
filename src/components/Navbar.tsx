@@ -97,8 +97,14 @@ const Navbar = function Navbar(props: NavProps) {
 						<FocusLeaf
 							focusedStyles="after:block animateUnderline"
 							class="hover:text-yellow-300"
+							onEnterPress={() => props.showSynced("history")}
 						>
-							<a class="cursor-pointer">History</a>
+							<a
+								class="cursor-pointer"
+								onclick={() => props.showSynced("history")}
+							>
+								History
+							</a>
 						</FocusLeaf>
 						<FocusLeaf
 							focusedStyles="after:block animateUnderline"

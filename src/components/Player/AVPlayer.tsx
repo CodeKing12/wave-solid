@@ -22,7 +22,6 @@ interface AVPlayerProps {
 	show: boolean;
 	url?: string;
 	canPlayonTizen: boolean;
-	addToTraktHistory: () => void;
 	onQuit: () => void;
 }
 
@@ -642,7 +641,6 @@ export default function AVPlayer(props: AVPlayerProps) {
 		// setAvailableAudio();
 		setMediaDuration(webapis.avplay.getDuration());
 		webapis.avplay.play();
-		props.addToTraktHistory();
 		setIsPending(false);
 		setPaused(false);
 	};

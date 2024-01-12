@@ -23,6 +23,7 @@ export interface MediaListProps {
 	onRemoveMedia: (media: MediaObj) => void;
 	syncLength: SyncDataLength;
 	setSyncData: Setter<SyncDataObj | undefined>;
+	history?: { [id: string]: number };
 }
 
 const MediaList = function MediaList(props: MediaListProps) {
@@ -101,6 +102,9 @@ const MediaList = function MediaList(props: MediaListProps) {
 										}
 										syncLength={props.syncLength}
 										setSyncData={props.setSyncData}
+										watchCount={
+											props.history?.[show()._id] ?? 0
+										}
 									/>
 								)}
 							</Index>

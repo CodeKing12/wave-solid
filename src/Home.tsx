@@ -17,6 +17,7 @@ import {
 	checkWebshareStatus,
 	filterByTraktID,
 	getDefaultlist,
+	normalizeTraktService,
 } from "@/utils/general";
 import Navbar from "@/components/Navbar";
 import {
@@ -41,7 +42,7 @@ import {
 import AuthenticateTrakt from "./components/AuthenticateTrakt";
 import { useSettings } from "./SettingsContext";
 import { useLoader } from "./LoaderContext";
-import { makePersisted } from "@solid-primitives/storage";
+// import { makePersisted } from "@solid-primitives/storage";
 
 type PaginationType = {
 	[page in PageType]: number;
@@ -83,9 +84,15 @@ export default function Home() {
 	const { setShowLoader } = useLoader();
 
 	const [display, setDisplay] = createSignal<"media" | SyncType>("media");
-	const [syncData, setSyncData] = makePersisted(createSignal<SyncDataObj>(), {
-		name: "trakt-sync",
-	});
+	const [syncData, setSyncData] = createSignal<SyncDataObj>();
+	// makePersisted(, {
+	// 	name: "trakt-sync",
+	// 	storage: sessionStorage,
+	// });
+	const [mediaHistory, setMediaHistory] = createSignal<{
+		[id: string]: number;
+	}>();
+
 	const [hasNetwork, setHasNetwork] = createSignal(true);
 	const [isAuthenticated, setIsAuthenticated] = createSignal(false);
 	const [openLogin, setOpenLogin] = createSignal(false);
@@ -299,7 +306,7 @@ export default function Home() {
 			setDisplay("media");
 			return;
 		}
-		if ((syncData()?.[type]?.length ?? 0) > 0) {
+		if (type !== "history" && (syncData()?.[type]?.length ?? 0) > 0) {
 			setDisplay(type);
 			return;
 		}
@@ -328,7 +335,8 @@ export default function Home() {
 		} else {
 			const ids: string[] = traktSynced.result.map(
 				(item: TraktDefaultListItem) =>
-					item[item.type]?.ids.trakt.toString(),
+					`${normalizeTraktService(item.type)}:${item[item.type]?.ids
+						.trakt}`,
 			);
 
 			if (ids.length > 0) {
@@ -351,11 +359,34 @@ export default function Home() {
 						return {
 							...prev,
 							[type]: [
-								...(prev?.[type] ?? []),
+								// ...(prev?.[type] ?? []),
 								...syncInfo.result.hits.hits,
 							],
 						};
 					});
+					if (type === "history") {
+						const watchCount: any = {};
+						console.log(traktSynced.result);
+						traktSynced.result.forEach(
+							(item: TraktDefaultListItem) => {
+								const itemId = item[item.type]?.ids.trakt ?? 0;
+								const sccServiceId = `${normalizeTraktService(
+									item.type,
+								)}:${itemId}`;
+								const media = syncInfo.result.hits.hits.find(
+									(media: MediaObj) =>
+										media._source.services.trakt ===
+										itemId.toString(),
+								);
+
+								watchCount[media?._id] = ids.filter(
+									(id) => id === sccServiceId.toString(),
+								).length;
+							},
+						);
+						console.log(watchCount);
+						setMediaHistory(watchCount);
+					}
 					setDisplay(type);
 				}
 			} else {
@@ -510,6 +541,7 @@ export default function Home() {
 							onRemoveMedia={handleRemoveMedia}
 							syncLength={getSyncDataLength()}
 							setSyncData={setSyncData}
+							history={mediaHistory()}
 						/>
 					</div>
 					<Show when={display() === "media"}>

@@ -16,7 +16,14 @@ import {
 	IconBookmark,
 	IconTrashX,
 } from "@tabler/icons-solidjs";
-import { Match, Setter, Switch, createEffect, createMemo } from "solid-js";
+import {
+	Match,
+	Setter,
+	Show,
+	Switch,
+	createEffect,
+	createMemo,
+} from "solid-js";
 import { FocusableComponentLayout } from "@/spatial-nav";
 import "@/css/media.css";
 import { useSettings } from "@/SettingsContext";
@@ -31,8 +38,9 @@ export interface MediaCardProps {
 	currentDisplay: SyncType | "media";
 	index: number;
 	media: MediaObj;
-	showMediaInfo: (mediaInfo: MediaObj) => void;
 	syncLength: SyncDataLength;
+	watchCount: number;
+	showMediaInfo: (mediaInfo: MediaObj) => void;
 	setSyncData: Setter<SyncDataObj | undefined>;
 	onRemove: () => void;
 	onEnterPress: (mediaInfo: MediaObj) => void;
@@ -328,51 +336,64 @@ function MediaCard(props: MediaCardProps) {
 								</p>
 							</div>
 						</div>
-						<Switch>
-							<Match when={props.currentDisplay === "media"}>
-								<div class="flex items-center justify-between">
-									<button
-										class="group flex h-[50px] w-[50px] items-center justify-center space-x-4 rounded-2xl border-none bg-[rgba(249,249,249,0.20)] text-lg font-bold tracking-wide text-[#F9F9F9] !outline-none backdrop-blur-[5px] hover:bg-[#F9F9F9] hover:text-black-1"
-										onclick={(e) =>
-											handleSyncPress("favorites", e)
-										}
-									>
-										<IconHeart
-											width={22}
-											class="group-hover:-fill-black-1"
-										/>
-									</button>
+						<div class="flex justify-between gap-4">
+							<Switch>
+								<Match when={props.currentDisplay === "media"}>
+									<div class="flex w-full items-center justify-between">
+										<button
+											class="group flex h-[50px] w-[50px] items-center justify-center space-x-4 rounded-2xl border-none bg-[rgba(249,249,249,0.20)] text-lg font-bold tracking-wide text-[#F9F9F9] !outline-none backdrop-blur-[5px] hover:bg-[#F9F9F9] hover:text-black-1"
+											onclick={(e) =>
+												handleSyncPress("favorites", e)
+											}
+										>
+											<IconHeart
+												width={22}
+												class="group-hover:-fill-black-1"
+											/>
+										</button>
 
-									<button
-										class="group flex h-[50px] w-[50px] items-center justify-center space-x-4 rounded-2xl border-none bg-[rgba(249,249,249,0.20)] text-lg font-bold tracking-wide text-[#F9F9F9] !outline-none backdrop-blur-[5px] hover:bg-[#F9F9F9] hover:text-black-1"
-										onclick={(e) =>
-											handleSyncPress("watchlist", e)
-										}
-									>
-										<IconBookmark
-											width={22}
-											class="group-hover:-fill-black-1"
-										/>
-									</button>
-								</div>
-							</Match>
+										<button
+											class="group flex h-[50px] w-[50px] items-center justify-center space-x-4 rounded-2xl border-none bg-[rgba(249,249,249,0.20)] text-lg font-bold tracking-wide text-[#F9F9F9] !outline-none backdrop-blur-[5px] hover:bg-[#F9F9F9] hover:text-black-1"
+											onclick={(e) =>
+												handleSyncPress("watchlist", e)
+											}
+										>
+											<IconBookmark
+												width={22}
+												class="group-hover:-fill-black-1"
+											/>
+										</button>
+									</div>
+								</Match>
 
-							<Match when={props.currentDisplay !== "media"}>
-								<div class="flex items-center justify-between">
-									<button
-										class="group flex h-[50px] w-[50px] items-center justify-center space-x-4 rounded-2xl border-none bg-red-700 text-lg font-bold tracking-wide text-[#F9F9F9] !outline-none backdrop-blur-[5px] hover:bg-yellow-300 hover:text-black-1"
-										onclick={(e) =>
-											handleSyncDeletePress(e)
-										}
-									>
-										<IconTrashX
-											width={22}
-											class="group-hover:-fill-black-1"
-										/>
-									</button>
+								<Match when={props.currentDisplay !== "media"}>
+									<div class="flex items-center justify-between">
+										<button
+											class="group flex h-[50px] w-[50px] items-center justify-center space-x-4 rounded-2xl border-none bg-red-700 text-lg font-bold tracking-wide text-[#F9F9F9] !outline-none backdrop-blur-[5px] hover:bg-yellow-300 hover:text-black-1"
+											onclick={(e) =>
+												handleSyncDeletePress(e)
+											}
+										>
+											<IconTrashX
+												width={22}
+												class="group-hover:-fill-black-1"
+											/>
+										</button>
+									</div>
+								</Match>
+							</Switch>
+							<Show when={props.watchCount > 1}>
+								<div class="relative flex items-center justify-center">
+									<IconStarFilled
+										class="text-yellow-300 text-opacity-90"
+										size={40}
+									/>
+									<p class="absolute mt-1 text-xl font-bold text-black-1">
+										{props.watchCount}
+									</p>
 								</div>
-							</Match>
-						</Switch>
+							</Show>
+						</div>
 					</div>
 				</div>
 			</div>
