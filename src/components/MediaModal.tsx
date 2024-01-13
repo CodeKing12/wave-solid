@@ -78,7 +78,11 @@ export interface SeriesStreamObj {
 	[seasonId: string]: SeasonStreamObj;
 }
 
-const MediaModal = function MediaModal(props: MediaModalProps) {
+export interface EpisodePagination {
+	[seasonId: string]: number;
+}
+
+function MediaModal(props: MediaModalProps) {
 	// console.log("MediaModal is re-rendering")
 	const isTizenTv = "tizen" in window;
 	const hasWebApi = "webapis" in window;
@@ -167,6 +171,8 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 	const [selectedSeason, setSelectedSeason] = createSignal<SeriesObj>();
 	const [selectedEpisode, setSelectedEpisode] = createSignal();
 	const [episodes, setEpisodes] = createSignal<SeriesData>({});
+	const [hasMoreEpisodes, setHasMoreEpisodes] =
+		createSignal<EpisodePagination>();
 	const [selectedStream, setSelectedStream] = createSignal<
 		StreamObj | undefined
 	>();
@@ -205,18 +211,26 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 		// console.log("Focused MediaModal")
 	};
 
-	async function getEpisodes(season: SeriesObj) {
+	async function getEpisodes(season?: SeriesObj, from?: number) {
+		if (!season) return;
 		try {
 			const response = await axiosInstance.get(
 				MEDIA_ENDPOINT + `/api/media/filter/v2/parent?sort=episode`,
 				{
 					params: {
-						value: season._id,
+						value: season?._id,
 						[TOKEN_PARAM_NAME]: TOKEN_PARAM_VALUE,
+						from: from ? from : undefined,
 					},
 				},
 			);
 			// console.log(response.data.hits.hits);
+			if (response.data.hits.total.value > 100) {
+				setHasMoreEpisodes((prev) => ({
+					...prev,
+					[season?._id]: response.data.hits.total.value,
+				}));
+			}
 			return response.data.hits.hits;
 		} catch (error) {
 			console.log(error);
@@ -458,6 +472,24 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 				traktToken(),
 			);
 		}
+	}
+
+	async function loadMoreEpisodes() {
+		// const currentEpisodes = episodes()?.[selectedSeason()?._id ?? ""] ?? [];
+		// const lastEpisodeId = currentEpisodes[currentEpisodes.length - 1]._id;
+		// setFocus(lastEpisodeId);
+
+		const seasonId = selectedSeason()?._id ?? 0;
+
+		const newEpisodes = await getEpisodes(
+			selectedSeason(),
+			episodes()[selectedSeason()?._id ?? ""].length,
+		);
+
+		setEpisodes((prevEpisodes) => ({
+			...prevEpisodes,
+			[seasonId]: [...prevEpisodes[seasonId], ...newEpisodes],
+		}));
 	}
 
 	// rating = ; // To get the rating as a fraction of 10. (Multiplying by 2 undoes the dividing by 2 in the getRatingAggr function)
@@ -821,6 +853,12 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 												showEpisodes() &&
 													selectedSeason(),
 											)}
+											total={
+												hasMoreEpisodes()?.[
+													selectedSeason()?._id ?? 0
+												] ?? 0
+											}
+											handleLoadMore={loadMoreEpisodes}
 										/>
 										{/* <div class="flex flex-col gap-4 flex-wrap max-w-full">
 													{
@@ -882,6 +920,6 @@ const MediaModal = function MediaModal(props: MediaModalProps) {
 			</div>
 		</FocusContext.Provider>
 	);
-};
+}
 
 export default MediaModal;
