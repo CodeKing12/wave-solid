@@ -59,7 +59,9 @@ const MediaList = function MediaList(props: MediaListProps) {
 					{/* fallback={<Spinner type={SpinnerType.puff} width={70} height={70} color="#fde047" class="!absolute top-[37%] left-1/2 -translate-x-1/2 -translate-y-1/2" />} */}
 					{/* Can use this for the placeholder: <Suspense></Suspense> */}
 					<Show
-						when={!props.isLoading}
+						when={
+							!props.isLoading || (props.media?.length ?? 0) > 0
+						}
 						fallback={
 							<Spinner
 								type={SpinnerType.puff}

@@ -42,6 +42,7 @@ import {
 import AuthenticateTrakt from "./components/AuthenticateTrakt";
 import { useSettings } from "./SettingsContext";
 import { useLoader } from "./LoaderContext";
+import { AxiosError } from "axios";
 // import { makePersisted } from "@solid-primitives/storage";
 
 type PaginationType = {
@@ -76,6 +77,21 @@ export type SyncDataObj = {
 	// };
 };
 
+export interface TraktPaginationDataObj {
+	watchlist?: {
+		itemCount: number;
+		pageCount: number;
+		currentPage: number;
+	};
+	history?: {
+		itemCount: number;
+		pageCount: number;
+		currentPage: number;
+	};
+	favorites?: null;
+	media?: null;
+}
+
 export default function Home() {
 	const { setRef, focusKey, focusSelf } = useFocusable({
 		forceFocus: true,
@@ -104,6 +120,14 @@ export default function Home() {
 
 	const dummyPagination: any = {};
 	allPages.map((page) => (dummyPagination[page] = 0));
+	const [traktPage, setTraktPage] = createSignal({
+		history: 0,
+		watchlist: 0,
+		favorites: 0,
+		media: 0,
+	});
+	const [traktPaginationData, setTraktPaginationData] =
+		createSignal<TraktPaginationDataObj>();
 	const [pagination, setPagination] =
 		createSignal<PaginationType>(dummyPagination);
 
@@ -190,12 +214,29 @@ export default function Home() {
 		// document.addEventListener("keydown", displayInputs)
 	});
 
-	const updatePagination = (page: PageType, increment?: number) => {
+	createEffect(() => {
+		if (traktPage()[display()] > 0 && display() !== "media") {
+			console.log("Getting New Page", traktPage()[display()]);
+			// @ts-ignore because I've added a check to make sure the fn isnt called when display() is "media"
+			showSynced(display(), true, traktPage()[display()] + 1);
+		}
+	});
+
+	const updatePagination = (page?: PageType, increment?: number) => {
 		// const prevPageValue = pagination()[page] || 0
-		setPagination((prevPagination) => ({
-			...prevPagination,
-			[page]: increment ? prevPagination[page] + increment : 0,
-		}));
+		if (!page && (display() === "watchlist" || display() === "history")) {
+			console.log(traktPage()[display()] + (increment ?? 0));
+			setTraktPage((prev) => ({
+				...prev,
+				[display()]: prev[display()] + (increment ?? 0),
+			}));
+		}
+		if (page) {
+			setPagination((prevPagination) => ({
+				...prevPagination,
+				[page]: increment ? prevPagination[page] + increment : 0,
+			}));
+		}
 	};
 
 	async function fetchPageMedia(
@@ -228,7 +269,9 @@ export default function Home() {
 
 			setDisplay("media");
 			return newState;
-		} catch (error) {
+		} catch (err) {
+			const error = err as AxiosError;
+
 			console.log(error);
 			addAlert({
 				type: "error",
@@ -301,14 +344,19 @@ export default function Home() {
 		setModalPlaceholder(placeholderUrl || "");
 	};
 
-	async function showSynced(type: SyncType, page?: number) {
-		// If the display is "media" (the regular display), do nothing
-		if (display() === type) {
+	async function showSynced(
+		type: SyncType,
+		isPagination = true,
+		page?: number,
+	) {
+		// If the display() for a type is clicked again, go back to the media display
+		console.log("Is It Pagination", isPagination);
+		if (display() === type && !isPagination) {
 			setDisplay("media");
 			return;
 		}
 		// If the data has already been fetched, don't fetch it again.
-		if (type !== "history" && (syncData()?.[type]?.length ?? 0) > 0) {
+		if (type === "favorites" && (syncData()?.[type]?.length ?? 0) > 0) {
 			setDisplay(type);
 			return;
 		}
@@ -324,7 +372,7 @@ export default function Home() {
 		}
 
 		setShowLoader(true);
-		const traktSynced = await getDefaultlist(type, traktToken());
+		const traktSynced = await getDefaultlist(type, traktToken(), page);
 
 		if (traktSynced.status === "error") {
 			setShowLoader(false);
@@ -335,6 +383,40 @@ export default function Home() {
 				type: "error",
 			});
 		} else {
+			if (
+				(type === "watchlist" || type === "history") &&
+				traktSynced.headers
+			) {
+				console.log(traktSynced.headers);
+				setTraktPaginationData((prev) => {
+					console.log({
+						...prev,
+						[type]: {
+							itemCount: Number.parseInt(
+								traktSynced.headers["x-pagination-item-count"],
+							),
+							pageCount: Number.parseInt(
+								traktSynced.headers["x-pagination-page-count"],
+							),
+							currentPage: Number.parseInt(
+								traktSynced.headers["x-pagination-page"],
+							),
+						},
+					});
+
+					return {
+						...prev,
+						[type]: {
+							itemCount:
+								traktSynced.headers["x-pagination-item-count"],
+							pageCount:
+								traktSynced.headers["x-pagination-page-count"],
+							currentPage:
+								traktSynced.headers["x-pagination-page"],
+						},
+					};
+				});
+			}
 			// Generate the trakt_with_type ids for filtering with SCC
 			const ids: string[] = traktSynced.result.map(
 				(item: TraktDefaultListItem) =>
@@ -362,8 +444,8 @@ export default function Home() {
 						return {
 							...prev,
 							[type]: [
-								// ...(prev?.[type] ?? []),
-								...syncInfo.result.hits.hits,
+								...(prev?.[type] ?? []),
+								[...syncInfo.result.hits.hits],
 							],
 						};
 					});
@@ -407,6 +489,7 @@ export default function Home() {
 			setShowLoader(false);
 		}
 	}
+
 	const hideSidebarHandler = (isHidden: boolean) => setHideSidebar(isHidden);
 	const openLoginHandler = () => setOpenLogin(true);
 	const closeLoginHandler = () => {
@@ -438,13 +521,14 @@ export default function Home() {
 
 	function determineMedia() {
 		// @ts-ignore
-		const dataToDisplay = syncData()?.[display()];
+		const dataToDisplay = syncData()?.[display()]?.[traktPage()[display()]];
 		console.log(dataToDisplay);
 
-		if (display() === "media" || !dataToDisplay?.length) {
-			if (!dataToDisplay?.length) {
-				setDisplay("media");
-			}
+		if (display() === "media") {
+			// || !dataToDisplay?.length
+			// if (!dataToDisplay?.length) {
+			// 	setDisplay("media");
+			// }
 			return pageMedia()?.media;
 		}
 
@@ -452,12 +536,13 @@ export default function Home() {
 			if (dataToDisplay?.length) {
 				return dataToDisplay;
 			} else {
-				addAlert({
-					type: "info",
-					title: `You don't have any ${displayReadableName()}`,
-					message: `Add some media to your ${display()}`,
-				});
-				setDisplay("media");
+				return [];
+				// addAlert({
+				// 	type: "info",
+				// 	title: `You don't have any ${displayReadableName()}`,
+				// 	message: `Add some media to your ${display()}`,
+				// });
+				// setDisplay("media");
 			}
 		}
 	}
@@ -526,7 +611,7 @@ export default function Home() {
 				>
 					<Navbar
 						onSearch={searchMedia}
-						showSynced={showSynced}
+						showSynced={(type) => showSynced(type, false)}
 						handleNav={navigateItem}
 						currentDisplay={display()}
 					/>
@@ -619,6 +704,102 @@ export default function Home() {
 											: ""
 									}`}
 									onClick={() => updatePagination(page(), +1)}
+								>
+									<span>Next</span>
+									{/* <ArrowRight size={32} variant='Bold' /> */}
+									<IconArrowRight size={32} />
+								</button>
+							</FocusLeaf>
+						</div>
+					</Show>
+					<Show
+						when={
+							(traktPaginationData()?.[display()]?.pageCount ??
+								0) > 1
+						}
+					>
+						<div
+							class={`mt-12 flex flex-col items-center space-y-7 sm:flex-row sm:justify-between sm:space-y-0 ${
+								pageMedia.loading
+									? "pointer-events-none opacity-40"
+									: "pointer-events-auto opacity-100"
+							}`}
+						>
+							<FocusLeaf
+								class={
+									traktPage()[display()] === 0
+										? "cursor-not-allowed"
+										: ""
+								}
+								focusedStyles="[&>button]:!bg-black-1 [&>button]:!border-yellow-300 [&>button]:!text-yellow-300"
+								isFocusable={traktPage()[display()] !== 0}
+								onEnterPress={() =>
+									updatePagination(undefined, -1)
+								}
+							>
+								<button
+									class={`flex items-center space-x-3 rounded-xl border-2 border-transparent bg-yellow-300 px-9 py-3 text-lg font-semibold text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 ${
+										traktPage()[display()] === 0
+											? "pointer-events-none opacity-40"
+											: ""
+									}`}
+									onClick={() =>
+										updatePagination(undefined, -1)
+									}
+								>
+									<IconArrowLeft size={32} />
+									<span>Previous</span>
+								</button>
+							</FocusLeaf>
+
+							<Show
+								when={
+									traktPaginationData()?.[display()]
+										?.pageCount
+								}
+							>
+								<p class="text-lg font-semibold text-gray-300">
+									Page:{" "}
+									<span class="ml-2 text-yellow-300">
+										{traktPage()[display()] + 1}
+									</span>{" "}
+									/{" "}
+									{
+										traktPaginationData()?.[display()]
+											?.pageCount
+									}
+								</p>
+							</Show>
+
+							<FocusLeaf
+								class={
+									traktPage()[display()] + 1 ===
+									traktPaginationData()?.[display()]
+										?.pageCount
+										? "cursor-not-allowed"
+										: ""
+								}
+								focusedStyles="[&>button]:!bg-black-1 [&>button]:!border-yellow-300 [&>button]:!text-yellow-300"
+								isFocusable={
+									traktPage()[display()] + 1 !==
+									traktPaginationData()?.[display()]
+										?.pageCount
+								}
+								onEnterPress={() =>
+									updatePagination(undefined, +1)
+								}
+							>
+								<button
+									class={`flex items-center space-x-3 rounded-xl border-2 border-transparent bg-yellow-300 px-9 py-3 text-lg font-semibold text-black-1 hover:border-yellow-300 hover:bg-black-1 hover:text-yellow-300 ${
+										traktPage()[display()] + 1 ===
+										traktPaginationData()?.[display()]
+											?.pageCount
+											? "pointer-events-none opacity-40"
+											: ""
+									}`}
+									onClick={() =>
+										updatePagination(undefined, +1)
+									}
 								>
 									<span>Next</span>
 									{/* <ArrowRight size={32} variant='Bold' /> */}

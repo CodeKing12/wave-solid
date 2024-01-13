@@ -603,6 +603,7 @@ export async function pollAPI(device_code: string) {
 export async function getDefaultlist(
 	type: SyncType,
 	traktToken: string,
+	page?: number,
 	mediaType?: TRAKT_MEDIA_TYPE,
 	sort?: TRAKT_MEDIA_SORT,
 ) {
@@ -626,7 +627,8 @@ export async function getDefaultlist(
 			traktProxy + LIST_ENDPOINT + query,
 			{
 				params: {
-					limit: type === "history" ? 50 : "",
+					limit: type === "favorites" ? undefined : 50,
+					page: page,
 				},
 				headers: {
 					Authorization: `Bearer ${traktToken}`,
@@ -638,12 +640,14 @@ export async function getDefaultlist(
 		return {
 			status: "success",
 			result: response.data,
+			headers: response.headers,
 			error: null,
 		};
 	} catch (error) {
 		return {
 			status: "error",
 			result: null,
+			headers: null,
 			error: error as AxiosError,
 		};
 	}
