@@ -216,7 +216,6 @@ export default function Home() {
 
 	createEffect(() => {
 		if (traktPage()[display()] > 0 && display() !== "media") {
-			console.log("Getting New Page", traktPage()[display()]);
 			// @ts-ignore because I've added a check to make sure the fn isnt called when display() is "media"
 			showSynced(display(), true, traktPage()[display()] + 1);
 		}
@@ -225,7 +224,6 @@ export default function Home() {
 	const updatePagination = (page?: PageType, increment?: number) => {
 		// const prevPageValue = pagination()[page] || 0
 		if (!page && (display() === "watchlist" || display() === "history")) {
-			console.log(traktPage()[display()] + (increment ?? 0));
 			setTraktPage((prev) => ({
 				...prev,
 				[display()]: prev[display()] + (increment ?? 0),
@@ -350,7 +348,6 @@ export default function Home() {
 		page?: number,
 	) {
 		// If the display() for a type is clicked again, go back to the media display
-		console.log("Is It Pagination", isPagination);
 		if (display() === type && !isPagination) {
 			setDisplay("media");
 			return;
@@ -387,23 +384,7 @@ export default function Home() {
 				(type === "watchlist" || type === "history") &&
 				traktSynced.headers
 			) {
-				console.log(traktSynced.headers);
 				setTraktPaginationData((prev) => {
-					console.log({
-						...prev,
-						[type]: {
-							itemCount: Number.parseInt(
-								traktSynced.headers["x-pagination-item-count"],
-							),
-							pageCount: Number.parseInt(
-								traktSynced.headers["x-pagination-page-count"],
-							),
-							currentPage: Number.parseInt(
-								traktSynced.headers["x-pagination-page"],
-							),
-						},
-					});
-
 					return {
 						...prev,
 						[type]: {
@@ -437,10 +418,6 @@ export default function Home() {
 					});
 				} else {
 					setSyncData((prev) => {
-						console.log(
-							"Setting sync data",
-							syncInfo.result.hits.hits,
-						);
 						return {
 							...prev,
 							[type]: [
