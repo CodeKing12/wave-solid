@@ -478,6 +478,7 @@ function MediaModal(props: MediaModalProps) {
 		// const currentEpisodes = episodes()?.[selectedSeason()?._id ?? ""] ?? [];
 		// const lastEpisodeId = currentEpisodes[currentEpisodes.length - 1]._id;
 		// setFocus(lastEpisodeId);
+		setShowLoader(true);
 
 		const seasonId = selectedSeason()?._id ?? 0;
 
@@ -485,6 +486,8 @@ function MediaModal(props: MediaModalProps) {
 			selectedSeason(),
 			episodes()[selectedSeason()?._id ?? ""].length,
 		);
+
+		setShowLoader(false);
 
 		setEpisodes((prevEpisodes) => ({
 			...prevEpisodes,
