@@ -151,6 +151,9 @@ function TimeSlider(props: TimeSliderProps) {
 export default function AVPlayer(props: AVPlayerProps) {
 	let timeoutId: number;
 	let subtitleTimeout: any;
+	let forwardTimer: number | undefined;
+	let forwardInterval: number | undefined;
+	let playbackCount = 0;
 	// const controlsId = "player-controls"
 	// const [controlsEl, setControlsEl] = createSignal<HTMLElement | undefined>();
 	const [mediaDuration, setMediaDuration] = createSignal(0);
@@ -201,6 +204,7 @@ export default function AVPlayer(props: AVPlayerProps) {
 	createEffect(() => {
 		if (props.show) {
 			document.addEventListener("keydown", handleKeyPress);
+			document.addEventListener("keyup", handleKeyUp);
 			document.addEventListener("mousemove", showElement);
 			document.addEventListener("mousedown", showElement);
 
@@ -257,10 +261,12 @@ export default function AVPlayer(props: AVPlayerProps) {
 
 	function onSeekSuccess() {
 		setIsPending(false);
+		console.log("Seek Successful");
 	}
 
 	function onSeekError() {
 		setIsPending(false);
+		console.log("Failed to Seek Media");
 	}
 
 	function hideElement() {
@@ -299,10 +305,43 @@ export default function AVPlayer(props: AVPlayerProps) {
 		}
 	}
 
+	function longPressPlayback() {
+		// Start timer on press
+		forwardInterval = setInterval(function () {
+			playbackCount += 1;
+			console.log("Interval total: ", playbackCount);
+			// Increment forwarding time based on timer duration
+			// console.log(`Performing the ${direction} JUMP now`);
+			// console.log("Final count: ", playbackCount, 15000 * playbackCount);
+		}, 250); // Adjust timer interval as needed
+	}
+
+	function queuePlayback(direction: "FORWARD" | "BACKWARD") {
+		// Start timer on press
+		console.log("Interval: ", forwardInterval, Boolean(forwardInterval));
+		if (forwardTimer) {
+			clearTimeout(forwardTimer);
+		}
+		if (forwardInterval) {
+			clearInterval(forwardInterval);
+		}
+		playbackCount += 1;
+		forwardTimer = setTimeout(function () {
+			// Increment forwarding time based on timer duration
+			console.log(`Performing the ${direction} JUMP now`);
+			console.log("Final count: ", playbackCount, 15000 * playbackCount);
+			if (props.canPlayonTizen) {
+				jumpMedia(direction, 15000 * playbackCount);
+			}
+			playbackCount = 0;
+		}, 1000); // Adjust timer interval as needed
+	}
+
 	function handleKeyPress(event: KeyboardEvent) {
 		showElement();
 		const keycode = event.keyCode;
-		console.log("Pressed: ", keycode);
+		// console.log("Pressed: ", keycode);
+
 		// Space: 32
 		// Enter & Remote-center: 13
 		// Left: 37
@@ -320,12 +359,20 @@ export default function AVPlayer(props: AVPlayerProps) {
 			// case 10252:
 			// 	togglePlayPause();
 			// 	break;
-			// case 37:
-			// 	jumpMedia("BACKWARD");
-			// 	break;
-			// case 39:
-			// 	jumpMedia("FORWARD");
-			// 	break;
+			case 19: // MediaPause
+			case 415: // MediaPlay
+			case 10252: // MediaRewind
+				togglePlayPause();
+				break;
+			case 412: // MediaRewind
+				console.log("Clicked the back button");
+				longPressPlayback();
+				break;
+			case 417: // MediaFastForward
+				console.log("Clicked the forward button");
+				longPressPlayback();
+				// jumpMedia("FORWARD");
+				break;
 			case 27:
 			case 10009:
 				if (audioMenuOpen()) {
@@ -337,6 +384,24 @@ export default function AVPlayer(props: AVPlayerProps) {
 				} else {
 					quitPlayer();
 				}
+				break;
+			default:
+				break;
+		}
+	}
+
+	function handleKeyUp(event: KeyboardEvent) {
+		const keycode = event.keyCode;
+
+		switch (keycode) {
+			case 412: // MediaRewind
+				console.log("Clicked the back button");
+				queuePlayback("BACKWARD");
+				break;
+			case 417: // MediaFastForward
+				console.log("Clicked the forward button");
+				queuePlayback("FORWARD");
+				// jumpMedia("FORWARD");
 				break;
 			default:
 				break;
@@ -402,7 +467,7 @@ export default function AVPlayer(props: AVPlayerProps) {
 			setElapsedTime(currentTime + milliseconds);
 
 			if (direction === "FORWARD") {
-				console.log("Jumping Forward by 15s");
+				console.log(`Jumping Forward by ${milliseconds / 1000}s`);
 				setIsPending(true);
 				webapis.avplay.jumpForward(
 					milliseconds,
@@ -410,7 +475,7 @@ export default function AVPlayer(props: AVPlayerProps) {
 					onSeekError,
 				);
 			} else if (direction === "BACKWARD") {
-				console.log("Jumping Backward by 15s");
+				console.log(`Jumping Backward by ${milliseconds / 1000}s`);
 				setIsPending(true);
 				webapis.avplay.jumpBackward(
 					milliseconds,
@@ -495,7 +560,22 @@ export default function AVPlayer(props: AVPlayerProps) {
 
 	onMount(() => {
 		if (props.canPlayonTizen) {
-			tizen.tvinputdevice.registerKey("MediaPlayPause");
+			var usedKeys = [
+				"MediaPlay",
+				"MediaPause",
+				"MediaPlayPause",
+				"MediaStop",
+				"MediaFastForward",
+				"MediaRewind",
+				"0",
+				"1",
+				"2",
+				"3",
+			];
+
+			usedKeys.forEach(function (keyName) {
+				tizen.tvinputdevice.registerKey(keyName);
+			});
 		}
 
 		// Initially start the timeout

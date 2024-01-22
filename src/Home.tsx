@@ -208,10 +208,11 @@ export default function Home() {
 		setFinishedLoading(true);
 
 		// function displayInputs(event: KeyboardEvent) {
+		// 	console.log(event.code, event.keyCode, event.key, event.which);
 		//   setKeyInput([event.code, event.keyCode, event.key, event.which])
 		// }
 
-		// document.addEventListener("keydown", displayInputs)
+		// document.addEventListener("keydown", displayInputs);
 	});
 
 	createEffect(() => {
