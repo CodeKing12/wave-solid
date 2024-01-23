@@ -275,20 +275,22 @@ export async function getStreamUrl(token: string, stream: StreamObj) {
 }
 
 export async function getMediaStreams(media: MediaObj | SeriesObj) {
-	try {
-		let response = await axiosInstance.get(
-			MEDIA_ENDPOINT + `/api/media/${media._id}/streams`,
-			{
-				params: {
-					[TOKEN_PARAM_NAME]: TOKEN_PARAM_VALUE,
-				},
-			},
-		);
-		return response.data;
-	} catch (error) {
-		console.log(error);
-		return undefined;
-	}
+    try {
+        let response = await axiosInstance.get(
+            MEDIA_ENDPOINT + `/api/media/${media._id}/streams`,
+            {
+                params: {
+                    [TOKEN_PARAM_NAME]: TOKEN_PARAM_VALUE,
+                },
+            },
+        );
+        // Sort streams by size
+        const sortedStreams = response.data.sort((a, b) => b.size - a.size);
+        return sortedStreams;
+    } catch (error) {
+        console.log(error);
+        return undefined;
+    }
 }
 
 export function generateUniqueId(prefix = "") {
