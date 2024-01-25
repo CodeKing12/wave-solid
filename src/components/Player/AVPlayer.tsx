@@ -136,16 +136,46 @@ export function AudioSlider(props: AudioSliderProps) {
 }
 
 function TimeSlider(props: TimeSliderProps) {
-	return (
-		<div class="flex w-full items-center space-x-1">
-			<RangeSlider
-				min={0}
-				max={props.mediaDuration}
-				value={props.elapsedTime}
-				onSlide={props.updateElapsed}
-			/>
-		</div>
-	);
+    const { setRef, focused, focusSelf } = useFocusable({});
+
+    const handleArrowKeyPress = (event) => {
+        if (focused()) {
+            const step = 60000; // Move 60 seconds
+            if (event.keyCode === 37) { // Left arrow
+                event.preventDefault();
+                event.stopPropagation();
+                props.updateElapsed(Math.max(0, props.elapsedTime - step));
+            } else if (event.keyCode === 39) { // Right arrow
+                event.preventDefault();
+                event.stopPropagation();
+                props.updateElapsed(Math.min(props.mediaDuration, props.elapsedTime + step));
+                setTimeout(() => focusSelf(), 0); // Refocus after the event
+            }
+        }
+    };
+
+    onMount(() => {
+        document.addEventListener("keydown", handleArrowKeyPress);
+        onCleanup(() => {
+            document.removeEventListener("keydown", handleArrowKeyPress);
+        });
+    });
+
+    return (
+        <div
+            ref={setRef}
+            class="control-focus flex w-full items-center space-x-1"
+            classList={{ "is-focused": focused() }}
+            onClick={focusSelf}
+        >
+            <RangeSlider
+                min={0}
+                max={props.mediaDuration}
+                value={props.elapsedTime}
+                onSlide={props.updateElapsed}
+            />
+        </div>
+    );
 }
 
 export default function AVPlayer(props: AVPlayerProps) {
