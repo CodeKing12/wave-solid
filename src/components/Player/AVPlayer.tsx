@@ -17,6 +17,7 @@ import { AVPlayPlaybackCallback } from "tizen-tv-webapis";
 import FocusLeaf from "../Utilities/FocusLeaf";
 import { FocusContext, useFocusable } from "@/spatial-nav";
 import PlaybackControls from "./PlaybackControls";
+import { useSettings } from "@/SettingsContext";
 
 interface AVPlayerProps {
 	show: boolean;
@@ -42,6 +43,11 @@ interface SubtitleObj {
 	duration: number;
 	text: string;
 	now: number;
+}
+
+interface SubtitleSettingsObj {
+	size: number;
+	color: string;
 }
 
 export function AudioSlider(props: AudioSliderProps) {
@@ -136,46 +142,50 @@ export function AudioSlider(props: AudioSliderProps) {
 }
 
 function TimeSlider(props: TimeSliderProps) {
-    const { setRef, focused, focusSelf } = useFocusable({});
+	const { setRef, focused, focusSelf } = useFocusable({});
 
-    const handleArrowKeyPress = (event) => {
-        if (focused()) {
-            const step = 60000; // Move 60 seconds
-            if (event.keyCode === 37) { // Left arrow
-                event.preventDefault();
-                event.stopPropagation();
-                props.updateElapsed(Math.max(0, props.elapsedTime - step));
-            } else if (event.keyCode === 39) { // Right arrow
-                event.preventDefault();
-                event.stopPropagation();
-                props.updateElapsed(Math.min(props.mediaDuration, props.elapsedTime + step));
-                setTimeout(() => focusSelf(), 0); // Refocus after the event
-            }
-        }
-    };
+	const handleArrowKeyPress = (event) => {
+		if (focused()) {
+			const step = 60000; // Move 60 seconds
+			if (event.keyCode === 37) {
+				// Left arrow
+				event.preventDefault();
+				event.stopPropagation();
+				props.updateElapsed(Math.max(0, props.elapsedTime - step));
+			} else if (event.keyCode === 39) {
+				// Right arrow
+				event.preventDefault();
+				event.stopPropagation();
+				props.updateElapsed(
+					Math.min(props.mediaDuration, props.elapsedTime + step),
+				);
+				setTimeout(() => focusSelf(), 0); // Refocus after the event
+			}
+		}
+	};
 
-    onMount(() => {
-        document.addEventListener("keydown", handleArrowKeyPress);
-        onCleanup(() => {
-            document.removeEventListener("keydown", handleArrowKeyPress);
-        });
-    });
+	onMount(() => {
+		document.addEventListener("keydown", handleArrowKeyPress);
+		onCleanup(() => {
+			document.removeEventListener("keydown", handleArrowKeyPress);
+		});
+	});
 
-    return (
-        <div
-            ref={setRef}
-            class="control-focus flex w-full items-center space-x-1"
-            classList={{ "is-focused": focused() }}
-            onClick={focusSelf}
-        >
-            <RangeSlider
-                min={0}
-                max={props.mediaDuration}
-                value={props.elapsedTime}
-                onSlide={props.updateElapsed}
-            />
-        </div>
-    );
+	return (
+		<div
+			ref={setRef}
+			class="control-focus flex w-full items-center space-x-1"
+			classList={{ "is-focused": focused() }}
+			onClick={focusSelf}
+		>
+			<RangeSlider
+				min={0}
+				max={props.mediaDuration}
+				value={props.elapsedTime}
+				onSlide={props.updateElapsed}
+			/>
+		</div>
+	);
 }
 
 export default function AVPlayer(props: AVPlayerProps) {
@@ -186,6 +196,10 @@ export default function AVPlayer(props: AVPlayerProps) {
 	let playbackCount = 0;
 	// const controlsId = "player-controls"
 	// const [controlsEl, setControlsEl] = createSignal<HTMLElement | undefined>();
+
+	const { getSetting } = useSettings();
+	const [subtitleSettings, setSubtitleSettings] =
+		createSignal<SubtitleSettingsObj>();
 	const [mediaDuration, setMediaDuration] = createSignal(0);
 	const [elapsedTime, setElapsedTime] = createSignal(0);
 	const [availableSubtitles, setAvailableSubtitles] = createSignal<any[]>([
@@ -237,6 +251,10 @@ export default function AVPlayer(props: AVPlayerProps) {
 			document.addEventListener("keyup", handleKeyUp);
 			document.addEventListener("mousemove", showElement);
 			document.addEventListener("mousedown", showElement);
+			setSubtitleSettings({
+				size: parseInt(getSetting("subtitle_size") as string),
+				color: getSetting("subtitle_color").toString(),
+			});
 
 			if (props.url) {
 				console.log("Focusing Player");
@@ -831,11 +849,15 @@ export default function AVPlayer(props: AVPlayerProps) {
 				</div>
 				<div class="pointer-events-none absolute z-30 flex h-full w-full items-end justify-center">
 					<p
-						class="text media-subtitle -translate-y-10 px-7 py-4 text-center text-[32px] font-bold text-white duration-500 ease-in-out"
+						class="text media-subtitle -translate-y-10 px-7 py-4 text-center font-bold duration-500 ease-in-out"
 						classList={{
 							"!-translate-y-[calc(45px+64px+20px)]":
 								showControls(),
 							"!opacity-0 !invisible": !showSubtitles(),
+						}}
+						style={{
+							"font-size": `${subtitleSettings()?.size}px`,
+							color: subtitleSettings()?.color,
 						}}
 						innerHTML={currentSubtitle().text}
 					></p>

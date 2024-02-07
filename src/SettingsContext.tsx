@@ -1,4 +1,4 @@
-import { createContext, createSignal, onMount, useContext } from "solid-js";
+import { createContext, createSignal, useContext } from "solid-js";
 
 interface SettingsProviderObj {
 	updateSetting: (property: keyof AppSettings, newValue: any) => void;
@@ -15,6 +15,8 @@ const defaultContextValue: SettingsProviderObj = {
 export interface AppSettings {
 	restrict_content: boolean | "thorough";
 	store_credentials: boolean;
+	subtitle_size: number;
+	subtitle_color: string;
 	trakt_token: string;
 }
 
@@ -22,6 +24,8 @@ const defaultSettings: AppSettings = {
 	restrict_content: true,
 	store_credentials: true,
 	trakt_token: "",
+	subtitle_size: 32,
+	subtitle_color: "#ffffff",
 };
 
 type IsKeyOf<T, K extends keyof T> = K;
@@ -31,15 +35,14 @@ const SettingsContext = createContext<SettingsProviderObj>(defaultContextValue);
 export default function SettingsProvider(props: any) {
 	const [settings, setSettings] = createSignal<AppSettings>(defaultSettings);
 
-	onMount(() => {
-		const currentSettings = localStorage.getItem("settings");
-		if (currentSettings) {
-			const parsedSettings = JSON.parse(currentSettings);
-			setSettings(parsedSettings);
-		} else {
-			localStorage.setItem("settings", JSON.stringify(settings()));
-		}
-	});
+	const currentSettings = localStorage.getItem("settings");
+
+	if (currentSettings) {
+		const parsedSettings = JSON.parse(currentSettings);
+		setSettings(parsedSettings);
+	} else {
+		localStorage.setItem("settings", JSON.stringify(settings()));
+	}
 
 	const providerValue: SettingsProviderObj = {
 		updateSetting: (property, newValue) => {

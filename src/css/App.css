@@ -272,3 +272,13 @@ video-js.video-js {
 		transform: translateX(-99%);
 	}
 }
+
+input[type="number"].remove-step::-webkit-inner-spin-button,
+input[type="number"].remove-step::-webkit-outer-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+input[type="number"].remove-step {
+	-moz-appearance: textfield;
+}

@@ -4,6 +4,9 @@ import { FocusContext, useFocusable } from "@/spatial-nav";
 import FocusLeaf from "./Utilities/FocusLeaf";
 import FormSwitch from "./Switch";
 import { AppSettings, useSettings } from "@/SettingsContext";
+import { DefaultColorPicker } from "@thednp/solid-color-picker";
+
+import "@thednp/solid-color-picker/style.css";
 
 interface SettingsProps {
 	show: boolean;
@@ -11,6 +14,11 @@ interface SettingsProps {
 }
 
 interface SwitchSettingProps {
+	title: string;
+	id: keyof AppSettings;
+}
+
+interface SliderSettingProps {
 	title: string;
 	id: keyof AppSettings;
 }
@@ -39,6 +47,140 @@ function SwitchSetting(props: SwitchSettingProps) {
 			<h4>
 				<FormSwitch value={currentValue()} onSwitch={changeSetting} />
 			</h4>
+		</div>
+	);
+}
+
+function SliderSetting(props: SliderSettingProps) {
+	const { getSetting, updateSetting } = useSettings();
+	const currentValue = () => parseInt(getSetting(props.id));
+	const { setRef, focused } = useFocusable({
+		onArrowPress: handleIncrement,
+	});
+
+	function changeSetting(
+		event: Event | null,
+		increment: false | "decrease" | "increase" = false,
+	) {
+		let newValue = currentValue();
+
+		if (increment === "increase") {
+			newValue += 1;
+		} else if (increment === "decrease") {
+			newValue -= 1;
+		}
+
+		if (event) {
+			newValue = parseInt(event.target?.value);
+		}
+
+		if (newValue > 500) {
+			newValue = 500;
+		}
+
+		if (newValue) {
+			updateSetting(props.id, newValue);
+		}
+	}
+
+	function handleIncrement(direction: string) {
+		if (direction === "left") {
+			changeSetting(null, "decrease");
+			return false;
+		} else if (direction === "right") {
+			changeSetting(null, "increase");
+			return false;
+		}
+
+		return true;
+	}
+
+	return (
+		<div class="flex items-center space-x-32" ref={setRef}>
+			<h4
+				class="w-full flex-1 decoration-clone text-lg decoration-white decoration-4 underline-offset-8 duration-300 ease-in-out"
+				classList={{
+					"underline text-yellow-300 font-semibold": focused(),
+				}}
+			>
+				{props.title}
+			</h4>
+			<div class="w-2/5">
+				{/* Create a number input with step buttons */}
+				<div class="flex items-center gap-6">
+					{/* <FocusLeaf
+						class="h-12 p-2 text-yellow-300"
+						focusedStyles="bg-yellow-300 text-black"
+					>
+						<button>
+							<IconMinus size={32} />
+						</button>
+					</FocusLeaf> */}
+					{/* You won't be able to use keyboard controls in the number
+					input because of the spatial navigation */}
+					<input
+						class="remove-step h-12 w-16 border-none bg-black bg-opacity-20 text-center text-xl font-semibold !outline-none"
+						type="number"
+						value={currentValue()}
+						onInput={changeSetting}
+						max={500}
+					/>
+					{/* <FocusLeaf
+						class="h-12 p-2 text-yellow-300"
+						focusedStyles="bg-yellow-300 text-black"
+					>
+						<button>
+							<IconPlus size={32} class="" />
+						</button>
+					</FocusLeaf> */}
+				</div>
+			</div>
+		</div>
+	);
+}
+
+function ColorSetting(props: SliderSettingProps) {
+	const { getSetting, updateSetting } = useSettings();
+	const currentValue = () => getSetting(props.id).toString();
+	const { setRef, focused } = useFocusable({
+		onEnterPress: handleEnter,
+	});
+	let colorInput: HTMLButtonElement | undefined;
+
+	function handleEnter() {
+		if (!colorInput) {
+			colorInput = document.querySelector(
+				`#${props.id} button.picker-toggle`,
+			) as HTMLButtonElement;
+		}
+
+		if (colorInput.getAttribute("aria-expanded") === "false") {
+			colorInput?.click();
+		}
+	}
+
+	function changeSetting(color: string) {
+		if (color !== currentValue()) {
+			updateSetting(props.id, color);
+		}
+	}
+
+	return (
+		<div class="flex items-center space-x-32" ref={setRef}>
+			<h4
+				class="decoration-clone text-lg decoration-white decoration-4 underline-offset-8 duration-300 ease-in-out"
+				classList={{
+					"underline text-yellow-300 font-semibold": focused(),
+				}}
+			>
+				{props.title}
+			</h4>
+			<div class="w-2/5" id={props.id}>
+				<DefaultColorPicker
+					value={currentValue()}
+					onChange={changeSetting}
+				/>
+			</div>
 		</div>
 	);
 }
@@ -120,10 +262,20 @@ export default function Settings(props: SettingsProps) {
 								"visible opacity-100": props.show,
 							}}
 						>
-							<div class="flex flex-col space-y-4">
+							<div class="flex flex-col space-y-8">
 								<SwitchSetting
 									title="Restrict Explicit Content"
 									id="restrict_content"
+								/>
+
+								<SliderSetting
+									title="Adjust Subtitle Size"
+									id="subtitle_size"
+								/>
+
+								<ColorSetting
+									title="Change Subtitle Color"
+									id="subtitle_color"
 								/>
 							</div>
 						</div>
