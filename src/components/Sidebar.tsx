@@ -1,5 +1,8 @@
 import { useFocusable } from "@/spatial-nav/useFocusable";
 import { FocusContext } from "@/spatial-nav";
+import { Trans } from '@mbarzda/solid-i18next';
+import { useTransContext } from '@mbarzda/solid-i18next';
+import { useTranslation } from '@mbarzda/solid-i18next';
 import {
 	IconBrush,
 	IconComet,
@@ -200,7 +203,7 @@ const Sidebar = function Sidebar(props: SidebarProps) {
 				}`}
 			>
 				<p class="mb-5 px-8 text-[15px] font-semibold text-[rgba(249,249,249,0.67)] text-opacity-[67]">
-					Categories
+					<Trans key="categories" />
 				</p>
 				<FocusContext.Provider value={focusKey()}>
 					<div
@@ -213,56 +216,56 @@ const Sidebar = function Sidebar(props: SidebarProps) {
 					>
 						<NavItem
 							icon={<IconMovie size={30} />}
-							text="Movies"
+							text={<Trans key="movies" />}
 							page="movies"
 							current={props.current}
 							onItemClick={props.onChange}
 						/>
 						<NavItem
 							icon={<IconDeviceTv size={30} />}
-							text="Series"
+							text={<Trans key="series" />}
 							page="series"
 							current={props.current}
 							onItemClick={props.onChange}
 						/>
 						<NavItem
 							icon={<IconDisc size={30} />}
-							text="Concerts"
+							text={<Trans key="concerts" />}
 							page="concerts"
 							current={props.current}
 							onItemClick={props.onChange}
 						/>
 						<NavItem
 							icon={<IconComet size={30} />}
-							text="Fairy Tales"
+							text={<Trans key="fairy_tales" />}
 							page="fairy_tales"
 							current={props.current}
 							onItemClick={props.onChange}
 						/>
 						<NavItem
 							icon={<IconStereoGlasses size={30} />}
-							text="Animated Movies"
+							text={<Trans key="animated_movies" />}
 							page="animated_movies"
 							current={props.current}
 							onItemClick={props.onChange}
 						/>
 						<NavItem
 							icon={<IconBrush size={30} />}
-							text="Animated Series"
+							text={<Trans key="animated_series" />}
 							page="animated_series"
 							current={props.current}
 							onItemClick={props.onChange}
 						/>
 						<NavItem
 							icon={<IconCurrencyKroneCzech size={30} />}
-							text="Movies CZ/SK"
+							text={<Trans key="movies_czsk" />}
 							page="movies_czsk"
 							current={props.current}
 							onItemClick={props.onChange}
 						/>
 						<NavItem
 							icon={<IconLanguage size={30} />}
-							text="Series CZ/SK"
+							text={<Trans key="series_czsk" />}
 							page="series_czsk"
 							current={props.current}
 							onItemClick={props.onChange}
@@ -279,11 +282,11 @@ const Sidebar = function Sidebar(props: SidebarProps) {
 							onEnterPress={props.onLogout}
 						>
 							<button
-								class="group mt-auto flex items-center space-x-3 px-8 py-2 text-[17px] font-medium text-white text-opacity-70 duration-500 ease-in-out hover:text-yellow-300"
+								class="group mt-auto flex items-center space-x-8 border-2 border-l-0 border-yellow-300 bg-yellow-300 bg-opacity-90 px-8 py-2.5 font-semibold text-black-1 duration-500 ease-in-out hover:bg-transparent hover:text-yellow-300"
 								onClick={props.onLogout}
 							>
-								<span>Logout Webshare</span>
-								<IconLogout2 class="text-yellow-300 duration-500 ease-in-out group-hover:text-white" />
+								<span><Trans key="logout_webshare" /></span>
+								<IconLogout2 class="text-black duration-500 ease-in-out group-hover:text-yellow-300" />
 							</button>
 						</FocusLeaf>
 					</Match>

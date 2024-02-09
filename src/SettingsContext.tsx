@@ -15,9 +15,10 @@ const defaultContextValue: SettingsProviderObj = {
 export interface AppSettings {
 	restrict_content: boolean | "thorough";
 	store_credentials: boolean;
+	trakt_token: string;
 	subtitle_size: number;
 	subtitle_color: string;
-	trakt_token: string;
+	language: string;
 }
 
 const defaultSettings: AppSettings = {
@@ -26,6 +27,7 @@ const defaultSettings: AppSettings = {
 	trakt_token: "",
 	subtitle_size: 32,
 	subtitle_color: "#ffffff",
+	language: "en"
 };
 
 type IsKeyOf<T, K extends keyof T> = K;
@@ -33,17 +35,21 @@ type IsKeyOf<T, K extends keyof T> = K;
 const SettingsContext = createContext<SettingsProviderObj>(defaultContextValue);
 
 export default function SettingsProvider(props: any) {
-	const [settings, setSettings] = createSignal<AppSettings>(defaultSettings);
+    const [settings, setSettings] = createSignal<AppSettings>(defaultSettings);
 
-	const currentSettings = localStorage.getItem("settings");
+    const currentSettings = localStorage.getItem("settings");
 
-	if (currentSettings) {
-		const parsedSettings = JSON.parse(currentSettings);
-		setSettings(parsedSettings);
-	} else {
-		localStorage.setItem("settings", JSON.stringify(settings()));
-	}
+    if (currentSettings) {
+        const parsedSettings = JSON.parse(currentSettings);
 
+
+        const updatedSettings = { ...defaultSettings, ...parsedSettings };
+        setSettings(updatedSettings);
+        localStorage.setItem("settings", JSON.stringify(updatedSettings));
+    } else {
+        localStorage.setItem("settings", JSON.stringify(settings()));
+    }
+    
 	const providerValue: SettingsProviderObj = {
 		updateSetting: (property, newValue) => {
 			const isValidKey: IsKeyOf<AppSettings, typeof property> = property;

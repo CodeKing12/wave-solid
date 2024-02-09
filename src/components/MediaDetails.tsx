@@ -4,6 +4,9 @@ import { IconStarFilled } from "@tabler/icons-solidjs";
 import { FocusContext, useFocusable } from "@/spatial-nav";
 import FocusLeaf from "./Utilities/FocusLeaf";
 import { For, Show, createSignal } from "solid-js";
+import { Trans } from '@mbarzda/solid-i18next';
+import { useTransContext } from '@mbarzda/solid-i18next';
+import { useTranslation } from '@mbarzda/solid-i18next';
 
 export interface MediaDetailsProps {
 	movieTitle: string;
@@ -16,6 +19,8 @@ export interface MediaDetailsProps {
 
 export default function MediaDetails(props: MediaDetailsProps) {
 	const [fullCast, setFullCast] = createSignal(false);
+    const [, { getI18next }] = useTransContext();
+    const i18next = getI18next(); 
 	const { setRef, focusKey } = useFocusable({
 		autoRestoreFocus: true,
 		focusKey: "MEDIA-DETAILS",
@@ -58,7 +63,7 @@ export default function MediaDetails(props: MediaDetailsProps) {
 					<div class="mb-8 grid gap-7 text-lg md:grid-cols-2">
 						<p class="flex flex-col space-y-2">
 							<span class="text-[15px] opacity-40">
-								Release Date:{" "}
+								<Trans key="release_date" />{" "}
 							</span>
 							<span class="">
 								{formatDate(
@@ -68,7 +73,7 @@ export default function MediaDetails(props: MediaDetailsProps) {
 						</p>
 						<p class="flex flex-col space-y-2">
 							<span class="text-[15px] opacity-40">
-								Genre(s):{" "}
+								<Trans key="genre" />{" "}
 							</span>
 							<span class="">
 								{props.movieDetails?.info_labels.genre.join(
@@ -129,7 +134,7 @@ export default function MediaDetails(props: MediaDetailsProps) {
 					<div class="mb-8 grid gap-7 text-lg md:grid-cols-2">
 						<p class="flex flex-col space-y-2">
 							<span class="text-[15px] opacity-40">
-								Run Time:{" "}
+								<Trans key="time" />{" "}
 							</span>
 							<span class="">
 								{convertSecondsToTime(
@@ -138,7 +143,7 @@ export default function MediaDetails(props: MediaDetailsProps) {
 							</span>
 						</p>
 						<div class="flex flex-col space-y-2">
-							<span class="text-[15px] opacity-40">Rating: </span>
+							<span class="text-[15px] opacity-40"><Trans key="rating" /> </span>
 							<div class="flex items-center space-x-2">
 								<span class="">
 									{(props.rating * 2) % 1 === 0
@@ -189,7 +194,7 @@ export default function MediaDetails(props: MediaDetailsProps) {
 						onEnterPress={() => setFullCast(!fullCast())}
 					>
 						<p class="flex flex-col space-y-2">
-							<span class="text-[15px] opacity-40">Cast: </span>
+							<span class="text-[15px] opacity-40"><Trans key="cast" /> </span>
 							<span
 								class="leading-[32px] opacity-90"
 								classList={{

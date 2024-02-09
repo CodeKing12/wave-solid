@@ -1,5 +1,8 @@
 import { getDisplayDetails, getRatingAggr } from "./MediaCard";
 import { I18nInfoLabel, MediaObj, SeriesObj, StreamObj } from "./MediaTypes";
+import { Trans } from '@mbarzda/solid-i18next';
+import { useTransContext } from '@mbarzda/solid-i18next';
+import { useTranslation } from '@mbarzda/solid-i18next';
 import {
 	MEDIA_ENDPOINT,
 	TOKEN_PARAM_NAME,
@@ -84,6 +87,8 @@ export interface EpisodePagination {
 
 function MediaModal(props: MediaModalProps) {
 	// console.log("MediaModal is re-rendering")
+	const [, { getI18next }] = useTransContext();
+    const i18next = getI18next(); 
 	const isTizenTv = "tizen" in window;
 	const hasWebApi = "webapis" in window;
 	const { ref, setRef, focusSelf, focusKey } = useFocusable({
@@ -550,7 +555,7 @@ function MediaModal(props: MediaModalProps) {
 						/>
 						<Show when={!props.authToken.length}>
 							<p class="my-5 text-lg font-medium text-red-500">
-								Login to watch
+								<Trans key="login_watch" />
 							</p>
 						</Show>
 						{/* Show the list of streams when the mediatype is not a tvshow. If it is a tvshow, the list of seasons or the list of episodes will be shown instead. */}
@@ -569,7 +574,7 @@ function MediaModal(props: MediaModalProps) {
 								}}
 							>
 								<p class="mb-5 text-center text-base opacity-60">
-									Available Streams
+									<Trans key="available_streams" />
 								</p>
 								<div class="flex flex-col space-y-20 md:space-y-16 lg:space-y-12 xl:space-y-10">
 									<Show
@@ -632,7 +637,7 @@ function MediaModal(props: MediaModalProps) {
 									}
 								>
 									<IconHeartPlus size={32} />
-									<span>Add to Favorites</span>
+									<span><Trans key="add_to_favorites" /></span>
 								</button>
 							</FocusLeaf>
 
@@ -653,7 +658,7 @@ function MediaModal(props: MediaModalProps) {
 									}
 								>
 									<IconBookmark size={32} />
-									<span>Add to Watchlist</span>
+									<span><Trans key="add_to_watchlist" /></span>
 								</button>
 							</FocusLeaf>
 
@@ -707,9 +712,8 @@ function MediaModal(props: MediaModalProps) {
 											?.length,
 								}}
 							>
-								<p class="mb-5 text-center text-base opacity-60">
-									Available{" "}
-									{showEpisodes() ? "Episodes" : "Seasons"}
+								<p class="mb-5 text-center text-2xl opacity-60">
+									{i18next.t('available')} {showEpisodes() ? i18next.t('episode') : i18next.t('season')}
 								</p>
 								<div
 									class="relative min-h-[250px] w-full"
