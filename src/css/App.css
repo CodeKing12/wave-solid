@@ -151,22 +151,39 @@ input {
 	@apply text-white text-opacity-50 duration-300 ease-in-out;
 }
 
+.icon-logo {
+	@apply text-white text-opacity-20 duration-300 ease-in-out;
+}
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: -10px;
+    margin-top: -90px;
+}
 .stream-focus .icon-stream {
 	@apply text-opacity-100;
 }
 
-.logout-btn-onfocus button,
-.login-btn-onfocus svg {
-	color: #fde047 !important;
+.logout-btn-onfocus button, .logout-btn:hover button {
+    background-color: #191919;
+    border-color: #fde047;
+    color: #fde047;
 }
 
-.logout-btn-onfocus svg {
-	color: #fff !important;
+.logout-btn-onfocus svg, .logout-btn:hover svg {
+    color: #fde047;
 }
 
-.login-btn-onfocus button {
-	background-color: transparent;
-	color: #fde047;
+.login-btn-onfocus button, 
+.login-btn:hover button {
+    background-color: #191919;
+    color: #fde047;
+}
+
+.login-btn-onfocus svg, 
+.login-btn:hover svg {
+    color: #fde047;
 }
 
 @media (max-width: 1200px) {
@@ -281,4 +298,37 @@ input[type="number"].remove-step::-webkit-outer-spin-button {
 
 input[type="number"].remove-step {
 	-moz-appearance: textfield;
+}
+
+.color-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.color-option {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.color-option.selected {
+    border: 3px solid yellow;
+}
+.color-option.focused {
+    border: 3px solid #00ff00;
+    box-shadow: 0 0 10px #00ff00;
+}
+.color-picker-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.color-picker-label {
+    margin-bottom: 10px;
+    font-size: 1rem;
+    color: #ffffff;
+    text-align: center;
 }

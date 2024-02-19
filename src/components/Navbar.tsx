@@ -11,6 +11,9 @@ import { Show, createEffect, createSignal } from "solid-js";
 import "@/css/layout.css";
 import { SyncType } from "./TraktTypes";
 import { Transition } from "solid-transition-group";
+import { Trans } from '@mbarzda/solid-i18next';
+import { useTransContext } from '@mbarzda/solid-i18next';
+import { useTranslation } from '@mbarzda/solid-i18next';
 
 interface NavProps {
 	onSearch: (searchTerm: string) => void;
@@ -23,6 +26,14 @@ const Navbar = function Navbar(props: NavProps) {
 	// console.log("Navbar is re-rendering")
 	const { setRef, focusKey, hasFocusedChild } = useFocusable({});
 	const [searchTerm, setSearchTerm] = createSignal("");
+	
+    function handleInput(e) {
+        const value = e.target.value;
+        setSearchTerm(value);
+        if (value.length >= 3) {
+            props.onSearch(value);
+        }
+    }
 
 	function handleSearch(e: Event | undefined) {
 		if (e) {
@@ -55,7 +66,7 @@ const Navbar = function Navbar(props: NavProps) {
 								class="flex cursor-pointer items-center gap-2"
 								onClick={() => props.showSynced("favorites")}
 							>
-								Favorites
+								<Trans key="favorites" />
 								<Transition name="slide">
 									<Show
 										when={
@@ -79,7 +90,7 @@ const Navbar = function Navbar(props: NavProps) {
 								onclick={() => props.showSynced("watchlist")}
 								class="flex cursor-pointer items-center gap-2"
 							>
-								Watchlist
+								<Trans key="watchlist" />
 								<Transition name="slide">
 									<Show
 										when={
@@ -103,7 +114,7 @@ const Navbar = function Navbar(props: NavProps) {
 								class="cursor-pointer"
 								onclick={() => props.showSynced("history")}
 							>
-								History
+								<Trans key="history" />
 							</a>
 						</FocusLeaf>
 						<FocusLeaf
@@ -115,7 +126,7 @@ const Navbar = function Navbar(props: NavProps) {
 								class="cursor-pointer"
 								onclick={() => props.handleNav("settings")}
 							>
-								Settings
+								<Trans key="settings" />
 							</a>
 						</FocusLeaf>
 					</div>
@@ -131,10 +142,10 @@ const Navbar = function Navbar(props: NavProps) {
 							onSubmit={handleSearch}
 						>
 							<input
-								class="h-14 w-full rounded-xl border border-[rgba(249,249,249,0.10)] px-14 py-3 text-base text-white outline-none placeholder:text-base placeholder:text-gray-300 xl:w-[350px]"
-								placeholder="Search Movies or TV Shows"
-								onInput={(e) => setSearchTerm(e.target.value)}
-							/>
+							class="h-14 w-full rounded-xl border border-[rgba(249,249,249,0.10)] px-14 py-3 text-base text-white outline-none placeholder:text-base placeholder:text-gray-300 xl:w-[350px]"
+							placeholder="Search Movies or TV Shows"
+							onInput={handleInput}
+						/>
 							<IconSearch
 								size={24}
 								class="icon absolute left-4 top-1/2 duration-300 ease-in-out"

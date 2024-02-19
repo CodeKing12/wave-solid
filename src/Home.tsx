@@ -12,6 +12,9 @@ import Login from "@/components/Login";
 import MediaModal from "@/components/MediaModal";
 import { useAlert } from "@/AlertContext";
 import axiosInstance from "@/utils/axiosInstance";
+import { Trans } from '@mbarzda/solid-i18next';
+import { useTransContext } from '@mbarzda/solid-i18next';
+import { useTranslation } from '@mbarzda/solid-i18next';
 import {
 	checkTraktToken,
 	checkWebshareStatus,
@@ -640,7 +643,7 @@ export default function Home() {
 								>
 									{/* <ArrowLeft size={32} variant='Bold' /> */}
 									<IconArrowLeft size={32} />
-									<span>Previous</span>
+									<span><Trans key="previous" /></span>
 								</button>
 							</FocusLeaf>
 
@@ -683,7 +686,7 @@ export default function Home() {
 									}`}
 									onClick={() => updatePagination(page(), +1)}
 								>
-									<span>Next</span>
+									<span><Trans key="next" /></span>
 									{/* <ArrowRight size={32} variant='Bold' /> */}
 									<IconArrowRight size={32} />
 								</button>

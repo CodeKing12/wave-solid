@@ -14,6 +14,9 @@ import { Spinner, SpinnerType } from "solid-spinner";
 import { IconKey, IconX } from "@tabler/icons-solidjs";
 import { FocusContext, setFocus, useFocusable } from "@/spatial-nav";
 import FocusLeaf from "./Utilities/FocusLeaf";
+import { Trans } from '@mbarzda/solid-i18next';
+import { useTransContext } from '@mbarzda/solid-i18next';
+import { useTranslation } from '@mbarzda/solid-i18next';
 
 interface LoginProps {
 	show: boolean;
@@ -175,10 +178,10 @@ export default function Login(props: LoginProps) {
 							}`}
 						>
 							<h3 class="mb-2 text-3xl font-semibold text-gray-50">
-								Log in to Webshare
+								<Trans key="login_to_webshare" />
 							</h3>
 							<p class="mb-10 text-sm text-gray-400">
-								Enter your Webshare username and password
+								<Trans key="enter_username_password" />
 							</p>
 							<form
 								class="mb-4 flex w-full flex-col space-y-4"
@@ -224,7 +227,7 @@ export default function Login(props: LoginProps) {
 										onClick={loginWebshare}
 										onSubmit={loginWebshare}
 									>
-										<span>Authenticate</span>
+										<span><Trans key="login" /></span>
 										<IconKey size={24} />
 									</button>
 								</FocusLeaf>
